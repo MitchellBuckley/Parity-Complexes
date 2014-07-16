@@ -10,7 +10,7 @@ Require Import Max Le.
 Require Import Arith.
 Require Import Setoid.
 Require Import Recdef.
-Require Import PreparityComplexes_fix_sub. 
+Require Import PreparityComplexes. 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Parity Complex Definitions                           *)
