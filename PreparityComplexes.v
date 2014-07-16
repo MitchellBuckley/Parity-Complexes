@@ -112,11 +112,6 @@ Arguments Full_set {U} _.
 
   Hint Resolve SSn_n le_SSn_n.
 
-  (* at some stage these should go, we never need to use n-1 *)
-  Lemma qwer   : forall n, (n-1 <= n). Admitted.
-  Lemma qwer'  : forall n, (n-1 <  n). Admitted.
-  Lemma qwer'' : forall n, (n <= n-1) -> False. Admitted.
-
   Lemma Sn_minus_1 : forall n, (S n - 1 = n).
   Proof. 
     intros. 
@@ -347,25 +342,70 @@ Arguments Full_set {U} _.
     | tr_refl'  : forall x, In R x -> triangle_rest' R x x
     | tr_trans' : forall x y z, In R z -> less y z -> triangle_rest' R x y -> triangle_rest' R x z.
 
+  Inductive triangle_rest'' (R : Ensemble carrier) : relation carrier :=
+    | tr_clos'' : forall x y, In R x -> In R y -> less x y -> triangle_rest'' R x y
+    | tr_refl''  : forall x, In R x -> triangle_rest'' R x x
+    | tr_trans'' : forall x y z, triangle_rest'' R x y -> triangle_rest'' R y z -> triangle_rest'' R x z.
+
   Lemma triangle_rest_in_set : forall R, forall x y, triangle_rest R x y -> In R x /\ In R y.
   Proof with intuition.
     intros...
     induction H... induction H...
   Qed.
 
+  Lemma triangle_rest_equiv' : forall S, forall x y, triangle_rest S x y <-> triangle_rest'' S x y.
+  Proof with intuition.
+    intuition. 
+    - induction H... 
+      + apply tr_refl''...
+      + apply tr_trans'' with y...
+        apply tr_clos''... 
+        inversion H1...
+    - induction H...
+      + right with y... left...
+      + left...
+      + clear H H0. 
+        generalize dependent z.
+        induction IHtriangle_rest''1...
+        right with y...
+  Qed.
+
+  Lemma triangle_rest_equiv'' : forall S, forall x y, triangle_rest' S x y <-> triangle_rest'' S x y.
+  Proof with intuition.
+    intuition. 
+    - induction H... 
+      + apply tr_refl''...
+      + apply tr_trans'' with y...
+        apply tr_clos''...
+        inversion H1... 
+    - induction H...
+      + right with x... left...
+      + left...
+      + clear H H0. 
+        generalize dependent x.
+        induction IHtriangle_rest''2...
+        right with y...
+  Qed.
+
   Lemma triangle_rest_equiv : forall S, forall x y, triangle_rest S x y <-> triangle_rest' S x y.
   Proof with intuition.
-  Admitted.
+    intuition. 
+    apply triangle_rest_equiv''.
+    apply triangle_rest_equiv'.
+    assumption.
+    apply triangle_rest_equiv'.
+    apply triangle_rest_equiv''.
+    assumption.
+  Qed.
 
   Hint Resolve triangle_rest_in_set.
 
   Lemma triangle_rest_trans : forall X, forall y z, triangle_rest X y z -> forall x, triangle_rest X z x -> triangle_rest X y x.
   Proof with intuition.
-	    intros...
+    intros.
     generalize dependent x.
     induction H...
-      rename x0 into w.
-      apply (tr_trans _ _ y)...
+      right with y... 
   Qed.
 
   Lemma triangle_rest_ind' :
@@ -638,7 +678,7 @@ Arguments Full_set {U} _.
     | H: In (sup _ (?n)) ?x |- (S (dim ?x) <= ?n) => apply (sup_def_Lemma' _ _ _ H) 
     end.
 
-  Hint Resolve qwer qwer' qwer'' sub_Included_Lemma sub_def_Lemma sup_def_Lemma le_Sn_n n_Sn.
+  Hint Resolve sub_Included_Lemma sub_def_Lemma sup_def_Lemma le_Sn_n n_Sn.
 
   Lemma sub_Included : forall T n, Included (sub T (n)) T.
   Proof with repeat (basic || subsuptac); auto.
@@ -1556,8 +1596,11 @@ Arguments Full_set {U} _.
   Proof with intuition.
     intros. 
     unfold is_a_segment in H...
-    (* need other induction principle for triangle_rest *)
-  Admitted.
+    generalize dependent z. 
+    induction H4.
+      intros...
+      admit. (* ?? *)
+  Qed.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* initial and final segments                           *)
@@ -1642,9 +1685,20 @@ Arguments Full_set {U} _.
   Qed.
 
   Lemma TT : forall k R T, setdim T k /\ setdim R k -> 
-                (forall m, m <= k -> sub T (m) == sub R (m)) -> R == T.
+                (forall m, m <= S k -> sub T (m) == sub R (m)) -> R == T.
   Proof with intuition.
-  Admitted.
+    intros...
+    symmetry.
+    apply Same_set_by_dimension...
+    unfold setdim in *.
+    assert ({k0 <= k} + {k < k0})...
+      assert (T == sup T (S k))...
+        unfold Same_set, Included, sup... unfold In at 1 in H...
+      assert (R == sup R (S k))...
+        unfold Same_set, Included, sup... unfold In at 1 in H3...
+      rewrite H, H3.
+      repeat (rewrite sub_sup_Empty_set)...
+  Qed.
 
   Lemma weird_lemma_2 : forall S T, 
     well_formed S -> 
