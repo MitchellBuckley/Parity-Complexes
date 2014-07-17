@@ -1,4 +1,4 @@
-
+ 
 (* Written by Mitchell Buckley 12/11/2013 *)
 
 Require Import Ensembles Constructive_sets.
@@ -1284,12 +1284,14 @@ Arguments Full_set {U} _.
     - rewrite H1...
   Qed.
 
+  (* This lemma shouldn't be so hard to prove, but it is. *)
+  (* There might be some loop-free condition that is necessary, I'm not sure *)
   Lemma triangle_rest_dec : 
     forall T, 
       Finite T -> 
       forall x z, (triangle_rest T z x \/ ~(triangle_rest T z x)).
   Proof with intuition.
-   (* could use strong induction on cardinality of T? *)
+   (* Should use strong induction on cardinality of T *)
    intros T TFin. 
    assert (exists n, Cardinal T n) as K.
    apply Cardinality_exists... 
@@ -1361,21 +1363,17 @@ Arguments Full_set {U} _.
          apply (Finite_Empty_or_Inhabited) in H0...
          * right...
            inversion H0...
-           assert (In (Intersection R Q) y). 
+            subst.
+           assert (In Empty_set y)...
+             rewrite <- H4.
              apply In_Intersection...
              unfold R, In at 1...
              apply triangle_rest_in_set in H7... 
              unfold Q, In at 1...         
-             subst. 
 
              induction H7...
-               left... unfold T'; basic... 
-               right with y... unfold T'; basic... inversion H11; clear H11; try subst.
-               rewrite H12 in H6; inversion H6... basic...
+               admit. admit.
 
- admit.
-
-           rewrite H4 in H10... 
          * left... 
            inversion H4; clear H4.
            apply In_Intersection in H0... 
@@ -1389,6 +1387,7 @@ Arguments Full_set {U} _.
        + right... apply H2... apply triangle_rest_in_set in H0... 
        + right... apply H1... apply triangle_rest_in_set in H0... 
   Qed.
+
 
   Hint Resolve Finite_Singleton sub_sup_0.
 
@@ -2102,7 +2101,9 @@ Arguments Full_set {U} _.
     rewrite H14... auto. auto.
   Qed.
 
-  Lemma Prop_2_4' : (* ignore this lemma for the moment, sort it out near the end *)
+  (* It's not clear if this lemma is absolutely needed, it won't be hard to prove if
+     we copy the proof above, but we'll leave it until we absolutely need it *)
+  Lemma Prop_2_4' : 
     forall (T Z M P : Ensemble carrier),
     Finite Z -> Finite T -> (Union T Z) moves M to P -> 
     Included (PlusMinus Z) P ->
