@@ -1964,7 +1964,7 @@ Arguments Full_set {U} _.
     intros S A B x SFin. intros.
     unfold moves_def in H. inversion H; clear H.
     assert (exists (P : Ensemble carrier), S moves ((A) ∩ √(Singleton x)) to P).
-      apply Prop_2_1_dual. assumption.
+      apply Prop_2_1_dua. assumption.
       split.
         apply Included_trans with (T:=(A ∩ √(Singleton x))).
           rewrite H3. 
