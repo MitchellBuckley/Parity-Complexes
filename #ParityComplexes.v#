@@ -4212,7 +4212,7 @@ Proof with intuition.
        admit. (* no problem *)
     assert (Setminus P (Singleton x) moves Setminus (M ∪ plus x) (minus x) to P) as HHJJ'.
       apply gghhkk'...
-      repeat basic; intuition. admit (* ?? *)
+      repeat basic; intuition. admit. (* ?? *)
       
     assert (Setminus (M ∪ plus x) (minus x) moves M to P) as FFGG. 
       unfold moves_def...
