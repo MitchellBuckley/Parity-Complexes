@@ -1883,8 +1883,8 @@ Arguments Full_set {U} _.
 
   Lemma Prop_2_1_dual' : ∀ S P : Ensemble carrier,
        Finite S
-    → (S moves ((P ∪ Minus S) ∩ √Plus S) to P)
-         ↔ PlusMinus S ⊆ P ∧ Disjoint P (Minus S).
+    → ((S moves ((P ∪ Minus S) ∩ √Plus S) to P)
+         ↔ (PlusMinus S ⊆ P ∧ Disjoint P (Minus S))).
   Proof with intuition. 
     intros S P SFin. split; intros.
     apply Prop_2_1_dual...
@@ -1953,7 +1953,7 @@ Arguments Full_set {U} _.
     rewrite H5. apply Intersection_Included_cancel_left. reflexivity.
     apply Disjoint_property_left. apply H3.
   Qed.
-
+(*
   Lemma Prop_2_2' : 
     forall (S A B: Ensemble carrier) (x : carrier),
     Finite S ->
@@ -1964,7 +1964,7 @@ Arguments Full_set {U} _.
     intros S A B x SFin. intros.
     unfold moves_def in H. inversion H; clear H.
     assert (exists (P : Ensemble carrier), S moves ((A) ∩ √(Singleton x)) to P).
-      apply Prop_2_1_dual. assumption.
+      apply Prop_2_1. assumption.
       split.
         apply Included_trans with (T:=(A ∩ √(Singleton x))).
           rewrite H3. 
@@ -2009,7 +2009,7 @@ Arguments Full_set {U} _.
     rewrite H5. apply Intersection_Included_cancel_left. reflexivity.
     apply Disjoint_property_left. apply H3.
   Qed.
-
+*)
   Lemma Prop_2_3 : 
     forall (S M P T Q : Ensemble carrier),
     S moves M to P -> T moves P to Q -> (Disjoint (Minus S) (Plus T) ) 
@@ -2066,7 +2066,7 @@ Arguments Full_set {U} _.
     unfold moves_def in H...
     
     assert (exists N, Z moves N to P). 
-    apply Prop_2_1_dual. assumption.
+    apply Prop_2_1_dual. assumption. 
       split; try assumption.
       assert (Included (Minus Z) (Minus S)). 
         rewrite HeqS. rewrite Minus_Union. apply Union_Included_cancel_left. reflexivity.
@@ -2157,8 +2157,111 @@ Arguments Full_set {U} _.
     rewrite H14... auto. auto.
   Qed.
 
-  (* It's not clear if this lemma is absolutely needed, it won't be hard to prove if
-     we copy the proof above, but we'll leave it until we absolutely need it *)
+  Lemma Prop_2_4'' :
+    forall (T Z M P : Ensemble carrier),
+    Finite Z -> Finite T -> (Union T Z) moves M to P -> 
+    Included (MinusPlus T) M ->
+    Perp T Z ->
+    (exists N N', (N == N') /\ (T moves M to N) /\ (Z moves N' to P)).
+  Proof with repeat basic; auto.
+    intros T Z M P ZFin TFin. 
+    remember (Union T Z) as S.
+    intros.
+    assert (Finite S) as SFin. rewrite HeqS. apply Finite_Union...
+    unfold moves_def in H...
+    
+    assert (exists N, T moves M to N). 
+    apply Prop_2_1. assumption.
+      split; try assumption.
+      assert (Included (Plus T) (Plus S)). 
+        rewrite HeqS. rewrite Plus_Union. apply Union_Included_cancel_right. reflexivity.
+      apply Disjoint_Intersection_condition. apply (Included_Empty_set _ (M ∩ Plus S)). apply Intersection_Included_compat...
+      rewrite H3. rewrite Intersection_trans. rewrite (Intersection_sym _ (Plus S)). 
+      rewrite Empty_set_property...
+    inversion H1 as [N']; clear H1.
+
+    assert (exists N', Z moves N' to P).        
+    apply Prop_2_1_dual. assumption. split.
+      assert (K1: Plus Z == (Plus S) ∩ √(Plus T)). 
+        rewrite HeqS. rewrite Plus_Union. rewrite I_U_dist_r.
+        rewrite Empty_set_property. rewrite Empty_set_ident_left.
+        apply Disjoint_result... rewrite Intersection_sym...
+      assert (K2: Minus Z == (Minus S) ∩ √(Minus T)). rewrite HeqS. 
+        rewrite Minus_Union. rewrite I_U_dist_r.
+        rewrite Empty_set_property. rewrite Empty_set_ident_left.
+        apply Disjoint_result... rewrite Intersection_sym... 
+      assert ((PlusMinus Z) == (PlusMinus S ∩ √(Plus T)) ∪ (Plus S ∩ (MinusPlus T)) ). 
+        unfold MinusPlus, PlusMinus. rewrite K1, K2.
+        rewrite (Intersection_Complement_compat).
+        rewrite (Complement_Complement_compat).
+      unfold Same_set; unfold Included...
+        inversion H7... left... right... 
+        inversion H1. apply In_Intersection in H6... apply In_Intersection in H6... 
+        inversion H1. apply In_Intersection in H6... apply In_Intersection in H6... 
+        inversion H1; apply In_Intersection in H6...  
+        auto. auto.
+
+      assert (P == (Union P (Intersection (Plus S) M))).
+      unfold Same_set; unfold Included...
+        inversion H6... symmetry in H2. rewrite <- H2...
+        rewrite H3 in H9... 
+
+      rewrite H1, H6. rewrite H2.
+      unfold PlusMinus.
+      unfold Included...
+      inversion H7. left... right... 
+
+      (* apply Disjoint_Intersection_condition.  *)
+      constructor... rewrite H2 in H6...
+      rewrite HeqS in H8. assert ((√Minus (T ∪ Z)) == ((√ Minus T ∩ √ Minus Z))).
+      rewrite Minus_Union. rewrite Union_Complement_compat...
+      rewrite H6 in H8...
+
+    inversion H1 as [N]; clear H1. 
+    exists N'. exists N...
+    
+    unfold moves_def in H5. inversion H5. clear H5.
+    unfold moves_def in H6. inversion H6. clear H6.
+    rewrite H1, H8. 
+    assert ((Plus T) == (Intersection (Plus S) (Complement (Plus Z)))).
+      rewrite HeqS. rewrite Plus_Union. rewrite I_U_dist_r.
+      rewrite Empty_set_property. rewrite Empty_set_ident_right.
+      apply Disjoint_result. assumption.
+    assert ((Minus T) == (Intersection (Minus S) (Complement (Minus Z)))).
+      rewrite HeqS. rewrite Minus_Union. rewrite I_U_dist_r.
+      rewrite Empty_set_property. rewrite Empty_set_ident_right.
+      apply Disjoint_result. assumption. 
+    rewrite H6, H9. 
+    rewrite Intersection_Complement_compat. 
+    rewrite Complement_Complement_compat.
+    rewrite U_I_dist_l. 
+    rewrite Intersection_trans. 
+    rewrite (Intersection_sym (M ∪ √Plus Z) _).
+    rewrite <- Intersection_trans. 
+    rewrite (I_U_dist_l (M ∪ Plus S)). 
+    rewrite <- H2.
+    assert ((Minus Z) ⊆ Union (MinusPlus S) (Plus S)).
+      assert ((Union (MinusPlus S) (Plus S)) == (Union (Minus S) (Plus S))).
+        unfold MinusPlus. rewrite U_I_dist_r. rewrite Full_set_property. rewrite Full_set_ident_right...
+        auto.
+      rewrite H10. rewrite HeqS. rewrite Minus_Union. left; right...
+    assert ((MinusPlus S ∪ Plus S) ⊆ (Union M (Plus S))). 
+      unfold MinusPlus. rewrite H3. apply Union_Included_compat. 
+      apply Intersection_Included_compat. apply Union_Included_cancel_left. 
+      reflexivity. reflexivity. reflexivity.
+    assert (Minus Z ⊆ M ∪ Plus S). 
+      apply (Included_trans _ (MinusPlus S ∪ Plus S)). apply H10... assumption.
+    assert (((M ∪ Plus S) ∩ Minus Z) == (Minus Z)).
+      unfold Same_set; unfold Included... rewrite H13.
+    assert ((M ∪ √Plus Z) == (√Plus Z)).
+      apply Union_Included_left.
+      rewrite H3. apply Intersection_Included_cancel_left.
+      apply Complement_Included_flip. rewrite HeqS. 
+      rewrite Plus_Union. apply (Included_trans _ (Plus T ∪ Plus Z) _).
+      unfold Included; intros; right... apply Complement_closure.
+    rewrite H14... auto. auto.
+  Qed.
+
   Lemma Prop_2_4' : 
     forall (T Z M P : Ensemble carrier),
     Finite Z -> Finite T -> (Union T Z) moves M to P -> 
@@ -2168,60 +2271,43 @@ Arguments Full_set {U} _.
     (Z moves (P ∪ Minus Z) ∩ √Plus Z to P) /\ 
     ((P ∪ Minus Z) ∩ √Plus Z == (M ∪ Plus T) ∩ √Minus T).
   Proof with repeat basic; auto.
-    intros T Z M P ZFin TFin. 
-    remember (Union T Z) as S.
     intros.
-    assert (Finite S) as SFin. 
-      rewrite HeqS. apply Finite_Union...
-    
-    assert ((T moves M to (M ∪ Plus T) ∩ √Minus T)) as A.
-    apply Prop_2_1'. 
-    assumption. 
-    admit. (* ?? *)
+    assert (∃ N N' : Ensemble carrier, N == N' ∧ (T moves M to N) ∧ (Z moves N' to P)). 
+      apply Prop_2_4; assumption.
+    inversion H4 as [N K]; clear H4.
+    inversion K as [N' J]; clear K. 
+    assert (N == (M ∪ Plus T) ∩ √Minus T). 
+      unfold moves_def in *... 
+    assert (N' == (P ∪ Minus Z) ∩ √Plus Z). 
+      unfold moves_def in *...
+    splits.
+    rewrite <- H4...
+    rewrite <- H5...
+    rewrite <- H4, <- H5...
+  Qed.
 
-    assert ((Z moves (P ∪ Minus Z) ∩ √Plus Z to P)) as B.
-    apply Prop_2_1_dual'. 
-    assumption.
-      split; try assumption.
-      assert (Included (Minus Z) (Minus S)). 
-        rewrite HeqS. rewrite Minus_Union. apply Union_Included_cancel_left. reflexivity.
-      apply Disjoint_Intersection_condition. 
-      apply (Included_Empty_set _ (P ∩ Minus S))... 
-      apply Intersection_Included_compat...
-      admit. (* ?? *)
-    
-    intuition. 
-
-    unfold moves_def in A...
-    unfold moves_def in B...
-    unfold moves_def in H...
-
-    assert ((Plus T) == (Intersection (Plus S) (Complement (Plus Z)))) as C.
-      rewrite HeqS. rewrite Plus_Union. rewrite I_U_dist_r.
-      rewrite Empty_set_property. rewrite Empty_set_ident_right.
-      apply Disjoint_result. assumption.
-    assert ((Minus T) == (Intersection (Minus S) (Complement (Minus Z)))) as D.
-      rewrite HeqS. rewrite Minus_Union. rewrite I_U_dist_r.
-      rewrite Empty_set_property. rewrite Empty_set_ident_right.
-      apply Disjoint_result. assumption. 
-    rewrite C, D. 
-    rewrite Intersection_Complement_compat. 
-    rewrite Complement_Complement_compat.
-    rewrite U_I_dist_l. 
-    rewrite Intersection_trans. 
-    rewrite (Intersection_sym (M ∪ √Plus Z) _).
-    rewrite <- Intersection_trans. 
-    rewrite (I_U_dist_l (M ∪ Plus S)). 
-    rewrite <- H7.
-    assert ((Minus Z) ⊆ Union (MinusPlus S) (Plus S)). admit. (* ?? *)
-    assert ((MinusPlus S ∪ Plus S) ⊆ (Union M (Plus S))). admit. (* ?? *)
-    assert (Minus Z ⊆ M ∪ Plus S). admit. (* ?? *) 
-    assert (((M ∪ Plus S) ∩ Minus Z) == (Minus Z)). admit. (* ?? *)
-    assert ((M ∪ √Plus Z) == (√Plus Z)). admit. (* ?? *)
-    rewrite H11...
-    rewrite H12...  
-    auto. 
-    auto.
+  Lemma Prop_2_4''' : 
+    forall (T Z M P : Ensemble carrier),
+    Finite Z -> Finite T -> (Union T Z) moves M to P -> 
+    Included (MinusPlus T) M ->
+    Perp T Z ->
+    (T moves M to (M ∪ Plus T) ∩ √Minus T) /\ 
+    (Z moves (P ∪ Minus Z) ∩ √Plus Z to P) /\ 
+    ((P ∪ Minus Z) ∩ √Plus Z == (M ∪ Plus T) ∩ √Minus T).
+  Proof with repeat basic; auto.
+    intros.
+    assert (∃ N N' : Ensemble carrier, N == N' ∧ (T moves M to N) ∧ (Z moves N' to P)). 
+      apply Prop_2_4''; assumption.
+    inversion H4 as [N K]; clear H4.
+    inversion K as [N' J]; clear K. 
+    assert (N == (M ∪ Plus T) ∩ √Minus T). 
+      unfold moves_def in *... 
+    assert (N' == (P ∪ Minus Z) ∩ √Plus Z). 
+      unfold moves_def in *...
+    splits.
+    rewrite <- H4...
+    rewrite <- H5...
+    rewrite <- H4, <- H5...
   Qed.
 
 End PreParityTheory.
