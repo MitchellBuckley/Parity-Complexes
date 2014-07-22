@@ -694,8 +694,12 @@ Module ParityComplexTheory (M : ParityComplex).
   Add Parametric Morphism : (receptive) with 
     signature (@Same_set carrier) ==> (iff) as is_a_cell_Same_set.
   Proof with intuition.
-    intuition. 
-  Admitted.
+    unfold receptive.
+    intros.
+    split; intros K; inversion K as [A B]; clear K.
+      split; intros z; rewrite <- H; [apply (A z) | apply (B z)].
+      split; intros z; rewrite    H; [apply (A z) | apply (B z)].
+  Qed.
 
   Definition cell_receptive (G : Ensemble carrier * Ensemble carrier) : Prop.
     inversion G as [M P].
@@ -1460,23 +1464,57 @@ Module ParityComplexTheory (M : ParityComplex).
       - rewrite H...
   Qed.
 
-Lemma well_formed_Setminus : forall S, well_formed S -> forall T, well_formed (Setminus S T).
-Admitted.
+  Lemma well_formed_Setminus : forall S, well_formed S -> forall T, well_formed (Setminus S T).
+  Proof with intuition. 
+    intros.
+    apply (well_formed_Included S)...
+    crush.
+  Qed.
 
-  Lemma Disjoint_well_formed : 
+  Lemma Disjoint_well_formed : (* NOT SURE THIS IS TRUE!! *)
     ∀ A : Ensemble carrier,
     well_formed A
     → ∀ B : Ensemble carrier,
       well_formed B
-      → (Disjoint A B) → well_formed (A ∪ B). Admitted.
+      → (Disjoint A B) → well_formed (A ∪ B). 
+  Proof with intuition. 
+  Admitted.
 
-Lemma well_formed_Empty_set : well_formed Empty_set. Admitted.
+  Lemma well_formed_Empty_set : well_formed Empty_set.
+  Proof with intuition. 
+    unfold well_formed...
+    exfalso... 
+    exfalso... 
+  Qed.
 
   Lemma bbbbb : forall M R T, Disjoint R T -> 
      Included R M -> Included T M -> 
      well_formed M ->
      Disjoint (Plus R) (Plus T).
-  Admitted.
+  Proof with intuition.
+    intros...
+    constructor... 
+    apply In_Intersection in H3...
+    inversion H4; clear H4...
+    inversion H5; clear H5...
+    assert (x0 = x1)...
+      unfold well_formed in H2...
+      remember (dim x0) as n. 
+      destruct n...
+      exfalso.
+      assert (In Empty_set x)...
+        rewrite <- (plus_zero x0)...
+      refine (H8 _ _ _ n _ _ _)...
+      assert (S (dim x) = dim x0)... 
+      assert (S (dim x) = dim x1)...
+      rewrite Heqn, <- H9... 
+      unfold perp in H2...
+      assert (In Empty_set x)...
+        rewrite <- H9...
+    subst.
+    inversion H...
+    apply (H3 x1)...
+  Qed.
 
   Lemma aaaaa : forall M R T, Disjoint R T -> 
      Included R M -> Included T M -> 
@@ -2640,9 +2678,19 @@ Lemma well_formed_Empty_set : well_formed Empty_set. Admitted.
     inversion T2 as [T2a T2b]; clear T2. *)
 
   Lemma receptive_by_dimension  : forall T, receptive T -> (forall n, receptive (sub T n)).
+  Proof with intuition. (* not sure that this is true *)
+    unfold receptive. 
+    intros...
+    + apply (H0 x)...
+      - apply Included_trans with (sub T n)...
+      - apply H2.
+        inversion H4; exists x0.
+        repeat (basic; intuition)...
+        unfold sub, In at 1...
   Admitted.
-  Lemma receptive_by_dimension' : forall T, (forall n, receptive (sub T n)) -> receptive T.
-  Admitted.
+
+(*  Lemma receptive_by_dimension' : forall T, (forall n, receptive (sub T n)) -> receptive T. 
+  Admitted.    *)
   
     assert ((minus x) moves A to B) as moves4. 
       apply Prop_3_1. 
@@ -3604,18 +3652,28 @@ Lemma well_formed_Empty_set : well_formed Empty_set. Admitted.
   Axiom mu_is_tight : forall x n, tight (sub (mu x) n). 
   Axiom pi_is_tight : forall x n, tight (sub (pi x) n). 
 
-Lemma Same_pair_dec : forall A B C D, Finite A ->
+  Lemma Same_pair_dec : forall A B C D, Finite A ->
                                       Finite B ->
                                       Finite C ->
                                       Finite D ->
                                       (((A, B) === (C, D)) \/ ~((A, B) === (C, D))).
-                                      Admitted.
+  Proof with intuition.
+    intros.
+    assert ((A == C) \/ ~(A == C))... apply Finite_eq_decidable...
+    assert ((B == D) \/ ~(B == D))... apply Finite_eq_decidable...
+      right; unfold Same_pair...
+      right; unfold Same_pair...
+  Qed.
 
-Lemma Same_pair_by_dim' : forall A B C D, (forall k, (sub A (S k), sub B (S k)) === (sub C (S k), sub D (S k))) 
-                               -> ((A, B) === (C, D)). Admitted. 
+  Lemma Same_pair_by_dim' : forall A B C D, (forall k, (sub A (S k), sub B (S k)) === (sub C (S k), sub D (S k))) 
+                               -> ((A, B) === (C, D)).
+  Proof with intuition. 
+    unfold Same_pair... 
+    apply Same_set_by_dimension... apply H... 
+    apply Same_set_by_dimension... apply H... 
+  Qed.
 
-      
-Lemma fffff : forall M P, is_a_cell (M, P) -> 
+  Lemma fffff : forall M P, is_a_cell (M, P) -> 
               forall u, In M u -> 
               forall k, sub (mu u) (k) ⊆ sub M (k).
   Proof with intuition.
