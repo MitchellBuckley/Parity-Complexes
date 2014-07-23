@@ -4149,117 +4149,11 @@ Lemma ffgghh' : forall M P, is_a_cell (M, P) ->
         apply (H4 x0)... 
 Qed. 
 
-Lemma gghhkk : forall M P, is_a_cell (M, P) ->
-               forall x, In (Intersection M P) x ->
-               Disjoint (minus x) (Plus M) ->
-               ( (Setminus M (Singleton x) moves Setminus (M ∪ plus x) (minus x) to P) /\
-                 (Singleton x moves M to Setminus (M ∪ Plus (Singleton x)) (Minus (Singleton x))) ).
-Proof with intuition.
-  intros M P H x H0 K.
-  assert (Singleton x ∪ (M ∩ √Singleton x) == M) as HH.
-    rewrite Union_sym. 
-    rewrite <- Setminus_is_Intersection_Complement. 
-    rewrite add_subtract'... 
-    unfold Included... inversion H1... subst. apply In_Intersection in H0... 
-  assert ((Singleton x moves M
-               to (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x))
-              ∧ (M ∩ √Singleton x
-                 moves (P ∪ Minus (M ∩ √Singleton x))
-                       ∩ √Plus (M ∩ √Singleton x) to P)
-                ∧ (P ∪ Minus (M ∩ √Singleton x)) ∩ √Plus (M ∩ √Singleton x) ==
-                  (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)).
-  apply Prop_2_4'... 
-  apply Setminus_Finite... apply H.
-  rewrite HH; apply H.
-  unfold PlusMinus, Included; repeat (basic; intuition)...
-    assert ((In (Minus M) x0) \/ ~(In (Minus M) x0))...
-      apply all_decidable.
-      apply Minus_Finite, H.
-      (**) 
-      inversion H6... 
-        assert ((x1 = x) \/ ~(x1 = x))...
-          apply carrier_decidable_eq.
-            subst. exfalso. apply (H1 x0)... apply In_Intersection... inversion H3; exists x1...
-            apply In_Intersection in H9...
-            exfalso. apply H4. exists x1...
-            repeat (basic; intuition)... apply In_Complement... inversion H0...
-      assert (Included (PlusMinus M) P). 
-        apply Prop_2_1_dual. 
-        apply H. exists M; apply H.
-      apply H0. unfold PlusMinus.
-      repeat (basic)...
-      inversion H3; exists x1... apply In_Intersection in H8...
-  apply Observation_p322.
-  rewrite HH; apply H.
-  constructor...
-  repeat (basic)...
-  rewrite <- Plus_Singleton. 
-  rewrite <- Minus_Singleton. 
-  repeat (rewrite Setminus_is_Intersection_Complement)...
-  rewrite <- H4...
-  Qed.
-
-(* not sure if this is any help *)
-Lemma gghhkk' : forall M P, is_a_cell (M, P) ->
-               forall x, In (Intersection M P) x ->
-               Disjoint (minus x) (Minus P) ->
-               ( (Setminus P (Singleton x) moves Setminus (M ∪ plus x) (minus x) to P) /\
-                 (Singleton x moves M to (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)) ).
-Proof with intuition.
-  intros M P H x H0 K.
-  assert (Singleton x ∪ (P ∩ √Singleton x) == P) as HH.
-    rewrite Union_sym. 
-    rewrite <- Setminus_is_Intersection_Complement. 
-    rewrite add_subtract'... 
-    unfold Included... inversion H1... subst. apply In_Intersection in H0... 
-  assert ((Singleton x moves M
-               to (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x))
-              ∧ (P ∩ √Singleton x
-                 moves (P ∪ Minus (P ∩ √Singleton x))
-                       ∩ √Plus (P ∩ √Singleton x) to P)
-                ∧ (P ∪ Minus (P ∩ √Singleton x)) ∩ √Plus (P ∩ √Singleton x) ==
-                  (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)).
-  apply Prop_2_4'... 
-  apply Setminus_Finite... apply H.
-  rewrite HH; apply H. 
-  unfold PlusMinus, Included; repeat (basic; intuition)...
-    assert ((In (Minus P) x0) \/ ~(In (Minus P) x0))...
-      apply all_decidable.
-      apply Minus_Finite, H.
-      (**) 
-      inversion H6... 
-        assert ((x1 = x) \/ ~(x1 = x))...
-          apply carrier_decidable_eq.
-            subst. exfalso. apply (H1 x0)... 
-            exfalso. apply H4. exists x1...
-            repeat (basic; intuition)... apply In_Complement... inversion H0...
-      assert (Included (PlusMinus P) P). 
-        apply Prop_2_1_dual. 
-        apply H. exists M; apply H.
-      apply H0. unfold PlusMinus.
-      repeat (basic)...
-      inversion H3; exists x1... apply In_Intersection in H8...
-  apply Observation_p322.
-  rewrite HH; apply H.
-  constructor...
-  repeat (basic)...
-  rewrite <- Plus_Singleton. 
-  rewrite <- Minus_Singleton. 
-  repeat (rewrite Setminus_is_Intersection_Complement)...
-  rewrite <- H4...
-  Qed.
-
     inversion xory; clear xory.
 
     - (* x case *)
     assert (dim x = S m) as dimx. 
-        unfold X, In at 1 in xismin... apply triangle_rest_in_set in H0... 
-    assert ((Singleton x) moves M to Setminus (M ∪ plus x) (minus x)) as DDFF.
-      rewrite <- Plus_Singleton.
-      rewrite <- Minus_Singleton.
-      apply (gghhkk M P) with (x:=x)...
-      repeat basic; intuition.
-        admit. (* no problem *)
+      unfold X, In at 1 in xismin... apply triangle_rest_in_set in H0... 
     assert (P moves Setminus M (Singleton x) to Setminus P (Singleton x)) as LLKK'.
       apply ffgghh... 
       repeat basic; intuition. 
@@ -4267,25 +4161,74 @@ Proof with intuition.
       apply ffgghh'... 
       repeat basic; intuition. 
     assert (Setminus M (Singleton x) moves Setminus (M ∪ plus x) (minus x) to P) as HHJJ.
-      apply gghhkk... 
-      repeat basic; intuition.
-      admit. (* no problem *)
+      assert (Singleton x ∪ (M ∩ √Singleton x) == M).
+        rewrite Union_sym, <- Setminus_is_Intersection_Complement.
+        apply add_subtract'. 
+        apply all_decidable...
+        unfold Included... inversion H6; clear H6; subst. apply In_Intersection in H... 
+      assert ((Singleton x moves M
+               to (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x))
+              ∧ (M ∩ √Singleton x
+                 moves (P ∪ Minus (M ∩ √Singleton x))
+                       ∩ √Plus (M ∩ √Singleton x) to P)
+                ∧ (P ∪ Minus (M ∩ √Singleton x)) ∩ √Plus (M ∩ √Singleton x) ==
+                  (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)).
+      apply Prop_2_4'''.     
+      apply Setminus_Finite. apply cellcond. apply Finite_Singleton.
+      apply Finite_Singleton.
+      rewrite H0. apply cellcond. 
+      rewrite MinusPlus_Singleton. apply Included_trans with (sub M (S m))...
+      apply Observation_p322... rewrite H0. apply cellcond.
+      constructor; repeat (basic; intuition).
+      rewrite <- Minus_Singleton, <- Plus_Singleton.
+      repeat (rewrite Setminus_is_Intersection_Complement)...
+      rewrite <- H10...
     assert (Setminus P (Singleton x) moves Setminus (M ∪ plus x) (minus x) to P) as HHJJ'.
-      apply gghhkk'...
-      repeat basic; intuition. admit. (* ?? *)
-      
+      assert (Singleton x ∪ (P ∩ √Singleton x) == P).
+        rewrite Union_sym, <- Setminus_is_Intersection_Complement.
+        apply add_subtract'. 
+        apply all_decidable...
+        unfold Included... inversion H6; clear H6; subst. apply In_Intersection in H... 
+      assert ((Singleton x moves M
+               to (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x))
+              ∧ (P ∩ √Singleton x
+                 moves (P ∪ Minus (P ∩ √Singleton x))
+                       ∩ √Plus (P ∩ √Singleton x) to P)
+                ∧ (P ∪ Minus (P ∩ √Singleton x)) ∩ √Plus (P ∩ √Singleton x) ==
+                  (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)).
+      apply Prop_2_4'''.     
+      apply Setminus_Finite. apply cellcond. apply Finite_Singleton.
+      apply Finite_Singleton.
+      rewrite H0. apply cellcond. 
+      rewrite MinusPlus_Singleton. apply Included_trans with (sub M (S m))...
+      apply Observation_p322... rewrite H0. apply cellcond.
+      constructor; repeat (basic; intuition).
+      rewrite <- Minus_Singleton, <- Plus_Singleton.
+      repeat (rewrite Setminus_is_Intersection_Complement)...
+      rewrite <- H10...
+    assert ((Singleton x) moves M to Setminus (M ∪ plus x) (minus x)) as DDFF.
+      assert (Singleton x ∪ (P ∩ √Singleton x) == P).
+        rewrite Union_sym, <- Setminus_is_Intersection_Complement.
+        apply add_subtract'. 
+        apply all_decidable...
+        unfold Included... inversion H6; clear H6; subst. apply In_Intersection in H... 
+      assert ((Singleton x moves M
+               to (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x))
+              ∧ (P ∩ √Singleton x
+                 moves (P ∪ Minus (P ∩ √Singleton x))
+                       ∩ √Plus (P ∩ √Singleton x) to P)
+                ∧ (P ∪ Minus (P ∩ √Singleton x)) ∩ √Plus (P ∩ √Singleton x) ==
+                  (M ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)).
+      apply Prop_2_4'''.     
+      apply Setminus_Finite. apply cellcond. apply Finite_Singleton.
+      apply Finite_Singleton.
+      rewrite H0. apply cellcond. 
+      rewrite MinusPlus_Singleton. apply Included_trans with (sub M (S m))...
+      apply Observation_p322... rewrite H0. apply cellcond.
+      constructor; repeat (basic; intuition).
+      rewrite <- Minus_Singleton, <- Plus_Singleton.
+      repeat (rewrite Setminus_is_Intersection_Complement)...
     assert (Setminus (M ∪ plus x) (minus x) moves M to P) as FFGG. 
-      unfold moves_def...
-      assert (P == (M ∪ Plus M) ∩ √Minus M). apply cellcond. 
-      rewrite H6. (* not easy *)
-      repeat (rewrite Setminus_is_Intersection_Complement).
-      repeat (rewrite I_U_dist_r). 
-      repeat (rewrite Minus_Union || rewrite Plus_Union). 
-      repeat (rewrite <- Union_Complement_compat).
-      repeat (rewrite I_U_dist_r || rewrite I_U_dist_l).
-      (* sub (Setminus (M ∪ plus x) (minus x)) (S m) moves sub M m to sub P m *)
-(*     unfold Same_set, Included; repeat (basic; intuition)...  *)
-      admit.
       admit.
 
       set (R := (P ∩ (√(Singleton x)))).
@@ -4744,19 +4687,63 @@ Proof with intuition.
                     rewrite dimx in H6...
 
       (* y case *)
-    - assert (dim y = S m) as ydim. 
-        unfold Y, In at 1 in yismax... apply triangle_rest_in_set in H2... 
-
-    assert ((Singleton y) moves M to Setminus (M ∪ minus y) (plus y)) as DDFF.
-      admit.
+    - 
+    assert (dim y = S m) as ydim. 
+      unfold Y, In at 1 in yismax... apply triangle_rest_in_set in H2... 
     assert (P moves Setminus M (Singleton y) to Setminus P (Singleton y)) as LLKK'.
       apply ffgghh... repeat (basic; intuition)... 
     assert (M moves Setminus M (Singleton y) to Setminus P (Singleton y)) as LLKK.
       apply ffgghh'... repeat (basic; intuition)... 
     assert (Setminus M (Singleton y) moves M to Setminus (P ∪ minus y) (plus y)) as HHJJ.
-      admit. 
+      assert (Setminus M (Singleton y) ∪ Singleton y == M).
+        apply add_subtract'. 
+        apply all_decidable...
+        unfold Included... inversion H6; clear H6; subst. apply In_Intersection in H... 
+      assert ((Setminus M (Singleton y) moves M
+               to (M ∪ Plus (Setminus M (Singleton y)))
+                  ∩ √Minus (Setminus M (Singleton y)))
+              ∧ (Singleton y
+                 moves (P ∪ Minus (Singleton y)) ∩ √Plus (Singleton y) to P)
+                ∧ (P ∪ Minus (Singleton y)) ∩ √Plus (Singleton y) ==
+                  (M ∪ Plus (Setminus M (Singleton y)))
+                  ∩ √Minus (Setminus M (Singleton y))).
+      apply Prop_2_4'.     
+      apply Finite_Singleton.
+      rewrite Setminus_is_Intersection_Complement.
+      apply Setminus_Finite. apply cellcond. apply Finite_Singleton.
+      rewrite H0. apply cellcond. 
+      rewrite PlusMinus_Singleton. apply Included_trans with (sub P (S m))...
+      apply Observation_p322... rewrite H0. apply cellcond.
+      constructor; repeat (basic; intuition).
+      rewrite <- Minus_Singleton, <- Plus_Singleton.
+      repeat (rewrite Setminus_is_Intersection_Complement)...
+      rewrite H10...
+      rewrite <- Setminus_is_Intersection_Complement...
     assert (Setminus P (Singleton y) moves M to Setminus (P ∪ minus y) (plus y)) as HHJJ'.
-      admit. 
+      assert (Setminus P (Singleton y) ∪ Singleton y == P).
+        apply add_subtract'. 
+        apply all_decidable...
+        unfold Included... inversion H6; clear H6; subst. apply In_Intersection in H... 
+      assert ((Setminus P (Singleton y) moves M
+               to (M ∪ Plus (Setminus P (Singleton y)))
+                  ∩ √Minus (Setminus P (Singleton y)))
+              ∧ (Singleton y
+                 moves (P ∪ Minus (Singleton y)) ∩ √Plus (Singleton y) to P)
+                ∧ (P ∪ Minus (Singleton y)) ∩ √Plus (Singleton y) ==
+                  (M ∪ Plus (Setminus P (Singleton y)))
+                  ∩ √Minus (Setminus P (Singleton y))).
+      apply Prop_2_4'.     
+      apply Finite_Singleton.
+      rewrite Setminus_is_Intersection_Complement.
+      apply Setminus_Finite. apply cellcond. apply Finite_Singleton.
+      rewrite H0. apply cellcond. 
+      rewrite PlusMinus_Singleton. apply Included_trans with (sub P (S m))...
+      apply Observation_p322... rewrite H0. apply cellcond.
+      constructor; repeat (basic; intuition).
+      rewrite <- Minus_Singleton, <- Plus_Singleton.
+      repeat (rewrite Setminus_is_Intersection_Complement)...
+      rewrite H10...
+      rewrite <- Setminus_is_Intersection_Complement...
     assert (Setminus (P ∪ minus y) (plus y) moves M to P) as FFGG. 
       admit. 
 
