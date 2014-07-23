@@ -748,6 +748,19 @@ Ltac crush :=
       inversion H0... 
   Qed.
 
+  Lemma add_subtract' :
+  ∀ (U : Type) (A B: Ensemble U),
+  decidable (A) → Included A B → Union (Setminus B A) A == B. 
+Proof with intuition. 
+  intros.
+  unfold Same_set, Included...
+  apply In_Union in H1...
+  unfold Setminus, In at 1 in H2...
+  assert ((In A x) \/ ~(In A x))...
+  apply H.
+Qed.
+
+
   Hint Resolve Same_set_sym Same_set_refl Same_set_trans.
   Hint Resolve Included_refl Included_trans.
   Hint Resolve Union_trans Union_sym Union_idemp. 

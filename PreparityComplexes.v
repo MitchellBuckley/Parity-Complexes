@@ -523,6 +523,30 @@ Arguments Full_set {U} _.
   Hint Resolve lt_irrefl le_lt_dec lt_Sn_n.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* less lemmas                                          *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+Lemma less_irrefl : forall x, less x x -> False.
+Proof with intuition. 
+  intros. 
+  inversion H. 
+  apply In_Intersection in H0... 
+Qed.
+
+Lemma less_dim : forall x y, less x y -> dim x = dim y. 
+Proof with intuition.
+  intros.
+  unfold less in H...
+  inversion H...
+  apply In_Intersection in H0...
+  assert (S (dim x0) = dim x)...
+  assert (S (dim x0) = dim y)...
+  rewrite <- H0...
+Qed.
+
+Hint Resolve less_irrefl less_dim. 
+ 
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Setoid rewrite stuff                                 *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
