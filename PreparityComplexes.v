@@ -868,19 +868,19 @@ Hint Resolve less_irrefl less_dim.
     crush...
   Qed.
 
-  Lemma sup_sub_comm : forall R n k, sup (sub R (S n)) (S k) == sub (sup R (S k)) (S n). 
+  Lemma sup_sub_comm : forall R n k, sup (sub R (n)) (k) == sub (sup R (k)) (n). 
   Proof with intuition. 
     crush.
   Qed.
 
-  Lemma sup_sup_comm : forall R n k, sup (sup R (S n)) (S k) == sup (sup R (S k)) (S n). 
+  Lemma sup_sup_comm : forall R n k, sup (sup R (n)) (k) == sup (sup R (k)) (n). 
   Proof with intuition. 
     crush.
   Qed.
 
-  Lemma sup_sup_min : forall R n k, k <= n -> sup (sup R (S n)) (S k) == sup R (S k). 
+  Lemma sup_sup_min : forall R n k, k <= n -> sup (sup R (n)) (k) == sup R (k). 
   Proof with intuition. 
-    crush. apply (le_trans _ (S k))...
+    crush. apply (le_trans _ (k))...
   Qed.
 
   Lemma sub_Singleton_Empty_set : forall y k, ~(S (dim y) = k) -> sub (Singleton y) (k) == Empty_set.

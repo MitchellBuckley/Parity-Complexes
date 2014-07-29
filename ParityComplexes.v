@@ -4196,7 +4196,7 @@ Qed.
       apply Observation_p322... rewrite H0. apply cellcond.
       constructor; repeat (basic; intuition).
       rewrite <- Minus_Singleton, <- Plus_Singleton.
-      repeat (rewrite Setminus_is_Intersection_Complement)...
+      repeat (rewrite Setminus_is_Intersection_Complement)... 
     assert (Setminus (M ∪ plus x) (minus x) moves M to P) as FFGG. 
       admit.
 
@@ -4713,8 +4713,74 @@ Qed.
       repeat (rewrite Setminus_is_Intersection_Complement)...
       rewrite H10...
       rewrite <- Setminus_is_Intersection_Complement...
-    assert (Setminus (P ∪ minus y) (plus y) moves M to P) as FFGG. 
-      admit. 
+    assert (sub (Setminus (P ∪ minus y) (plus y)) (S m) moves sub M m to sub P m) as FFGG.
+      pose (Lemma_3_2_b m 1). 
+      unfold Lemma_3_2_b_st in l. 
+      assert (is_a_cell
+          (sup (sub P (S m) ∪ sup M m) m ∪ ((sub (sub P (S m) ∪ sup M m) (S m) ∪ Minus (Singleton y)) ∩ √Plus (Singleton y)),
+            sup (sup P (S m)) m ∪ ((sub (sub P (S m) ∪ sup M m) (S m) ∪ Minus (Singleton y)) ∩ √Plus (Singleton y)))
+          ∧ Minus (Singleton y) ∩ sub (sub P (S m) ∪ sup M m) (S m) == Empty_set).
+      apply l... 
+      apply Cardinality_Singleton_is_one. 
+      apply (target_is_a_cell (n-1))... 
+      destruct n. inversion mltn... simpl. rewrite <- minus_n_O. 
+        apply dimcond. 
+      destruct n. inversion mltn... simpl. rewrite <- minus_n_O. 
+        apply lt_n_Sm_le in mltn...
+      unfold celldim, setdim... repeat (basic; intuition)... 
+        assert (dim x0 = m)... rewrite H12... 
+        assert (S (dim x0) <= m)...
+      unfold Included, sub... unfold In at 1... inversion H6; clear H6; subst...
+      rewrite PlusMinus_Singleton. 
+        rewrite sub_Union. 
+        rewrite sub_sup_Empty_set... 
+        rewrite sub_idemp. 
+        rewrite Empty_set_ident_right...
+      unfold is_a_cell in H0... 
+      assert (sub (sup (sup P (S m)) m
+      ∪ ((sub (sub P (S m) ∪ sup M m) (S m) ∪ Minus (Singleton y))
+         ∩ √Plus (Singleton y))) (S m)
+      moves sub (sup (sub P (S m) ∪ sup M m) m
+            ∪ ((sub (sub P (S m) ∪ sup M m) (S m) ∪ Minus (Singleton y))
+               ∩ √Plus (Singleton y))) m
+      to sub (sup (sup P (S m)) m
+         ∪ ((sub (sub P (S m) ∪ sup M m) (S m) ∪ Minus (Singleton y))
+            ∩ √Plus (Singleton y))) m).
+      apply moves_by_dim... 
+      clear H15 H13. 
+      repeat (rewrite <- Setminus_is_Intersection_Complement in H14 ||
+              rewrite sub_Union in H14 ||
+              rewrite sub_Setminus in H14 ||
+              rewrite sub_Plus in H14 ||
+              rewrite sub_Minus in H14 ||
+              rewrite sup_Union in H14 ||
+              rewrite sup_idemp in H14 ||
+              rewrite sub_idemp in H14).
+      rewrite (sup_sup_min _ (S m) m) in H14...
+      rewrite (sub_sup_Empty_set m (S m)) in H14...
+      rewrite (sub_sup_Empty_set m (S m)) in H14...
+      rewrite (sub_sup_cancel m m) in H14...
+      rewrite (sub_sup_cancel m m) in H14...
+      rewrite (sub_sup_cancel m m) in H14...
+      rewrite (sub_sub_Empty_set (S m) m) in H14...
+      rewrite (sub_Singleton_Empty_set _ (S m)) in H14...
+      repeat (rewrite Plus_Empty_set in H14 ||
+              rewrite Minus_Empty_set in H14 ||
+              rewrite Empty_set_ident_left in H14 ||
+              rewrite Empty_set_ident_right in H14 ||
+              rewrite Setminus_Empty_set in H14).
+      repeat (rewrite <- sub_Union in H14 ||
+              rewrite <- sub_Setminus in H14 ||
+              rewrite <- sub_Plus in H14 ||
+              rewrite <- sub_Minus in H14).
+      repeat (rewrite Minus_Singleton in H14 ||
+              rewrite Plus_Singleton in H14||
+              rewrite Empty_set_ident_right in H14 ).
+      assumption.
+      rewrite ydim in H13...
+
+
+
 
       set (N := (M ∩ (√(Singleton y)))).
       set (Q := ((P ∩ √(Singleton y)) ∪ minus y) ∩ √plus y).
@@ -4832,7 +4898,7 @@ Qed.
           repeat (rewrite <- sub_Setminus || rewrite <- sub_Plus || 
                   rewrite <- sub_Minus || rewrite <- sub_Union)...          
           rewrite Minus_Singleton, Plus_Singleton.
-          apply moves_by_dim...
+          assumption.
           rewrite b. 
           repeat (rewrite (sub_Singleton_Empty_set _ (S m)) || 
                   rewrite (sub_Singleton_Empty_set _ (S (S (S m)))) || 
