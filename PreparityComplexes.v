@@ -1309,7 +1309,6 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   (* This lemma shouldn't be so hard to prove, but it is. *)
-  (* There might be some loop-free condition that is necessary, I'm not sure *)
   Lemma triangle_rest_dec : 
     forall T, 
       Finite T -> 
@@ -1396,6 +1395,7 @@ Hint Resolve less_irrefl less_dim.
              unfold Q, In at 1...         
 
              induction H7...
+               left...
                admit. admit.
 
          * left... 
