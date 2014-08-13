@@ -3728,6 +3728,29 @@ Qed.
     + exfalso. 
       apply le_not_gt in H0... 
   Qed.
+
+  Lemma perp_sym : forall a b, perp a b -> perp b a.
+  Proof with intuition.
+    unfold perp; intuition; rewrite Intersection_sym; assumption.
+  Qed.
+
+Lemma well_formed_fffff : forall A B, 
+  well_formed A -> 
+  well_formed B -> 
+  (forall a b n, In A a -> In B b -> dim a = S n -> dim b = S n -> (~ perp a b) -> a = b) ->
+  (forall a b  , In A a -> In B b -> dim a = 0 -> dim b = 0 -> a = b) ->
+  well_formed (Union A B).
+ Proof with intuition.
+   intros.
+   unfold well_formed in H.
+   unfold well_formed in H0.
+   unfold well_formed; intuition; repeat (basic; intuition).
+   symmetry. apply H2...
+   refine (H4 _ _ _ n _ _ _)...
+   symmetry. apply (H1 _ _ n)... apply perp_sym in H6... 
+   apply (H1 _ _ n)...
+   refine (H5 _ _ _ n _ _ _)...
+ Qed. 
  
   Notation "'<<' x '>>'" := ((mu x), (pi x)) (at level 85).
 
@@ -3873,35 +3896,6 @@ Qed.
         symmetry in HeqQ. apply leb_complete in HeqQ.
         rewrite CC in HeqQ. assert (S j <= j)... apply le_trans with n...
 
-Lemma ddddd : forall u n, n <= dim u -> Inhabited (sub (mu u) (S n)).
-Proof with intuition.
-  intros. 
-  rewrite sub_mu.
-  generalize dependent n.
-  refine (mu'_ind' _ (fun k => fun W => (k <= dim u → Inhabited (W))) _ _ _).
-  + intros. exists u...
-  + intros. apply (MinusPlus_Inhabited _ (n)). 
-    rewrite <- sub_mu.
-    apply sub_Included'...
-    apply mu'_Finite.
-    apply H0... 
-  + intros. exfalso... apply lt_not_le in H...
-Qed. 
-Lemma eeeee : forall u n, n <= dim u -> Inhabited (sub (pi u) (S n)).
-Proof with intuition.
-  intros. 
-  rewrite sub_pi.
-  generalize dependent n.
-  refine (pi'_ind' _ (fun k => fun W => (k <= dim u → Inhabited (W))) _ _ _).
-  + intros. exists u...
-  + intros. apply (PlusMinus_Inhabited _ (n)). 
-    rewrite <- sub_pi.
-    apply sub_Included'...
-    apply pi'_Finite.
-    apply H0... 
-  + intros. exfalso... apply lt_not_le in H...
-Qed. 
-
       assert ((sub M 1, sub P 1) === (sub (mu u) 1, sub (pi u) 1)).
         unfold Same_pair...
         assert (∃ z : carrier, sub M 1 == Singleton z).
@@ -3923,7 +3917,7 @@ Qed.
         rewrite H8.
         symmetry.
         apply Included_Singleton...
-        apply ddddd. apply le_0_n.
+        rewrite sub_mu. apply mu'_Inhabited. apply le_0_n.
         rewrite H8 in H7...
         assert (∃ z : carrier, sub P 1 == Singleton z).
           apply (P_0_Inhabited M P)...
@@ -3944,7 +3938,7 @@ Qed.
         rewrite H8.
         symmetry.
         apply Included_Singleton...
-        apply eeeee. apply le_0_n. 
+        rewrite sub_pi. apply pi'_Inhabited. apply le_0_n.
         rewrite H8 in H7...
         
       unfold Same_pair. 
@@ -4032,14 +4026,6 @@ Qed.
         unfold Same_set, Included... unfold sup, In at 1...
       rewrite H3; rewrite sub_sup_Empty_set.
       idtac... idtac... intuition. rewrite H0... rewrite H0...
-
-  (*  inversion mltn; clear mltn.
-      rewrite <- H in *. clear H. subst.
-      admit.
-
-    assert (S m < n) as mltn.
-      rewrite <- H0...
-    rewrite H0. clear H H0 m0. *)
 
     assert ((sub M (S (S m))) == (sub (mu u) (S (S m))) ∪ ((sub M (S (S m))) ∩ (sub P (S (S m))))) as Mcond.
       inversion mltn...
@@ -4235,6 +4221,7 @@ Qed.
     set (Q := ((((sub M (S m)) ∪ (plus x)) ∩ √(minus x))) ∪ (sup P m) ∪ (Singleton x)).
     set (N := ((sup M (S m)) ∪ ((Singleton x)))).
     exists N. exists Q. exists L. exists R. exists m.
+
     admit. (* figure out how to NOT repeat any proofs *)
         
     (* S m < n *)
@@ -4381,29 +4368,6 @@ Qed.
       set (N := ((sup M (S m)) ∪ ((Singleton x)))).
       exists N. exists Q. exists L. exists R. exists m.
       splits...
-
-  Lemma perp_sym : forall a b, perp a b -> perp b a.
-  Proof with intuition.
-    unfold perp; intuition; rewrite Intersection_sym; assumption.
-  Qed.
-
-Lemma well_formed_fffff : forall A B, 
-  well_formed A -> 
-  well_formed B -> 
-  (forall a b n, In A a -> In B b -> dim a = S n -> dim b = S n -> (~ perp a b) -> a = b) ->
-  (forall a b  , In A a -> In B b -> dim a = 0 -> dim b = 0 -> a = b) ->
-  well_formed (Union A B).
- Proof with intuition.
-   intros.
-   unfold well_formed in H.
-   unfold well_formed in H0.
-   unfold well_formed; intuition; repeat (basic; intuition).
-   symmetry. apply H2...
-   refine (H4 _ _ _ n _ _ _)...
-   symmetry. apply (H1 _ _ n)... apply perp_sym in H6... 
-   apply (H1 _ _ n)...
-   refine (H5 _ _ _ n _ _ _)...
- Qed. 
 
       + unfold N, Q.
         unfold is_a_cell...
