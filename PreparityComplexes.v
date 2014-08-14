@@ -1308,6 +1308,59 @@ Hint Resolve less_irrefl less_dim.
     - rewrite H1...
   Qed.
 
+  Inductive is_a_path : list carrier -> Prop :=
+    | fff'' : forall x, is_a_path (cons x nil)
+    | ffff'' : forall x y, less x y -> forall l, is_a_path (cons y l) -> is_a_path (cons x (cons y l)).
+  Inductive is_in_set (M : Ensemble carrier) : list carrier -> Prop :=
+    | ggg'' : forall x, In M x -> forall k, is_in_set M k -> is_in_set M (cons x k).
+  Inductive starts_and_ends (x z : carrier) : list carrier -> Prop := 
+    | hhh'' : forall l, starts_and_ends x z (cons x (app l (cons z nil))).
+  Inductive has_loop : list carrier -> Prop :=
+    | iii'' : forall a1 a2 a3 (x : carrier), has_loop (app a1 (app (cons x nil) (app a2 (app (cons x nil) a3)))).
+  Lemma loops_and_length : forall n, forall M, Cardinal M n -> 
+       forall l, is_a_path l -> is_in_set M l -> (n < length l) -> has_loop l.
+  Admitted.
+  Definition dec_Prop (P : Prop) := P \/ ~P.
+  Lemma is_a_path_dec : forall l, dec_Prop (is_a_path l).
+  Admitted.
+  Lemma is_in_set_dec : forall M l, dec_Prop (is_in_set M l).
+  Admitted.
+  Lemma starts_and_ends_dec : forall l x z, dec_Prop (starts_and_ends x z l).
+  Admitted.
+  Lemma has_loop_dec : forall l, dec_Prop (has_loop l).
+  Admitted.
+  Lemma list_le_n_Finite : forall l M, is_in_set M l ->
+    forall n, Cardinal M n ->
+    Finite (fun w => @length carrier w <= n).
+  Admitted.
+  (* if we can define the above, we should be able to define the following *)
+  Lemma loop_free_path_dec :
+    forall M x z,
+      Finite M ->
+      Finite (fun l =>
+                is_a_path l /\
+                is_in_set M l /\
+                ~(has_loop l) /\
+                starts_and_ends x z l).
+  Admitted.
+  (* then if we get the following *)
+  Lemma equiv''' : 
+    forall T, 
+      Finite T -> 
+      forall x z, (triangle_rest T z x <-> (exists l, 
+        is_a_path l /\ is_in_set T l /\
+        ~(has_loop l) /\ starts_and_ends x z l)).
+  Admitted.
+  (* we should be able to prove the decidability as below *)
+
+
+
+  (* If we could construct the set of all paths in a Finite M, then so 
+     long as that set is finite then it is finite or inhabited, which is really 
+     the same decidability question as below. *)
+  (* The problem is that, a priori, it is not finite. It is only finite if we exclude
+     loops, which we can do, but it gets more complicated. *)
+
   (* This lemma shouldn't be so hard to prove, but it is. *)
   Lemma triangle_rest_dec : 
     forall T, 
