@@ -927,7 +927,8 @@ Module ParityComplexTheory (M : ParityComplex).
         repeat (basic; intuition).
   Qed.
 
-  Lemma receptive_by_dimension'  : forall T, (forall n, receptive (sub T n)) -> receptive T.
+  Lemma receptive_by_dimension'  : 
+      forall T, (forall n, receptive (sub T n)) -> receptive T.
   Proof with intuition. 
     unfold receptive.
     intros...
@@ -970,9 +971,6 @@ Module ParityComplexTheory (M : ParityComplex).
       + exists x0... 
         repeat (basic; intuition)...
   Qed. 
-
-  (* I think this must be Prop_3_3 and i'm a bit confused *)
-  Axiom cells_are_receptive : forall M P, is_a_cell (M, P) -> receptive M /\ receptive P.
 
   Lemma Empty_set_moves : forall M, Empty_set moves M to M.
   Proof with intuition.
@@ -1920,10 +1918,6 @@ Qed.
       rewrite H6...
       rewrite H6...
   Qed.
-
-  Lemma Prop_3_3 : (forall M P : Ensemble carrier, is_a_cell (M, P) -> cell_receptive (M, P)).
-  Proof with intuition.
-  Admitted. 
   
   Definition Lemma_3_2_b_st : nat -> nat -> Prop :=
     (fun n => (fun m =>
@@ -1960,6 +1954,11 @@ Qed.
     ((X ⊆ (sub (Full_set) (S (S n)))) /\ well_formed X /\ ((MinusPlus X) ⊆ (sub P (S n)))) ->
     is_a_cell ( M ∪ X, (sup P n) ∪ (((sub P (S n)) ∪ Plus X) ∩ √(Minus X)) ∪ X)
     ))).
+
+
+  Lemma Prop_3_3 : forall M P : Ensemble carrier, is_a_cell (M, P) -> receptive M /\ receptive P.
+  Proof with intuition.
+  Admitted. 
 
   Lemma Lemma_3_2_b_n_0 : forall n, Lemma_3_2_b_st n 0.
   Proof with intuition.
@@ -3009,7 +3008,7 @@ Qed.
     assert ((minus x) moves A to B) as moves4.
       apply Prop_3_1.
       assumption.
-      apply cells_are_receptive in plusx1...
+      apply Prop_3_3 in plusx1...
       rewrite targetrel in H1.
       rewrite <- Bdef in H1.
       rewrite (sub_Union _ _ (S n)) in H1.
@@ -3131,7 +3130,7 @@ Qed.
            refine (Prop_3_1 _ _ _ _ _)...
            assert (is_a_cell ((sup M n) ∪ A', (sup P n) ∪ A')).
              admit. (* by induction on n? *)
-           apply cells_are_receptive in H12...
+           apply Prop_3_3 in H12...
            apply (receptive_by_dimension) with (n:= S n) in H13.
            rewrite sub_Union in H13.
            rewrite sub_sup_Empty_set in H13...
@@ -3641,25 +3640,6 @@ Qed.
   Proof.
     admit.
   Qed.
-
-  Lemma Prop_3_4 :
-    forall M P, is_a_cell (M, P) ->
-    forall z n, dim z = S n ->
-    minus z ⊆ P ->
-    Minus M ∩ plus z == Empty_set.
-  Admitted.
-
-  Lemma Prop_3_5 :
-    forall M P N Q, is_a_cell (M, P) /\ is_a_cell (N, Q) ->
-    (forall n m, m < n-1 -> (M == N /\ P == Q /\ P = N)) ->
-    (Minus M ∩ Plus N == Empty_set) /\ is_a_cell (M, N).
-  Admitted.
-
-  Lemma Theorem_3_6b :
-    forall M P N Q (n: nat),
-      is_a_cell (M, P) -> is_a_cell (N, Q) -> 4 = 4 ->
-      Minus (M ∪ P) ∩ Plus (N ∪ Q) == Empty_set.
-  Admitted.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* mu and pi                                            *)
@@ -4559,8 +4539,69 @@ Lemma well_formed_fffff : forall A B,
       constructor; repeat (basic; intuition).
       rewrite <- Minus_Singleton, <- Plus_Singleton.
       repeat (rewrite Setminus_is_Intersection_Complement)...
-    assert (Setminus (M ∪ plus x) (minus x) moves M to P) as FFGG.
-      admit.
+    assert (sub (Setminus (M ∪ plus x) (minus x)) (S m) moves sub M m to sub P m) as FFGG.
+      pose (Lemma_3_2_b' m 1).
+      unfold Lemma_3_2_b'_st in l.
+      assert (is_a_cell 
+            (sup (sup M (S m)) m ∪ ((sub ((sub M (S m)) ∪ (sup P (m))) (S m) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)),
+            sup ((sub M (S m)) ∪ (sup P (m))) m ∪ ((sub ((sub M (S m)) ∪ (sup P (m))) (S m) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)))
+          ∧ Plus (Singleton x) ∩ sub ((sub M (S m)) ∪ (sup P (m))) (S m) == Empty_set).
+      apply l...
+      apply Cardinality_Singleton_is_one.
+      apply (source_is_a_cell (n-1))...
+      destruct n. inversion mltn... simpl. rewrite <- minus_n_O.
+        apply dimcond.
+      destruct n. inversion mltn... simpl. rewrite <- minus_n_O.
+        apply lt_n_Sm_le in mltn...
+      unfold celldim, setdim... repeat (basic; intuition)...
+        assert (dim x0 = m)... rewrite H10...
+        assert (S (dim x0) <= m)...
+      unfold Included, sub... unfold In at 1... inversion H6; clear H6; subst...
+      rewrite MinusPlus_Singleton.
+        rewrite sub_Union.
+        rewrite sub_sup_Empty_set...
+        rewrite sub_idemp.
+        rewrite Empty_set_ident_right...
+      unfold is_a_cell in H0...
+      assert (sub (sup (sup M (S m)) m
+      ∪ ((sub (sub M (S m) ∪ sup P m) (S m) ∪ Plus (Singleton x))
+         ∩ √Minus (Singleton x))) (S m) moves sub (sup (sup M (S m)) m
+            ∪ ((sub (sub M (S m) ∪ sup P m) (S m) ∪ Plus (Singleton x))
+               ∩ √Minus (Singleton x))) m to sub (sup (sub M (S m) ∪ sup P m) m
+         ∪ ((sub (sub M (S m) ∪ sup P m) (S m) ∪ Plus (Singleton x))
+            ∩ √Minus (Singleton x))) m).
+      apply moves_by_dim...
+      clear H15 H13.
+      repeat (rewrite <- Setminus_is_Intersection_Complement in H14 ||
+              rewrite sub_Union in H14 ||
+              rewrite sub_Setminus in H14 ||
+              rewrite sub_Plus in H14 ||
+              rewrite sub_Minus in H14 ||
+              rewrite sup_Union in H14 ||
+              rewrite sup_idemp in H14 ||
+              rewrite sub_idemp in H14).
+      rewrite (sup_sup_min _ (S m) m) in H14...
+      rewrite (sub_sup_Empty_set m (S m)) in H14...
+      rewrite (sub_sup_Empty_set m (S m)) in H14...
+      rewrite (sub_sup_cancel m m) in H14...
+      rewrite (sub_sup_cancel m m) in H14...
+      rewrite (sub_sup_cancel m m) in H14...
+      rewrite (sub_sub_Empty_set (S m) m) in H14...
+      rewrite (sub_Singleton_Empty_set _ (S m)) in H14...
+      repeat (rewrite Plus_Empty_set in H14 ||
+              rewrite Minus_Empty_set in H14 ||
+              rewrite Empty_set_ident_left in H14 ||
+              rewrite Empty_set_ident_right in H14 ||
+              rewrite Setminus_Empty_set in H14).
+      repeat (rewrite <- sub_Union in H14 ||
+              rewrite <- sub_Setminus in H14 ||
+              rewrite <- sub_Plus in H14 ||
+              rewrite <- sub_Minus in H14).
+      repeat (rewrite Minus_Singleton in H14 ||
+              rewrite Plus_Singleton in H14||
+              rewrite Empty_set_ident_right in H14 ).
+      assumption.
+      rewrite dimx in H13...
 
       set (R := (P ∩ (√(Singleton x)))).
       set (L := ((M ∩ √(Singleton x)) ∪ plus x) ∩ √minus x).
@@ -4580,9 +4621,8 @@ Lemma well_formed_fffff : forall A B,
         * rewrite <- Setminus_is_Intersection_Complement.
           apply well_formed_Union...
           apply well_formed_Union...
-          rewrite Setminus_is_Intersection_Complement.
-          rewrite I_U_dist_r.
-          admit.
+          rewrite Setminus_is_Intersection_Complement. 
+          admit. 
           apply well_formed_sup... apply cellcond.
           assert (S (dim y0) <= m)...
             unfold Setminus, In at 1 in H8... 
@@ -4709,7 +4749,7 @@ Lemma well_formed_fffff : forall A B,
             repeat (rewrite <- sub_Plus || rewrite <- sub_Minus ||
                     rewrite <- sub_Union || rewrite <- sub_Setminus). (**)
             repeat (rewrite Plus_Singleton || rewrite Minus_Singleton).
-            apply moves_by_dim...
+            assumption. 
             rewrite b.
             repeat (rewrite (sub_Singleton_Empty_set _ (S (m))) ||
                     rewrite (sub_Singleton_Empty_set _ (S (S (S m)))) ||
@@ -4753,14 +4793,46 @@ Lemma well_formed_fffff : forall A B,
           exists x0...
           apply In_Intersection...
           apply In_Complement... inversion H7; clear H7; subst...
-        * rewrite I_U_dist_r. 
+        * apply well_formed_by_dimension. intros k.
           repeat (rewrite <- Setminus_is_Intersection_Complement).
-          apply well_formed_fffff...
-          repeat (apply well_formed_Setminus).
-          apply cellcond.
-          apply well_formed_Setminus...
-          exfalso. admit.
-          exfalso. admit. 
+          repeat (rewrite sub_Setminus || rewrite sub_Union ||
+                  rewrite <- Minus_Singleton || rewrite <- Plus_Singleton ||
+                  rewrite sub_Minus || rewrite sub_Plus).
+          assert (k < m \/ k = m \/ k = S m \/ S m < k)... admit.
+          repeat (rewrite sub_Singleton_Empty_set ||
+                  rewrite Minus_Empty_set || 
+                  rewrite Plus_Empty_set || 
+                  rewrite Setminus_Empty_set); try rewrite dimx...
+                  rewrite Empty_set_ident_right.
+                  unfold is_a_cell in cellcond... 
+                  pose (well_formed_by_dimension M)...
+                  assert (S m = k)... rewrite <- H8 in H7...
+          repeat (rewrite (sub_Singleton_Empty_set _ (S k)) ||
+                  rewrite Setminus_Empty_set)...
+          repeat (rewrite <- sub_Setminus || rewrite <- sub_Union ||
+                  rewrite <- sub_Minus || rewrite <- sub_Plus). rewrite H6.
+                  (* use Lemma_3_2_b' *)
+                  admit.
+                  rewrite H6, dimx in H7...
+          repeat (rewrite (sub_Singleton_Empty_set _ (S (S k))) ||
+                  rewrite Minus_Empty_set || 
+                  rewrite Plus_Empty_set || 
+                  rewrite Setminus_Empty_set)...
+                  rewrite Empty_set_ident_right. 
+                  apply (well_formed_Included (sub M (S k)))...
+                  unfold is_a_cell in cellcond... 
+                  pose (well_formed_by_dimension M)...
+                  apply Setminus_Included...
+                  rewrite H7, dimx in H6...
+          repeat (rewrite sub_Singleton_Empty_set ||
+                  rewrite Minus_Empty_set || 
+                  rewrite Plus_Empty_set || 
+                  rewrite Setminus_Empty_set)...
+                  rewrite Empty_set_ident_right. 
+                  unfold is_a_cell in cellcond... 
+                  pose (well_formed_by_dimension M)...
+                  rewrite dimx in H6...
+                  rewrite dimx in H6...
         * apply (well_formed_Included P)... apply cellcond.
           apply Intersection_Included_cancel_right...
         * repeat (rewrite <- Setminus_is_Intersection_Complement).
@@ -4803,7 +4875,7 @@ Lemma well_formed_fffff : forall A B,
                     rewrite <- (sub_Minus) ||
                     rewrite Plus_Singleton ||
                     rewrite Minus_Singleton ).
-            apply moves_by_dim...
+            assumption. 
             rewrite b.
             repeat (rewrite (sub_Singleton_Empty_set _ (S (S (S m)))) ||
                     rewrite (sub_Singleton_Empty_set _ (S m)) ||
@@ -5136,9 +5208,6 @@ Lemma well_formed_fffff : forall A B,
               rewrite Empty_set_ident_right in H14 ).
       assumption.
       rewrite ydim in H13...
-
-
-
 
       set (N := (M ∩ (√(Singleton y)))).
       set (Q := ((P ∩ √(Singleton y)) ∪ minus y) ∩ √plus y).
