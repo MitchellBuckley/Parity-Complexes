@@ -4145,19 +4145,90 @@ Lemma well_formed_fffff : forall A B,
     exists x... 
   Qed.
 
-
 Lemma Lemma_3_2_b'_corr : forall x, forall M P n,
                           is_a_cell (M, P) /\ celldim (M, P) n ->
                           dim x = (S n) /\ minus x ⊆ sub P (S n) ->
                           well_formed ((sub M (S n) ∪ plus x) ∩ √minus x).
-Admitted.
-
+Proof with intuition.
+  intros...
+  pose (Lemma_3_2_b' n 1 (Singleton x)).
+  assert (is_a_cell
+            (sup M n
+             ∪ ((sub P (S n) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)),
+            sup P n
+            ∪ ((sub P (S n) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)))
+          ∧ Plus (Singleton x) ∩ sub P (S n) == Empty_set).
+  apply a...
+  apply Cardinality_Singleton_is_one... 
+  unfold Included; repeat (basic; intuition)... 
+    inversion H0. rewrite <- H4. unfold sub, In at 1...
+  rewrite MinusPlus_Singleton...
+  clear a.
+  unfold is_a_cell in H0...
+  assert ((∀ n0 : nat,
+          well_formed
+            (sub
+               (sup P n
+                ∪ ((sub P (S n) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)))
+               (S n0)))).
+               apply well_formed_by_dimension...
+  specialize H11 with n.
+  rewrite sub_Union in H11.
+  rewrite sub_sup_Empty_set in H11...
+  rewrite Empty_set_ident_left in H11...
+  rewrite <- Setminus_is_Intersection_Complement in H11.
+  rewrite sub_Setminus in H11.
+  rewrite sub_Minus in H11.
+  rewrite sub_Union in H11.
+  rewrite sub_Plus in H11.
+  rewrite sub_idemp in H11.
+  rewrite sub_Singleton in H11...
+  rewrite Minus_Singleton in H11.
+  rewrite Plus_Singleton in H11.
+  rewrite Setminus_is_Intersection_Complement in H11.
+  rewrite (cell_dim_n_property M P)...
+Qed.
+  
 
 Lemma Lemma_3_2_b_corr : forall x, forall M P n,
                           is_a_cell (M, P) /\ celldim (M, P) n ->
                           dim x = (S n) /\ plus x ⊆ sub M (S n) ->
                           well_formed ((sub P (S n) ∪ minus x) ∩ √plus x).
-Admitted.
+Proof with intuition.
+  intros...
+  pose (Lemma_3_2_b n 1 (Singleton x)).
+  assert (is_a_cell
+            (sup M n
+             ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x)),
+            sup P n
+            ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x)))
+          ∧ Minus (Singleton x) ∩ sub M (S n) == Empty_set).
+  apply a...
+  apply Cardinality_Singleton_is_one... 
+  unfold Included; repeat (basic; intuition)... 
+    inversion H0. rewrite <- H4. unfold sub, In at 1...
+  rewrite PlusMinus_Singleton...
+  clear a.
+  unfold is_a_cell in H0...
+  assert ((∀ n0 : nat,
+          well_formed (sub (sup P n ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x))) (S n0)))).
+               apply well_formed_by_dimension...
+  specialize H11 with n.
+  rewrite sub_Union in H11.
+  rewrite sub_sup_Empty_set in H11...
+  rewrite Empty_set_ident_left in H11...
+  rewrite <- Setminus_is_Intersection_Complement in H11.
+  rewrite sub_Setminus in H11.
+  rewrite sub_Plus in H11.
+  rewrite sub_Union in H11.
+  rewrite sub_Minus in H11.
+  rewrite sub_idemp in H11.
+  rewrite sub_Singleton in H11...
+  rewrite Minus_Singleton in H11.
+  rewrite Plus_Singleton in H11.
+  rewrite Setminus_is_Intersection_Complement in H11.
+  rewrite <- (cell_dim_n_property M P)...
+Qed.
 
   Lemma Theorem_4_1 :
     forall M P n, is_a_cell (M, P) -> celldim (M, P) n -> (0 < n) ->
