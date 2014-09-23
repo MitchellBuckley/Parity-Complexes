@@ -1937,7 +1937,7 @@ Qed.
     is_a_cell ( (sup M n) ∪ (((sub M (S n)) ∪ Minus X) ∩ √(Plus X)) ∪ X, P ∪ X)
     ))).
 
-  Definition Lemma_3_2_b'_st : nat -> nat -> Prop :=
+  Definition Lemma_3_2_b_dual_st : nat -> nat -> Prop :=
     (fun n => (fun m =>
     forall (X : Ensemble carrier),
     Cardinal X m ->
@@ -1955,10 +1955,7 @@ Qed.
     is_a_cell ( M ∪ X, (sup P n) ∪ (((sub P (S n)) ∪ Plus X) ∩ √(Minus X)) ∪ X)
     ))).
 
-
-  Lemma Prop_3_3 : forall M P : Ensemble carrier, is_a_cell (M, P) -> receptive M /\ receptive P.
-  Proof with intuition.
-  Admitted. 
+  Axiom Prop_3_3 : forall M P : Ensemble carrier, is_a_cell (M, P) -> receptive M /\ receptive P.
 
   Lemma Lemma_3_2_b_n_0 : forall n, Lemma_3_2_b_st n 0.
   Proof with intuition.
@@ -2090,7 +2087,7 @@ Qed.
   Qed.
 
 
-  Lemma Lemma_3_2_Step_1' :
+  Lemma Lemma_3_2_Step_1 :
     forall n m, (Lemma_3_2_b_st n m) -> (Lemma_3_2_c_st n m).
   Proof with intuition.
     unfold Lemma_3_2_b_st, Lemma_3_2_c_st.
@@ -2338,7 +2335,7 @@ Qed.
         apply Empty_set_moves.
   Qed.
 
-  Lemma Lemma_3_2_Step_2' :
+  Lemma Lemma_3_2_Step_2 :
     forall n, ((Lemma_3_2_b_st n 1) -> (forall m, Lemma_3_2_b_st n (S m))).
   Proof with intuition.
     intros n hypothesis_for_1 m.
@@ -2576,7 +2573,7 @@ Qed.
     apply (Minus_Included Z X)... rewrite XZrel...
   Qed.
 
-  Lemma Lemma_3_2_Step_3' :
+  Lemma Lemma_3_2_Step_3 :
     forall n, (forall m , Lemma_3_2_b_st n m) -> (Lemma_3_2_b_st (S n) 1). 
   Proof with intuition.
     intros n Hyp1.
@@ -2808,7 +2805,7 @@ Qed.
 
     (* is a cell (M + B + T) (P + T) *)
     assert (is_a_cell ((sup tM n ∪ ((sub tM (S n) ∪ Minus T) ∩ √Plus T) ∪ T, tP ∪ T))) as T1.
-      apply (Lemma_3_2_Step_1' _ mT)...
+      apply (Lemma_3_2_Step_1 _ mT)...
       unfold Included... subsuptac...
       assert (In (sub M (S (S n))) x0). rewrite DisjUnion. right...
       subsuptac...
@@ -2843,7 +2840,7 @@ Qed.
     assert (is_a_cell
              ((sup (sup tM n ∪ ((sub tM (S n) ∪ Minus T) ∩ √Plus T)) n ∪ ((sub (sup tM n ∪ ((sub tM (S n) ∪ Minus T) ∩ √Plus T)) (S n) ∪ Minus (plus x)) ∩ √Plus (plus x))) ∪ (plus x),
              (sup tP n ∪ ((sub tM (S n) ∪ Minus T) ∩ √Plus T)) ∪ (plus x))) as plusx1.
-      apply (Lemma_3_2_Step_1' _ mplusx)...
+      apply (Lemma_3_2_Step_1 _ mplusx)...
       unfold celldim...
         setdimtac.
         unfold T; setdimtac.
@@ -2890,7 +2887,7 @@ Qed.
                 ∪ Minus (plus x)) ∩ √Plus (plus x))) (S n) ∪ Minus S') ∩ √Plus S')) ∪ S', (sup (sup tP n ∪ ((sub tM (S n) ∪ Minus T) ∩ √Plus T)) n
            ∪ ((sub (sup tM n ∪ ((sub tM (S n) ∪ Minus T) ∩ √Plus T)) (S n)
                ∪ Minus (plus x)) ∩ √Plus (plus x))) ∪ S')) as S'1.
-      apply (Lemma_3_2_Step_1' _ mS')...
+      apply (Lemma_3_2_Step_1 _ mS')...
       unfold celldim. setdimtac.
         apply (setdim_Included _ _ plusxdim)... setdimtac.
         apply (setdim_Included _ _ plusxdim)... setdimtac.
@@ -3369,7 +3366,6 @@ Qed.
 
     assert (well_formed (S' ∪ (minus x))) as WF1.
       assert (Perp S' (minus x))...
-      assert (True)...
       assert (sub (S' ∪ minus x) 1 == Empty_set).
         unfold Same_set, Included...
           exfalso.
@@ -3696,7 +3692,7 @@ Qed.
   Lemma Lemma_3_2_b_0_m :
     forall m, (Lemma_3_2_b_st 0 (S m)).
   Proof with intuition.
-    apply Lemma_3_2_Step_2'.
+    apply Lemma_3_2_Step_2.
     apply Lemma_3_2_b_0_1.
   Qed. 
 
@@ -3710,8 +3706,8 @@ Qed.
       apply Lemma_3_2_b_0_m.
     destruct m.
       apply Lemma_3_2_b_n_0.
-    apply Lemma_3_2_Step_2'.
-    apply Lemma_3_2_Step_3'.
+    apply Lemma_3_2_Step_2.
+    apply Lemma_3_2_Step_3.
     apply IHn.
   Qed.
 
@@ -3719,12 +3715,12 @@ Qed.
     forall n m, (Lemma_3_2_c_st n m).
   Proof.
     intros.
-    apply Lemma_3_2_Step_1'.
+    apply Lemma_3_2_Step_1.
     apply Lemma_3_2_b.
   Qed.
 
-  Lemma Lemma_3_2_b' :
-    forall n m, (Lemma_3_2_b'_st n m).
+  Lemma Lemma_3_2_b_dual :
+    forall n m, (Lemma_3_2_b_dual_st n m).
   Proof.
     admit.
   Qed.
@@ -4239,13 +4235,13 @@ Lemma well_formed_fffff : forall A B,
     exists x... 
   Qed.
 
-Lemma Lemma_3_2_b'_corr : forall x, forall M P n,
+Lemma Lemma_3_2_b_dual_corr : forall x, forall M P n,
                           is_a_cell (M, P) /\ celldim (M, P) n ->
                           dim x = (S n) /\ minus x ⊆ sub P (S n) ->
                           well_formed ((sub M (S n) ∪ plus x) ∩ √minus x).
 Proof with intuition.
   intros...
-  pose (Lemma_3_2_b' n 1 (Singleton x)).
+  pose (Lemma_3_2_b_dual n 1 (Singleton x)).
   assert (is_a_cell
             (sup M n
              ∪ ((sub P (S n) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)),
@@ -4719,8 +4715,8 @@ Qed.
       rewrite <- Minus_Singleton, <- Plus_Singleton.
       repeat (rewrite Setminus_is_Intersection_Complement)...
     assert (sub (Setminus (M ∪ plus x) (minus x)) (S m) moves sub M m to sub P m) as FFGG.
-      pose (Lemma_3_2_b' m 1).
-      unfold Lemma_3_2_b'_st in l.
+      pose (Lemma_3_2_b_dual m 1).
+      unfold Lemma_3_2_b_dual_st in l.
       assert (is_a_cell 
             (sup (sup M (S m)) m ∪ ((sub ((sub M (S m)) ∪ (sup P m)) (S m) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)),
             sup ((sub M (S m)) ∪ (sup P m)) m ∪ ((sub ((sub M (S m)) ∪ (sup P m)) (S m) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)))
@@ -4802,7 +4798,7 @@ Qed.
           apply well_formed_Union...
           rewrite Setminus_is_Intersection_Complement.
           assert (well_formed ((sub (sup M (S m)) (S m) ∪ plus x) ∩ √minus x)).
-          apply (Lemma_3_2_b'_corr x (sup M (S m)) (sub M (S m) ∪ sup P m) m)... 
+          apply (Lemma_3_2_b_dual_corr x (sup M (S m)) (sub M (S m) ∪ sup P m) m)... 
           apply (source_is_a_cell (n-1) M P)... 
             assert (S (n - 1) = n)... 
               destruct n... simpl. rewrite <- minus_n_O...
@@ -4995,7 +4991,7 @@ Qed.
                   rewrite Plus_Singleton). 
                   rewrite Setminus_is_Intersection_Complement.
                   assert (well_formed ((sub (sup M (S m)) (S m) ∪ plus x) ∩ √minus x)).
-                  apply (Lemma_3_2_b'_corr x (sup M (S m)) (sub M (S m) ∪ sup P m) m)...
+                  apply (Lemma_3_2_b_dual_corr x (sup M (S m)) (sub M (S m) ∪ sup P m) m)...
                   apply (source_is_a_cell (n-1))... 
                     assert (S (n-1) = n)... 
                       destruct n... simpl. rewrite <- minus_n_O...
