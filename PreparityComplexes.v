@@ -212,9 +212,9 @@ Arguments Full_set {U} _.
     Plus Minus sup sub: sets v62.
 
   Definition moves_def (S M P : Ensemble carrier) : Prop :=
-    P == (Intersection (Union (M) ( Plus S)) (Complement (Minus S))) 
+    P == (Intersection (Union M ( Plus S)) (Complement (Minus S))) 
     /\
-    M == (Intersection (Union (P) (Minus S)) (Complement ( Plus S))).
+    M == (Intersection (Union P (Minus S)) (Complement ( Plus S))).
 
   Notation "S 'moves' M 'to' P" := (moves_def S M P) (at level 89).
 
@@ -662,7 +662,7 @@ Hint Resolve less_irrefl less_dim.
     crush. 
   Qed.
 
-  Lemma sub_def_Lemma' : forall m x R, In (sub R (m)) x -> (S (dim x) = m). 
+  Lemma sub_def_Lemma' : forall m x R, In (sub R m) x -> (S (dim x) = m). 
   Proof with crush. 
     crush. 
   Qed.
@@ -672,7 +672,7 @@ Hint Resolve less_irrefl less_dim.
     crush. 
   Qed.
 
-  Lemma sup_def_Lemma' : forall R m x, In (sup R (m)) x -> (S (dim x) <= m). 
+  Lemma sup_def_Lemma' : forall R m x, In (sup R m) x -> (S (dim x) <= m). 
   Proof with crush. 
     crush. 
   Qed.
@@ -704,19 +704,19 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve sub_Included_Lemma sub_def_Lemma sup_def_Lemma le_Sn_n n_Sn.
 
-  Lemma sub_Included : forall T n, Included (sub T (n)) T.
+  Lemma sub_Included : forall T n, Included (sub T n) T.
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Included...
   Qed.
 
-  Lemma sup_Included : forall T n, Included (sup T (n)) T.
+  Lemma sup_Included : forall T n, Included (sup T n) T.
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Included...
   Qed.
 
-  Lemma sub_sup_Included : forall T n, Included (sub T (n)) (sup T (n)).
+  Lemma sub_sup_Included : forall T n, Included (sub T n) (sup T n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Included...
@@ -725,7 +725,7 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve sub_Included sup_Included sub_sup_Included.
 
-  Lemma sub_Union : forall T R n, sub (Union T R) (n) == Union (sub T (n)) (sub R (n)).
+  Lemma sub_Union : forall T R n, sub (Union T R) n == Union (sub T n) (sub R n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Same_set; unfold Included...
@@ -734,7 +734,7 @@ Hint Resolve less_irrefl less_dim.
     inversion H; inversion H0...
   Qed.
 
-  Lemma sup_Union : forall T R n, sup (Union T R) (n) == Union (sup T (n)) (sup R (n)).
+  Lemma sup_Union : forall T R n, sup (Union T R) n == Union (sup T n) (sup R n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Same_set; unfold Included...
@@ -743,39 +743,39 @@ Hint Resolve less_irrefl less_dim.
     inversion H; inversion H0...
   Qed.
 
-  Lemma sub_Included_compat : forall R T, R ⊆ T -> forall m, (sub R (m)) ⊆ (sub T (m)).
+  Lemma sub_Included_compat : forall R T, R ⊆ T -> forall m, (sub R m) ⊆ (sub T m).
   Proof.
     autounfold with *. intuition.
   Qed.
 
-  Lemma sup_Included_compat : forall R T, R ⊆ T -> forall m, (sup R (m)) ⊆ (sup T (m)).
+  Lemma sup_Included_compat : forall R T, R ⊆ T -> forall m, (sup R m) ⊆ (sup T m).
   Proof.
     autounfold with *. intuition.
   Qed.
 
-  Lemma sup_Intersection : forall T R n, sup (Intersection T R) (n) == Intersection (sup T (n)) (sup R (n)).
+  Lemma sup_Intersection : forall T R n, sup (Intersection T R) n == Intersection (sup T n) (sup R n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Same_set; unfold Included...
   Qed.
 
-  Lemma sub_Intersection : forall T R n, sub (Intersection T R) (n) == Intersection (sub T (n)) (sub R (n)).
+  Lemma sub_Intersection : forall T R n, sub (Intersection T R) n == Intersection (sub T n) (sub R n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Same_set; unfold Included...
   Qed.
 
-  Lemma sub_idemp : forall n R, sub (sub R (n)) (n) == sub R (n).
+  Lemma sub_idemp : forall n R, sub (sub R n) n == sub R n.
   Proof with intuition.
     autounfold with *...
   Qed. 
 
-  Lemma sup_idemp : forall n R, sup (sup R (n)) (n) == sup R (n).
+  Lemma sup_idemp : forall n R, sup (sup R n) n == sup R n.
   Proof with intuition.
     autounfold with *...
   Qed. 
 
-  Lemma sub_Plus : forall n T, sub (Plus T) (n) == Plus (sub T (S (n))).
+  Lemma sub_Plus : forall n T, sub (Plus T) n == Plus (sub T (S n)).
   Proof with intuition.
     autounfold with *. 
     intros. split.
@@ -787,7 +787,7 @@ Hint Resolve less_irrefl less_dim.
     apply plus_dim in H1... apply eq_add_S in H2. rewrite H2 in H1... 
   Qed.
 
-  Lemma sup_Plus : forall T n, sup (Plus T) (n) == Plus (sup T (S (n))).
+  Lemma sup_Plus : forall T n, sup (Plus T) n == Plus (sup T (S n)).
   Proof with repeat (basic || subsuptac); auto.
     unfold Same_set.
     intros.
@@ -802,7 +802,7 @@ Hint Resolve less_irrefl less_dim.
     apply le_S_n. apply plus_dim in H1. rewrite H1...
   Qed.
 
-  Lemma sub_Minus : forall n T, sub (Minus T) (n) == Minus (sub T (S n)).
+  Lemma sub_Minus : forall n T, sub (Minus T) n == Minus (sub T (S n)).
   Proof with intuition.
     autounfold with *. 
     intros. split.
@@ -814,7 +814,7 @@ Hint Resolve less_irrefl less_dim.
     apply minus_dim in H1... apply eq_add_S in H2. rewrite H2 in H1... 
   Qed.
 
-  Lemma sup_Minus : forall T n, sup (Minus T) (n) == Minus (sup T (S (n))).
+  Lemma sup_Minus : forall T n, sup (Minus T) n == Minus (sup T (S n)).
   Proof with repeat (basic || subsuptac); auto.
     unfold Same_set.
     intros.
@@ -830,9 +830,15 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma sub_Setminus : 
-    forall A B k, sub (Setminus A B) (k) == Setminus (sub A (k)) (sub B (k)).
+    forall A B k, sub (Setminus A B) k == Setminus (sub A k) (sub B k).
   Proof with intuition.
     crush.
+  Qed.
+
+  Lemma sup_Setminus : 
+    forall A B k, sup (Setminus A B) k == Setminus (sup A k) (sup B k). 
+  Proof with intuition. 
+    crush...
   Qed.
 
   Lemma sub_PlusMinus : forall n T, sub (PlusMinus T) (S n) == PlusMinus (sub T (S (S n))).
@@ -855,7 +861,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite sub_Minus...
   Qed.
 
-  Lemma sub_sup_Empty_set : forall n k, n < k -> forall R, sub (sup R n) (k) == Empty_set.
+  Lemma sub_sup_Empty_set : forall n k, n < k -> forall R, sub (sup R n) k == Empty_set.
   Proof with intuition.
     autounfold with *... 
     subst. exfalso. 
@@ -863,27 +869,45 @@ Hint Resolve less_irrefl less_dim.
     apply (le_trans _ (S (dim x)))...
   Qed. 
 
-  Lemma sub_sup_cancel : forall k n, k <= n -> forall P, sub (sup P (n)) (k) == sub P (k).
+  Lemma sup_sub_Empty_set : forall n k : nat, k < n -> forall R, sup (sub R n) k == Empty_set.
+  Proof with intuition.
+    autounfold with *... 
+    subst. exfalso. 
+    apply (le_Sn_n k).
+    apply (le_trans _ (S (dim x)))...
+  Qed. 
+
+  Lemma sub_sup_cancel : forall k n, k <= n -> forall P, sub (sup P n) k == sub P k.
   Proof with intuition. 
     crush...
   Qed.
 
-  Lemma sup_sub_comm : forall R n k, sup (sub R (n)) (k) == sub (sup R (k)) (n). 
+  Lemma sub_Empty_set : forall k, sub (Empty_set) k == Empty_set. 
+  Proof with intuition. 
+    crush...
+  Qed.
+
+  Lemma sup_Empty_set : forall k, sup (Empty_set) k == Empty_set. 
+  Proof with intuition. 
+    crush...
+  Qed.
+
+  Lemma sup_sub_comm : forall R n k, sup (sub R n) k == sub (sup R k) n. 
   Proof with intuition. 
     crush.
   Qed.
 
-  Lemma sup_sup_comm : forall R n k, sup (sup R (n)) (k) == sup (sup R (k)) (n). 
+  Lemma sup_sup_comm : forall R n k, sup (sup R n) k == sup (sup R k) n. 
   Proof with intuition. 
     crush.
   Qed.
 
-  Lemma sup_sup_min : forall R n k, k <= n -> sup (sup R (n)) (k) == sup R (k). 
+  Lemma sup_sup_min : forall R n k, k <= n -> sup (sup R n) k == sup R k. 
   Proof with intuition. 
-    crush. apply (le_trans _ (k))...
+    crush. apply (le_trans _ k)...
   Qed.
 
-  Lemma sub_Singleton_Empty_set : forall y k, ~(S (dim y) = k) -> sub (Singleton y) (k) == Empty_set.
+  Lemma sub_Singleton_Empty_set : forall y k, ~(S (dim y) = k) -> sub (Singleton y) k == Empty_set.
   Proof with intuition.
     intros...
     crush. 
@@ -942,7 +966,7 @@ Hint Resolve less_irrefl less_dim.
    inversion H1; clear H1; [left | right]; crush.
   Qed.
 
-  Lemma sub_sub_Empty_set : forall n k, ~(n=k) -> forall T, sub (sub T (n)) (k) == Empty_set.
+  Lemma sub_sub_Empty_set : forall n k, ~(n=k) -> forall T, sub (sub T n) k == Empty_set.
   Proof with intuition. 
     intros...
     crush... apply H. rewrite H3 in H2...
@@ -976,7 +1000,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H in H1. subsuptac... 
   Qed.
 
-  Lemma Finite_sub : forall T, Finite T -> forall n, Finite (sub T (n)). 
+  Lemma Finite_sub : forall T, Finite T -> forall n, Finite (sub T n). 
   Proof with intuition.
     intros.
     apply (Finite_Included'' T)...
@@ -984,7 +1008,7 @@ Hint Resolve less_irrefl less_dim.
       apply eq_nat_dec.
   Qed.
 
-  Lemma Finite_sup : forall T, Finite T -> forall n, Finite (sup T (n)). 
+  Lemma Finite_sup : forall T, Finite T -> forall n, Finite (sup T n). 
   Proof with intuition.
     intros.
     apply (Finite_Included'' T)...
@@ -1323,7 +1347,7 @@ Hint Resolve less_irrefl less_dim.
   Proof with intuition.
     idtac... unfold Minus, In at 1 in H0...
     inversion H0; clear H0...
-    assert (dim x <= (n))... 
+    assert (dim x <= n)... 
     assert (S (dim y) = (dim x))...
     rewrite H3...
   Qed.
@@ -1346,7 +1370,7 @@ Hint Resolve less_irrefl less_dim.
     assert (dim x = k)... rewrite H0... 
   Qed.
 
-  Lemma setdim_sup' : forall R n k, k <= n -> setdim (sup R (k)) n.
+  Lemma setdim_sup' : forall R n k, k <= n -> setdim (sup R k) n.
   Proof with intuition.
     unfold setdim, sup... unfold In at 1 in H0... apply (le_trans _ k)... 
   Qed.
@@ -1382,7 +1406,7 @@ Hint Resolve less_irrefl less_dim.
      | H : _ |- setdim (Intersection _ (Complement _)) _ => rewrite <- Setminus_is_Intersection_Complement
      | H : _ |- setdim (sub _ (S _)) _ => apply setdim_sub
      | H : _ |- setdim (sup _ (S _)) _ => apply setdim_sup
-     | H : _ |- setdim (sup _ (_)) _ => apply setdim_sup'
+     | H : _ |- setdim (sup _ _) _ => apply setdim_sup'
      | H : _ |- setdim (Minus _) _ => apply setdim_Minus
      | H : _ |- setdim (Singleton _) _ => apply setdim_Singleton
     end; 
@@ -1552,7 +1576,7 @@ Hint Resolve less_irrefl less_dim.
       inversion H6; clear H6...
       assert (x0 = x1).
         remember (dim x0) as w.
-        destruct (w).
+        destruct w.
         + exfalso. rewrite plus_zero in H7...
         + refine (H4 _ _ _ w _ _ _)...
           rewrite Heqw. symmetry. apply G...
@@ -1571,7 +1595,7 @@ Hint Resolve less_irrefl less_dim.
       inversion H6; clear H6...
       assert (x0 = x1).
         remember (dim x0) as w.
-        destruct (w).
+        destruct w.
         + exfalso. rewrite minus_zero in H7...
         + refine (H4 _ _ _ w _ _ _)...
           rewrite Heqw. symmetry. apply G...
@@ -1584,7 +1608,7 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma TT : forall k R T, setdim T k /\ setdim R k -> 
-                (forall m, m <= S k -> sub T (m) == sub R (m)) -> R == T.
+                (forall m, m <= S k -> sub T m == sub R m) -> R == T.
   Proof with intuition.
     intros...
     symmetry.
@@ -1823,11 +1847,11 @@ Hint Resolve less_irrefl less_dim.
     Finite S ->
     S moves A to B -> (Singleton x) ⊆ A -> Disjoint (Plus S) (Singleton x) 
     ->
-    S moves ((A) ∩ (√(Singleton x))) to ((B) ∩ (√(Singleton x))).
+    S moves (A ∩ (√(Singleton x))) to (B ∩ (√(Singleton x))).
   Proof with intuition.
     intros S A B x SFin. intros.
     unfold moves_def in H. inversion H; clear H.
-    assert (exists (P : Ensemble carrier), S moves ((A) ∩ √(Singleton x)) to P).
+    assert (exists (P : Ensemble carrier), S moves (A ∩ √(Singleton x)) to P).
       apply Prop_2_1. assumption.
       split.
         apply Included_trans with (T:=(A ∩ √(Singleton x))).

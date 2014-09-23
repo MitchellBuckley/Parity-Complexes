@@ -1366,7 +1366,7 @@ Module ParityComplexTheory (M : ParityComplex).
   + apply moves_by_dim'.
     intros k.
     repeat (rewrite sub_Union).
-    assert ({k < (S n)} + {k = S (n)} + {k = S (S n)} + {S (S n) < k})...
+    assert ({k < (S n)} + {k = S n} + {k = S (S n)} + {S (S n) < k})...
       apply lt_eq_eq_lt_dec.
     * repeat (rewrite sub_sub_Empty_set || rewrite sub_sup_cancel ||
               rewrite Empty_set_ident_left)...
@@ -1391,7 +1391,7 @@ Module ParityComplexTheory (M : ParityComplex).
   + apply moves_by_dim'.
     intros k.
     repeat (rewrite sub_Union).
-    assert ({k < (S n)} + {k = S (n)} + {k = S (S n)} + {S (S n) < k})...
+    assert ({k < (S n)} + {k = S n} + {k = S (S n)} + {S (S n) < k})...
       apply lt_eq_eq_lt_dec.
     * repeat (rewrite sub_sub_Empty_set || rewrite sub_sup_cancel ||
               rewrite Empty_set_ident_left)...
@@ -2133,7 +2133,7 @@ Qed.
       assert (X == sub X (S (S n))) as dimX.
         unfold Same_set, Included, sub...
         unfold In at 1 in H6...
-      assert (Y == sub Y (S (n))) as dimY.
+      assert (Y == sub Y (S n)) as dimY.
         unfold Same_set, Included...
         unfold sub, In at 1... unfold Y in H6.
         apply In_Intersection in H6...
@@ -2233,7 +2233,7 @@ Qed.
                 rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
         rewrite <- dimX.
         rewrite Setminus_is_Intersection_Complement. fold Y.
-        pose (moves_by_dim _ _ _ H17 (n)).
+        pose (moves_by_dim _ _ _ H17 n).
         fold Y in m0.
         repeat (rewrite sub_Union in m0).
         rewrite dimY in m0.
@@ -3113,7 +3113,7 @@ Qed.
                apply well_formed_sub. apply MPcell.
              unfold well_formed in H11...
              assert (u = x2)...
-               refine (H16 _ _ _ (n) _ _ _)...
+               refine (H16 _ _ _ n _ _ _)...
                rewrite DisjUnion...
                left; left. unfold Z, In at 1 in uinZ...
                unfold Z, In at 1 in uinZ...
@@ -3126,10 +3126,102 @@ Qed.
                apply (H17 x2)... apply In_Intersection...
                rewrite <- H11.
                unfold Z, In at 1 in uinZ...
+         assert (is_a_cell (sup M n ∪ A, sup P n ∪ A)) as HHJJKK. 
+           apply (Same_set_is_a_cell _ _ H2). 
+           rewrite Adef, Bdef.
+           repeat (rewrite <- Setminus_is_Intersection_Complement).
+           rewrite <- Tdim. unfold tM.
+           repeat (rewrite sup_Union || rewrite sup_Setminus ||
+                   rewrite sub_Union || rewrite sub_Setminus ||
+                   rewrite sub_idemp || rewrite sup_idemp ||
+                   rewrite sub_Minus || rewrite sub_Plus ||
+                   rewrite sup_Minus || rewrite sup_Plus ||
+                   rewrite sub_sup_Empty_set || rewrite sup_sub_Empty_set
+                  )...
+           repeat (rewrite sup_Empty_set ||
+                   rewrite Minus_Empty_set || rewrite Plus_Empty_set ||
+                   rewrite Empty_set_ident_left || 
+                   rewrite Empty_set_ident_right || 
+                   rewrite Setminus_Empty_set
+                  )...
+           rewrite Adef, Bdef.
+           repeat (rewrite <- Setminus_is_Intersection_Complement).
+           rewrite <- Tdim. unfold tP, tM.
+           repeat (rewrite sup_Union || rewrite sup_Setminus ||
+                   rewrite sub_Union || rewrite sub_Setminus ||
+                   rewrite sub_idemp || rewrite sup_idemp ||
+                   rewrite sub_Minus || rewrite sub_Plus ||
+                   rewrite sup_Minus || rewrite sup_Plus ||
+                   rewrite sub_sup_Empty_set || rewrite sup_sub_Empty_set
+                  )...
+           repeat (rewrite sup_Empty_set ||
+                   rewrite Minus_Empty_set || rewrite Plus_Empty_set ||
+                   rewrite Empty_set_ident_left || 
+                   rewrite Empty_set_ident_right || 
+                   rewrite Setminus_Empty_set
+                  )...
+           rewrite sup_sup_min... 
          assert ((minus x) moves A' to B').
            refine (Prop_3_1 _ _ _ _ _)...
            assert (is_a_cell ((sup M n) ∪ A', (sup P n) ∪ A')).
-             admit. (* by induction on n? *)
+             unfold Lemma_3_2_b_st in Hyp1.
+             unfold A'.
+             assert (is_a_cell
+              (sup (sup M n ∪ A) n
+               ∪ ((sub (sup M n ∪ A) (S n) ∪ Minus (Singleton u))
+                  ∩ √Plus (Singleton u)),
+              sup (sup P n ∪ A) n
+              ∪ ((sub (sup M n ∪ A) (S n) ∪ Minus (Singleton u))
+                 ∩ √Plus (Singleton u)))).
+             apply Hyp1 with (m := 1) (X := Singleton u)... 
+             apply Cardinality_Singleton_is_one. 
+             unfold celldim, setdim, A.
+               repeat (basic; intuition)... 
+               apply le_trans with (S (dim x1))... 
+               assert (dim x1 = n)... rewrite H...
+               rewrite <- S'dim in H13. rewrite <- sub_Plus in H13...
+               assert (dim x1 = n)... rewrite H...
+               apply le_trans with (S (dim x1))...
+               assert (dim x1 = n)... rewrite H...
+               rewrite <- S'dim in H13. rewrite <- sub_Plus in H13...
+               assert (dim x1 = n)... rewrite H...
+             unfold Included... inversion H12; clear H12... rewrite <- H13.
+             unfold sub, In at 1... unfold Z, In at 1 in uinZ... rewrite <- S'dim in H12.
+             assert (dim u = (S n))...
+             rewrite PlusMinus_Singleton. 
+               rewrite sub_Union. rewrite sub_sup_Empty_set...
+               rewrite Empty_set_ident_left...
+               unfold Included, sub, In at 2...
+               unfold A. repeat (basic; intuition).
+               right; exists u... unfold Z, In at 1 in uinZ...
+               apply In_Complement...
+               inversion H... assert (u = x3)...
+               apply umax... unfold Z, In at 1... apply triangle_rest_trans with u... 
+               apply uinZ. right with x3... apply uinZ... exists x1... left... 
+               right with x3... exists x1... left... 
+               unfold Z, In at 1... apply triangle_rest_trans with u... 
+               apply uinZ. right with x3... apply uinZ... exists x1... left... 
+               rewrite H17 in *...
+               assert (S (dim x1) = dim u)...
+               rewrite H13. unfold Z, In at 1 in uinZ...
+               rewrite <- S'dim in H14...
+             apply (Same_set_is_a_cell _ _ H12).
+             rewrite Minus_Singleton. rewrite Plus_Singleton. rewrite sup_Union.
+             rewrite sub_Union. rewrite sup_idemp. 
+             rewrite <- Adim.
+             rewrite sup_sub_Empty_set...
+             rewrite sub_sup_Empty_set...
+             rewrite sub_idemp.
+             rewrite Empty_set_ident_left.
+             rewrite Empty_set_ident_right. auto.
+             rewrite Minus_Singleton. rewrite Plus_Singleton. rewrite sup_Union.
+             rewrite sub_Union. rewrite sup_idemp. 
+             rewrite <- Adim.
+             rewrite sup_sub_Empty_set...
+             rewrite sub_sup_Empty_set...
+             rewrite sub_idemp.
+             rewrite Empty_set_ident_left.
+             rewrite Empty_set_ident_right. auto.
            apply Prop_3_3 in H12...
            apply (receptive_by_dimension) with (n:= S n) in H13.
            rewrite sub_Union in H13.
@@ -3172,11 +3264,11 @@ Qed.
            inversion H16...
            exists v...
 
-    assert (Disjoint (Minus (minus x)) (Plus T)) as Disjtemp.
-        admit. (* ?? *)
-
     assert ((S' ∪ (minus x)) moves (sub M (S n)) to B) as moves5.
       refine (Prop_2_3 _ _ _ _ _ movesMtoA _ _)...
+
+    assert (Disjoint (Minus (minus x)) (Plus T)) as HardDisj2. 
+        admit. (* ?? *)
   
     assert (((minus x) ∪ T) moves A  to (sub P (S n))) as moves6.
       refine (Prop_2_3 _ _ _ _ _ moves4 _ _)...
@@ -3198,7 +3290,6 @@ Qed.
         inversion H5.
         rewrite H5; clear H5. rewrite Empty_set_ident_left.
       apply (Disjoint_Intersection_condition)...
-
 
     assert ( Minus S' ∩ Minus (minus x) == Empty_set) as PerpS'minusxB.
       unfold Same_set...
@@ -3255,7 +3346,7 @@ Qed.
         apply MPcell.
         inversion H5...
         apply (H9 x0)...
-        inversion Disjtemp.
+        inversion HardDisj2.
         apply (H5 x0)...
         inversion H5...
 
@@ -3275,6 +3366,7 @@ Qed.
       inversion H5... apply (H9 x0)...
 
     assert (well_formed (S' ∪ (minus x))) as WF1.
+      intuition. Disjoint
       assert (Perp S' (minus x))...
       assert (sub (S' ∪ minus x) 1 == Empty_set).
         unfold Same_set, Included...
@@ -3312,7 +3404,7 @@ Qed.
         rewrite DisjUnion...
 
     assert (well_formed ((S' ∪ minus x) ∪ T)) as WF3.
-      assert (Perp ((S' ∪ minus x)) (T)).
+      assert (Perp ((S' ∪ minus x)) T).
         unfold Perp.
         rewrite Plus_Union, Minus_Union.
         split.
@@ -3588,7 +3680,7 @@ Qed.
         assert (well_formed (sub M (S (S n))))... apply well_formed_sub. apply MPcell.
         assert (x2 = x3)...
           unfold well_formed in H15...
-          refine (H20 _ _ _ (n) _ _ _)...
+          refine (H20 _ _ _ n _ _ _)...
           rewrite DisjUnion...
           assert (In (sub M (S (S n))) x2)... rewrite DisjUnion...
           unfold perp in H15...
@@ -3900,7 +3992,7 @@ Qed.
     intros x.
     refine (mu'_ind' x (fun m => fun W => (m <= dim x -> Inhabited W)) _ _ _)...
     + exists x...
-    + apply (MinusPlus_Inhabited _ (n))... 
+    + apply (MinusPlus_Inhabited _ n)... 
       - rewrite <- sub_mu.
         crush.
       - apply mu'_Finite.
@@ -3913,7 +4005,7 @@ Qed.
     intros x.
     refine (pi'_ind' x (fun m => fun W => (m <= dim x -> Inhabited W)) _ _ _)...
     + exists x...
-    + apply (PlusMinus_Inhabited _ (n))... 
+    + apply (PlusMinus_Inhabited _ n)... 
       - rewrite <- sub_pi.
         crush.
       - apply pi'_Finite.
@@ -4628,9 +4720,9 @@ Qed.
       pose (Lemma_3_2_b' m 1).
       unfold Lemma_3_2_b'_st in l.
       assert (is_a_cell 
-            (sup (sup M (S m)) m ∪ ((sub ((sub M (S m)) ∪ (sup P (m))) (S m) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)),
-            sup ((sub M (S m)) ∪ (sup P (m))) m ∪ ((sub ((sub M (S m)) ∪ (sup P (m))) (S m) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)))
-          ∧ Plus (Singleton x) ∩ sub ((sub M (S m)) ∪ (sup P (m))) (S m) == Empty_set).
+            (sup (sup M (S m)) m ∪ ((sub ((sub M (S m)) ∪ (sup P m)) (S m) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)),
+            sup ((sub M (S m)) ∪ (sup P m)) m ∪ ((sub ((sub M (S m)) ∪ (sup P m)) (S m) ∪ Plus (Singleton x)) ∩ √Minus (Singleton x)))
+          ∧ Plus (Singleton x) ∩ sub ((sub M (S m)) ∪ (sup P m)) (S m) == Empty_set).
       apply l...
       apply Cardinality_Singleton_is_one.
       apply (source_is_a_cell (n-1))...
@@ -4753,7 +4845,7 @@ Qed.
                     rewrite (sub_Union) ||
                     rewrite (sub_Plus) ||
                     rewrite (sub_Minus)).
-            pose (lt_eq_eq_lt_dec k (m)); intuition.
+            pose (lt_eq_eq_lt_dec k m); intuition.
             repeat (rewrite (sub_Singleton_Empty_set) ||
                     rewrite (sub_sub_Empty_set) ||
                     rewrite (sub_sup_cancel) ||
@@ -4769,7 +4861,7 @@ Qed.
             assert (S m = k)... rewrite <- H7 in a...
             rewrite b.
             repeat (rewrite (sub_Singleton_Empty_set _ (S m)) ||
-                    rewrite (sub_Singleton_Empty_set _ (m)) ||
+                    rewrite (sub_Singleton_Empty_set _ m) ||
                     rewrite (sub_sub_Empty_set) ||
                     rewrite (Plus_Empty_set) ||
                     rewrite (Minus_Empty_set) ||
@@ -4815,7 +4907,7 @@ Qed.
                     rewrite (sub_Union) ||
                     rewrite (sub_Plus) ||
                     rewrite (sub_Minus)).
-            pose (lt_eq_eq_lt_dec k (m)); intuition.
+            pose (lt_eq_eq_lt_dec k m); intuition.
             repeat (rewrite (sub_Singleton_Empty_set) ||
                     rewrite (sub_sub_Empty_set) ||
                     rewrite (sub_sup_cancel) ||
@@ -4831,7 +4923,7 @@ Qed.
             assert (S m = k)... rewrite <- H7 in a...
             rewrite b.
             repeat (rewrite (sub_Singleton_Empty_set _ (S m)) ||
-                    rewrite (sub_Singleton_Empty_set _ (m)) ||
+                    rewrite (sub_Singleton_Empty_set _ m) ||
                     rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
                     rewrite (Plus_Empty_set) ||
                     rewrite (Minus_Empty_set) ||
@@ -4846,7 +4938,7 @@ Qed.
             repeat (rewrite Plus_Singleton || rewrite Minus_Singleton).
             assumption. 
             rewrite b.
-            repeat (rewrite (sub_Singleton_Empty_set _ (S (m))) ||
+            repeat (rewrite (sub_Singleton_Empty_set _ (S m)) ||
                     rewrite (sub_Singleton_Empty_set _ (S (S (S m)))) ||
                     rewrite sub_idemp || rewrite sub_sub_Empty_set ||
                     rewrite (sub_sup_cancel (S m) (S m)) ||
@@ -4936,7 +5028,7 @@ Qed.
                     rewrite (sub_Union) ||
                     rewrite (sub_Plus) ||
                     rewrite (sub_Minus)).
-            pose (lt_eq_eq_lt_dec k (m)); intuition.
+            pose (lt_eq_eq_lt_dec k m); intuition.
             repeat (rewrite (sub_Singleton_Empty_set) ||
                     rewrite (Plus_Empty_set) ||
                     rewrite (Minus_Empty_set) ||
@@ -4949,7 +5041,7 @@ Qed.
             apply eq_add_S in H6. rewrite <- H6 in a...
             rewrite b.
             repeat (rewrite (sub_Singleton_Empty_set _ (S m)) ||
-                    rewrite (sub_Singleton_Empty_set _ (m)) ||
+                    rewrite (sub_Singleton_Empty_set _ m) ||
                     rewrite (Plus_Empty_set) ||
                     rewrite (Minus_Empty_set) ||
                     rewrite (Empty_set_ident_left) ||
@@ -5299,7 +5391,7 @@ Qed.
       set (N := (M ∩ (√(Singleton y)))).
       set (Q := ((P ∩ √(Singleton y)) ∪ minus y) ∩ √plus y).
       set (L := ((sup M m ∪ (((sub P (S m)) ∪ (minus y)) ∩ √(plus y))) ∪ (Singleton y))).
-      set (R := ((sup P (S (m))) ∪ ((Singleton y)))).
+      set (R := ((sup P (S m)) ∪ ((Singleton y)))).
       assert (sup (sup M m ∪ sub P (S m)) m == sup M m).
         crush. exfalso. rewrite H7 in H8... left...
       assert ((sub (sup M m ∪ sub P (S m)) (S m)) == sub P (S m)).
