@@ -1946,7 +1946,7 @@ Qed.
     is_a_cell ( (sup M n) ∪ (((sub P (S n)) ∪ Plus X) ∩ √(Minus X)), (sup P n) ∪ (((sub P (S n)) ∪ Plus X) ∩ √(Minus X)) )
     /\ (Plus X ∩ (sub P (S n))) == Empty_set))).
 
-  Definition Lemma_3_2_c'_st : nat -> nat -> Prop :=
+  Definition Lemma_3_2_c_dual_st : nat -> nat -> Prop :=
     (fun n => (fun m =>
     forall (X : Ensemble carrier),
     Cardinal X m ->
@@ -1955,7 +1955,7 @@ Qed.
     is_a_cell ( M ∪ X, (sup P n) ∪ (((sub P (S n)) ∪ Plus X) ∩ √(Minus X)) ∪ X)
     ))).
 
-  Axiom Prop_3_3 : forall M P : Ensemble carrier, is_a_cell (M, P) -> receptive M /\ receptive P.
+  Definition Prop_3_3_st : Prop := forall M P, is_a_cell (M, P) -> receptive M /\ receptive P.
 
   Lemma Lemma_3_2_b_n_0 : forall n, Lemma_3_2_b_st n 0.
   Proof with intuition.
@@ -2574,9 +2574,9 @@ Qed.
   Qed.
 
   Lemma Lemma_3_2_Step_3 :
-    forall n, (forall m , Lemma_3_2_b_st n m) -> (Lemma_3_2_b_st (S n) 1). 
+    forall n, (forall m , Lemma_3_2_b_st n m) -> Prop_3_3_st -> (Lemma_3_2_b_st (S n) 1). 
   Proof with intuition.
-    intros n Hyp1.
+    intros n Hyp1 Prop_3_3.
 
     (* n > 0 *)
     intros X Xcard M P K L.
@@ -3697,9 +3697,9 @@ Qed.
   Qed. 
 
   Lemma Lemma_3_2_b :
-    forall n m, (Lemma_3_2_b_st n m).
+    Prop_3_3_st -> forall n m, (Lemma_3_2_b_st n m).
   Proof.
-    intros n.
+    intros Prop_3_3 n.
     induction n.
       intros m; destruct m.
       apply Lemma_3_2_b_n_0.
@@ -3709,14 +3709,16 @@ Qed.
     apply Lemma_3_2_Step_2.
     apply Lemma_3_2_Step_3.
     apply IHn.
+    assumption.
   Qed.
 
   Lemma Lemma_3_2_c :
-    forall n m, (Lemma_3_2_c_st n m).
+    Prop_3_3_st -> forall n m, (Lemma_3_2_c_st n m).
   Proof.
     intros.
     apply Lemma_3_2_Step_1.
     apply Lemma_3_2_b.
+    assumption.
   Qed.
 
   Lemma Lemma_3_2_b_dual :
@@ -3725,8 +3727,8 @@ Qed.
     admit.
   Qed.
 
-  Lemma Lemma_3_2_c' :
-    forall n m, (Lemma_3_2_c'_st n m).
+  Lemma Lemma_3_2_c_dual :
+    forall n m, (Lemma_3_2_c_dual_st n m).
   Proof.
     admit.
   Qed.
@@ -4280,13 +4282,13 @@ Proof with intuition.
 Qed.
   
 
-Lemma Lemma_3_2_b_corr : forall x, forall M P n,
+Lemma Lemma_3_2_b_corr : Prop_3_3_st -> forall x, forall M P n,
                           is_a_cell (M, P) /\ celldim (M, P) n ->
                           dim x = (S n) /\ plus x ⊆ sub M (S n) ->
                           well_formed ((sub P (S n) ∪ minus x) ∩ √plus x).
 Proof with intuition.
-  intros...
-  pose (Lemma_3_2_b n 1 (Singleton x)).
+  intros Prop_3_3...
+  pose (Lemma_3_2_b Prop_3_3 n 1 (Singleton x)).
   assert (is_a_cell
             (sup M n
              ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x)),
@@ -4321,6 +4323,7 @@ Proof with intuition.
 Qed.
 
   Lemma Theorem_4_1 :
+    Prop_3_3_st ->
     forall M P n, is_a_cell (M, P) -> celldim (M, P) n -> (0 < n) ->
     forall u, u ∈ (sub M (S n)) -> ~((M, P) === << u >>) ->
     exists N Q L R m,
@@ -4331,7 +4334,7 @@ Qed.
       ~(celldim (L, R) m) /\   *)
       ((M, P) === composite m (N, Q) (L, R)).
   Proof with intuition.
-    intros M P n cellcond dimcond nsize u udim notatomic. 
+    intros Prop_3_3 M P n cellcond dimcond nsize u udim notatomic. 
 
     set (Z := (fun m => (m < n) /\ ~((sub M (S (S m)), sub P (S (S m))) === (sub (mu u) (S (S m)), sub (pi u) (S (S m)))))).
     assert (Finite Z) as FinZ.
@@ -5321,7 +5324,7 @@ Qed.
       rewrite H10...
       rewrite <- Setminus_is_Intersection_Complement...
     assert (sub (Setminus (P ∪ minus y) (plus y)) (S m) moves sub M m to sub P m) as FFGG.
-      pose (Lemma_3_2_b m 1).
+      pose (Lemma_3_2_b Prop_3_3 m 1).
       unfold Lemma_3_2_b_st in l.
       assert (is_a_cell
           (sup (sub P (S m) ∪ sup M m) m ∪ ((sub (sub P (S m) ∪ sup M m) (S m) ∪ Minus (Singleton y)) ∩ √Plus (Singleton y)),
@@ -5424,7 +5427,7 @@ Qed.
                   rewrite Plus_Singleton). 
                   rewrite Setminus_is_Intersection_Complement.
                   assert (well_formed ((sub (sup P (S m)) (S m) ∪ minus y) ∩ √plus y)).
-                  apply (Lemma_3_2_b_corr y (sub P (S m) ∪ sup M m) (sup P (S m)) m)...
+                  apply (Lemma_3_2_b_corr Prop_3_3 y (sub P (S m) ∪ sup M m) (sup P (S m)) m)...
                   apply (target_is_a_cell (n-1))... 
                     assert (S (n-1) = n)... 
                       destruct n... simpl. rewrite <- minus_n_O...
@@ -5565,7 +5568,7 @@ Qed.
         apply (Same_set_is_a_cell ((sup (sup M m ∪ sub P (S m)) m
         ∪ ((sub (sup M m ∪ sub P (S m)) (S m) ∪ Minus (Singleton y))
         ∩ √Plus (Singleton y))) ∪ Singleton y) (sup P (S m) ∪ Singleton y))...
-        apply (Lemma_3_2_c _ 1).
+        apply (Lemma_3_2_c Prop_3_3 _ 1).
         apply Cardinality_Singleton_is_one.
         split.
         assert (is_a_cell (target m (M, P))) as QRQR.
