@@ -329,8 +329,6 @@ Ltac crush :=
 
   (* IMPLICATION *)
   
-  (*
-    
   Definition impl (S T : Prop) : Prop := S -> T.
 
   Lemma impl_iff_compat :
@@ -348,8 +346,15 @@ Ltac crush :=
   Proof.
     apply impl_iff_compat.
   Qed.
-  
-  *)
+
+  Add Parametric Morphism {U : Type} : (@Disjoint U) with 
+    signature (@Included U) --> (@Included U) --> (@impl) as Disjoint_impl_mor.
+  Proof.
+    unfold impl.
+    crush.
+    apply (L x1).
+    inversion H1; clear H1; crush.
+  Qed.
 
   (** Distribition laws **)
 
@@ -705,6 +710,14 @@ Ltac crush :=
     inversion H...
   Qed.
 
+  Lemma Singleton_Included {U : Type} : 
+    forall T u, Included (Singleton U u) T <-> In T u.
+  Proof with intuition.
+    intuition...
+    unfold Included...
+    inversion H0; subst...
+  Qed.
+
   Lemma Add_Setminus_Singleton {U : Type} : 
     (forall (a b : U), ((a=b) \/ ~(a=b))) -> 
     forall x X, @In U X x -> 
@@ -751,14 +764,14 @@ Ltac crush :=
   Lemma add_subtract' {U : Type} :
   ∀ (A B: Ensemble U),
     decidable (A) → Included A B → Union (Setminus B A) A == B. 
-Proof with intuition. 
-  intros.
-  unfold Same_set, Included...
-  apply In_Union in H1...
-  unfold Setminus, In at 1 in H2...
-  assert ((In A x) \/ ~(In A x))...
-  apply H.
-Qed.
+  Proof with intuition. 
+    intros.
+    unfold Same_set, Included...
+    apply In_Union in H1...
+    unfold Setminus, In at 1 in H2...
+    assert ((In A x) \/ ~(In A x))...
+    apply H.
+  Qed.
 
   Lemma Disjoint_Union_Setminus {U : Type} : 
     forall S T R, @Disjoint U S T -> R == Union S T -> S == Setminus R T.
