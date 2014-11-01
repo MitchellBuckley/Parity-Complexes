@@ -3079,7 +3079,6 @@ Qed.
       refine (Prop_2_3 _ _ _ _ _ movesMtoA _ _)...
 
     assert (Disjoint (Minus (minus x)) (Plus T)) as HardDisj2. 
-      
       inversion plusx2 as [GGG TTT]; clear plusx2.
       inversion T2 as [K K0]; clear T2.
       inversion S'2 as [K1 K2]; clear S'2.

@@ -1578,6 +1578,14 @@ Hint Resolve less_irrefl less_dim.
     apply H1 with z...
   Qed.
 
+  Lemma final_segment_is_a_segment : 
+    forall R T, is_final_segment R T -> is_a_segment R T.
+  Proof with intuition. 
+    unfold is_a_segment, is_final_segment...
+    apply H1 with x...
+    right with y... left... apply triangle_rest_in_set in H4...
+  Qed.
+
   Lemma segment_lemma : 
     forall R T, is_a_segment R T -> 
       forall x y, triangle_rest T x y -> 
@@ -1610,18 +1618,49 @@ Hint Resolve less_irrefl less_dim.
     unfold is_initial_segment... 
   Qed.
 
+  Lemma final_initial_lemma : 
+    forall R T, is_final_segment R T ->
+      forall Q, is_initial_segment Q R -> 
+        is_final_segment (Setminus R Q) T.
+  Proof with intuition.
+    unfold is_initial_segment, is_final_segment...
+    - apply Included_trans with R... 
+      apply Setminus_Included...
+    - constructor...
+      + apply H1 with y...
+        apply H4...
+      + inversion H4; clear H4...
+        apply H7; clear H7.
+        apply H3 with z...
+        apply segment_lemma with T... 
+        apply final_segment_is_a_segment... 
+        unfold is_final_segment... 
+  Qed.
+
   Lemma special_is_segment : 
     forall R w, In R w -> 
-      is_a_segment (fun y => y ∈ R ∧ triangle_rest R w y) R.
+      is_final_segment (fun y => y ∈ R ∧ triangle_rest R w y) R.
   Proof with intuition.
-    unfold is_a_segment... 
-    unfold Included, In at 1...
-    unfold In at 1 in H0...
-    unfold In at 1 in H4...
-    unfold In at 1...
-    apply triangle_rest_in_set in H3...
-    apply triangle_rest_equiv. right with x... apply triangle_rest_in_set in H3... 
-    apply triangle_rest_equiv... 
+    intros R w K.
+    unfold is_final_segment...
+    - unfold Included, In at 1...
+    - unfold In at 1 in H0...
+      unfold In at 1...
+      + apply triangle_rest_in_set in H...
+      + apply triangle_rest_trans with y...
+  Qed.
+
+  Lemma special_is_segment' : 
+    forall R w, In R w -> 
+      is_initial_segment (fun y => y ∈ R ∧ triangle_rest R y w) R.
+  Proof with intuition.
+    intros R w K.
+    unfold is_initial_segment...
+    - unfold Included, In at 1...
+    - unfold In at 1 in H0...
+      unfold In at 1...
+      + apply triangle_rest_in_set in H...
+      + apply triangle_rest_trans with z...
   Qed.
 
   Lemma Perp_thing :
@@ -1723,6 +1762,8 @@ Hint Resolve less_irrefl less_dim.
 (* Section 2                                            *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+
+  (* This follows directly from definitions and basic set operations *)
   Lemma Observation_p321 : 
     forall (S : Ensemble carrier), Finite S -> S moves (MinusPlus S) to (PlusMinus S).
   Proof with intuition.
@@ -1747,6 +1788,9 @@ Hint Resolve less_irrefl less_dim.
     apply all_decidable... 
   Qed.
 
+  (* This follows directly from definitions of movement and basic set operations *)
+  (* note that P is uniquely defined, but that it only satisfies the movement property
+     when the appropriate conditions on M are met *)
   Lemma Prop_2_1 : forall (S M : Ensemble carrier), 
      Finite S ->
      ((exists (P : Ensemble carrier), S moves M to P) 
@@ -1782,6 +1826,8 @@ Hint Resolve less_irrefl less_dim.
     apply all_decidable... 
   Qed.
 
+  (* this is a somewhat more direct expression of the previous lemma *)
+  (* it is more helpful in some cases *)
   Lemma Prop_2_1' : forall (S M : Ensemble carrier), 
      Finite S ->
      (S moves M to ((M ∪ (Plus S)) ∩ √(Minus S)) 
@@ -1797,6 +1843,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H0...
   Qed.
   
+  (* dual arguments give the following two lemmas, there is nothing sneaky here *)
   Lemma Prop_2_1_dual : forall (S P : Ensemble carrier), 
      Finite S ->
      ((exists (M : Ensemble carrier), S moves M to P) 
@@ -1846,6 +1893,11 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H1...
   Qed.
 
+  (* This is proved using proposition 2.1 and basic set operations *)
+  (* the idea is that, all elements of A that are not in MinusPlus S can be 
+     removed to create a meaningful movement condition *)
+  (* similarly, all elements that are disjoint from Plus S and Minus S can 
+     be safely added to create a meaningful movement condition *)
   Lemma Prop_2_2 : 
     forall (S A B X: Ensemble carrier),
     Finite S ->
@@ -1866,11 +1918,11 @@ Hint Resolve less_irrefl less_dim.
           rewrite <- (Intersection_idemp (MinusPlus S)).
           apply Intersection_Included_compat.
           unfold MinusPlus. 
-          apply Intersection_Included_compat.
-          apply Union_Included_cancel_left. reflexivity. reflexivity.
+          apply Intersection_Included_compat; try reflexivity.
+          apply Union_Included_cancel_left; reflexivity.
           apply Disjoint_property_left. apply H1.
-          apply Intersection_Included_compat.
-          apply Union_Included_cancel_right; reflexivity. reflexivity.
+          apply Intersection_Included_compat; try reflexivity.
+          apply Union_Included_cancel_right; reflexivity.
           
         apply Disjoint_Intersection_condition.
         rewrite Intersection_trans. rewrite (Intersection_sym _ (Plus S)).
@@ -1883,8 +1935,8 @@ Hint Resolve less_irrefl less_dim.
         rewrite Empty_set_zero_right...
 
     inversion H as [P].
-    assert (P == (B ∪ Y) ∩ √X).
-    Focus 2. unfold moves_def. unfold moves_def in H6. inversion H6; clear H6. 
+    cut (P == (B ∪ Y) ∩ √X); intros.
+    unfold moves_def. unfold moves_def in H6. inversion H6; clear H6. 
     split; rewrite <- H7; assumption.
     clear H.
     inversion H6; clear H6.
@@ -1904,6 +1956,67 @@ Hint Resolve less_irrefl less_dim.
     rewrite H5. apply Intersection_Included_cancel_left. reflexivity.
     apply Disjoint_property_left. apply H3.
   Qed.
+
+  Lemma Prop_2_2_dual : 
+    forall (S A B X: Ensemble carrier),
+    Finite S ->
+    S moves A to B -> X ⊆ B -> Disjoint (PlusMinus S) X 
+    -> 
+    forall (Y : Ensemble carrier),  
+    Disjoint Y (Plus S) -> Disjoint Y (Minus S) 
+    ->
+    S moves ((A ∪ Y) ∩ (√X)) to ((B ∪ Y) ∩ (√X)).
+  Proof with intuition.
+    intros S A B X SFin. intros.
+    unfold moves_def in H. inversion H; clear H.
+    assert (exists (M : Ensemble carrier), S moves M to ((B ∪ Y) ∩ √X)).
+      apply Prop_2_1_dual. 
+      assumption.
+      split.
+        apply Included_trans with (T:=(B ∩ √X)).
+          rewrite H4. 
+          rewrite <- (Intersection_idemp (PlusMinus S)).
+          apply Intersection_Included_compat.
+          unfold PlusMinus. 
+          apply Intersection_Included_compat.
+          apply Union_Included_cancel_left. reflexivity. reflexivity.
+          apply Disjoint_property_left. apply H1.
+          apply Intersection_Included_compat.
+          apply Union_Included_cancel_right; reflexivity. reflexivity.
+          
+        apply Disjoint_Intersection_condition.
+        rewrite Intersection_trans. rewrite (Intersection_sym _ (Minus S)).
+        rewrite <- Intersection_trans.
+        rewrite I_U_dist_r. assert (Disjoint Y (Minus S)). apply H3. 
+        apply Disjoint_Intersection_condition in H. rewrite H.
+        rewrite Empty_set_ident_right.
+        rewrite H4. rewrite (Intersection_trans _ _ (Minus S)).
+        rewrite (Intersection_sym _ (Minus S)). rewrite Empty_set_property...
+        rewrite Empty_set_zero_right...
+
+    inversion H as [M].
+    cut (M == (A ∪ Y) ∩ √X); intros.
+    unfold moves_def. unfold moves_def in H6. inversion H6; clear H6. 
+    split; rewrite <- H7; assumption.
+    clear H.
+    inversion H6; clear H6.
+    rewrite H7, H5.
+    repeat rewrite U_I_dist_r.
+    rewrite Union_trans.
+    rewrite (Union_sym Y).
+    rewrite <- Union_trans.
+    repeat rewrite Intersection_trans.
+    rewrite Intersection_Same_set_compat; try reflexivity.
+    rewrite (Union_sym _ Y). 
+    rewrite (Union_Included_left Y _).
+    rewrite (Union_sym). 
+    rewrite (Union_Included_left).
+    apply Intersection_sym. 
+    apply Complement_Included_flip. apply (Included_trans _ _ _ H0).
+    rewrite H4. apply Intersection_Included_cancel_left. reflexivity.
+    apply Disjoint_property_left. apply H2.
+  Qed.
+
 (*
   Lemma Prop_2_2' : 
     forall (S A B: Ensemble carrier) (x : carrier),
@@ -1961,6 +2074,10 @@ Hint Resolve less_irrefl less_dim.
     apply Disjoint_property_left. apply H3.
   Qed.
 *)
+
+  (* This is a basic condition for composition of movements *)
+  (* The proof relies only on definitions and basic set operations *)
+  (* there isn't a meaningful dual to this theorem *)
   Lemma Prop_2_3 : 
     forall (S M P T Q : Ensemble carrier),
     S moves M to P -> T moves P to Q -> (Disjoint (Minus S) (Plus T) ) 
@@ -2002,7 +2119,10 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- Union_sym, Union_trans...
   Qed.
 
- 
+  (* This is a basic condition concerning decomposition *) 
+  (* The reasoning is no more complicated than the basic 
+     combinatorics of the situation *)
+  (* this has an obvious dual *)
   Lemma Prop_2_4 :
     forall (T Z M P : Ensemble carrier),
     Finite Z -> Finite T -> (Union T Z) moves M to P -> 
@@ -2026,7 +2146,7 @@ Hint Resolve less_irrefl less_dim.
       rewrite Empty_set_property...
     inversion H1 as [N']; clear H1.
 
-    assert (exists N', T moves M to N').        
+    assert (exists N', T moves M to N'). 
     apply Prop_2_1. assumption. split.
       assert (K1: Plus T == (Plus S) ∩ √(Plus Z)). 
         rewrite HeqS. rewrite Plus_Union. rewrite I_U_dist_r.
@@ -2213,6 +2333,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite H14... auto. auto.
   Qed.
 
+  (* this remembers some of the essential data to the proof above *)
   Lemma Prop_2_4_exact : 
     forall (T Z M P : Ensemble carrier),
     Finite Z -> Finite T -> (Union T Z) moves M to P -> 
@@ -2260,6 +2381,52 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H5...
     rewrite <- H4, <- H5...
   Qed.
+
+      Definition less_than := fun R T => (fun x => (exists y, In T y /\ triangle_rest R x y)). 
+      
+      Lemma Singleton_segment :
+        forall R z, is_a_segment (less_than R (Singleton z)) R.
+      Proof with intuition. 
+        unfold less_than, is_a_segment...
+        + unfold Included, In at 1...
+          inversion H; clear H...
+          apply triangle_rest_in_set in H1...
+        + unfold In at 1 in H. 
+          unfold In at 1 in H3. 
+          unfold In at 1. 
+          exists z...
+          repeat (basic; intuition)...
+          inversion H3; clear H3; subst. 
+          inversion H; clear H; subst.
+          apply triangle_rest_trans with z0...
+      Qed.
+
+      Lemma less_than_initial_segment :
+        forall R T, is_initial_segment (less_than R T) R.
+      Proof with intuition. 
+        unfold less_than, is_initial_segment...
+        + unfold Included, In at 1...
+          inversion H; clear H...
+          apply triangle_rest_in_set in H1...
+        + unfold In at 1 in H0. 
+          unfold In at 1.
+          inversion H0; clear H0...
+          exists x... 
+          apply triangle_rest_trans with z...
+      Qed.
+
+      Lemma final_less_than_segment :
+        forall R T, Included R T -> is_final_segment R (less_than R T).
+      Proof with intuition. 
+        unfold less_than, is_final_segment...
+        + unfold Included, In at 2...
+          exists x...
+          left...
+        + apply triangle_rest_in_set in H0... 
+          unfold In at 1 in H3...
+          inversion H3; clear H3...
+          apply triangle_rest_in_set in H4...
+      Qed.
 
 End PreParityTheory.
 
