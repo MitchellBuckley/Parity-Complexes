@@ -179,13 +179,9 @@ Arguments Full_set {U} _.
 
   Definition less (x y : carrier) : Prop :=
     (Inhabited (Intersection (plus x) (minus y))).
-  Definition curly_less (x y : carrier) : Prop :=
-    (In (minus y) x) \/ (In (plus x) y). 
   
   Definition triangle : relation carrier := 
     clos_refl_trans_1n _ (less).
-  Definition solid_triangle : relation carrier := 
-    clos_refl_trans_1n _ (curly_less).
   Inductive triangle_rest (R : Ensemble carrier) : relation carrier :=
     | tr_refl  : forall x, In R x -> triangle_rest R x x
     | tr_trans : forall x y z, In R x -> less x y -> triangle_rest R y z -> triangle_rest R x z.
@@ -208,7 +204,7 @@ Arguments Full_set {U} _.
     y ∈ S ->
     z ∈ S. 
 
-  Hint Unfold PlusMinus MinusPlus Perp perp less curly_less triangle solid_triangle
+  Hint Unfold PlusMinus MinusPlus Perp perp less triangle
     Plus Minus sup sub: sets v62.
 
   Definition moves_def (S M P : Ensemble carrier) : Prop :=
@@ -335,7 +331,7 @@ Arguments Full_set {U} _.
     end.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(* triangle_rest                           *)
+(* triangle_rest                                        *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
   Inductive triangle_rest' (R : Ensemble carrier) : relation carrier :=
@@ -1003,7 +999,7 @@ Hint Resolve less_irrefl less_dim.
   Lemma Finite_sub : forall T, Finite T -> forall n, Finite (sub T n). 
   Proof with intuition.
     intros.
-    apply (Finite_Included'' T)...
+    apply (Finite_Included T)...
     assert ({S (dim x) = n} + {~ (S (dim x)) = n})...
       apply eq_nat_dec.
   Qed.
@@ -1011,7 +1007,7 @@ Hint Resolve less_irrefl less_dim.
   Lemma Finite_sup : forall T, Finite T -> forall n, Finite (sup T n). 
   Proof with intuition.
     intros.
-    apply (Finite_Included'' T)...
+    apply (Finite_Included T)...
     assert ({S (dim x) <= n} + {~ (S (dim x)) <= n})...
       apply le_dec.
   Qed.
@@ -1137,7 +1133,7 @@ Hint Resolve less_irrefl less_dim.
   Proof with intuition.
     intros.
     unfold PlusMinus.
-    apply (Finite_Included'' (Plus A))...
+    apply (Finite_Included (Plus A))...
     apply Plus_Finite...
     crush.
     assert ((In (Minus A) x) \/ ~(In (Minus A) x))...
@@ -1152,7 +1148,7 @@ Hint Resolve less_irrefl less_dim.
   Proof with intuition.
     intros.
     unfold MinusPlus.
-    apply (Finite_Included'' (Minus A))...
+    apply (Finite_Included (Minus A))...
     apply Minus_Finite...
     crush.
     assert ((In (Plus A) x) \/ ~(In (Plus A) x))...
@@ -1490,13 +1486,12 @@ Hint Resolve less_irrefl less_dim.
          rewrite Setminus_is_Intersection_Complement in H3.
          rewrite <- H3 in H1... 
   Qed.
-
-
+  
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(* weird lemmas                                         *)
+(* segment lemmas                                       *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-  Lemma weird_lemma_3 :  
+  Lemma segment_def :  
     forall S T : Ensemble carrier,
     (S ⊆ T /\ 
     (forall x z : carrier, x ∈ S ∧ z ∈ S -> 
@@ -1513,7 +1508,7 @@ Hint Resolve less_irrefl less_dim.
    left...
   Qed.
 
-  Lemma weird_lemma_4 :  
+  Lemma segment_def' :  
     forall S T : Ensemble carrier,
     (is_a_segment S T)
     ->
@@ -1534,10 +1529,6 @@ Hint Resolve less_irrefl less_dim.
         inversion H4...
       apply (H1 y z z0)...
   Qed.
-
-(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(* initial and final segments                           *)
-(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
   Lemma initial_property : forall S T M, 
     is_initial_segment S M -> 
@@ -1725,7 +1716,7 @@ Hint Resolve less_irrefl less_dim.
       repeat (rewrite sub_sup_Empty_set)...
   Qed.
 
-  Lemma weird_lemma_2 : forall S T, 
+  Lemma well_formed_Union_lemma : forall S T, 
     well_formed S -> 
     well_formed T -> 
     Perp S T -> 
@@ -1821,7 +1812,7 @@ Hint Resolve less_irrefl less_dim.
     assert ((M ∩ √Plus S) == M). apply Intersection_Included_left.
     apply Disjoint_property_right. apply Disjoint_sym. assumption. 
     rewrite H; clear H.
-    symmetry. rewrite Union_sym.
+    symmetry. rewrite Union_comm.
     apply Union_Included_left. apply H0.
     apply all_decidable... 
   Qed.
@@ -1874,7 +1865,7 @@ Hint Resolve less_irrefl less_dim.
     assert ((P ∩ √Minus S) == P). apply Intersection_Included_left.
     apply Disjoint_property_right. apply Disjoint_sym. assumption. 
     rewrite H; clear H.
-    symmetry. rewrite Union_sym.
+    symmetry. rewrite Union_comm.
     apply Union_Included_left. apply H0. 
     auto.
   Qed.
@@ -1925,13 +1916,13 @@ Hint Resolve less_irrefl less_dim.
           apply Union_Included_cancel_right; reflexivity.
           
         apply Disjoint_Intersection_condition.
-        rewrite Intersection_trans. rewrite (Intersection_sym _ (Plus S)).
+        rewrite Intersection_trans. rewrite (Intersection_comm _ (Plus S)).
         rewrite <- Intersection_trans.
         rewrite I_U_dist_r. assert (Disjoint Y (Plus S)). apply H2. 
         apply Disjoint_Intersection_condition in H. rewrite H.
         rewrite Empty_set_ident_right.
         rewrite H5. rewrite (Intersection_trans _ _ (Plus S)).
-        rewrite (Intersection_sym _ (Plus S)). rewrite Empty_set_property...
+        rewrite (Intersection_comm _ (Plus S)). rewrite Empty_set_property...
         rewrite Empty_set_zero_right...
 
     inversion H as [P].
@@ -1943,15 +1934,15 @@ Hint Resolve less_irrefl less_dim.
     rewrite H, H4.
     repeat rewrite U_I_dist_r.
     rewrite Union_trans.
-    rewrite (Union_sym Y).
+    rewrite (Union_comm Y).
     rewrite <- Union_trans.
     repeat rewrite Intersection_trans.
     rewrite Intersection_Same_set_compat; try reflexivity.
-    rewrite (Union_sym _ Y). 
+    rewrite (Union_comm _ Y). 
     rewrite (Union_Included_left Y _).
-    rewrite (Union_sym). 
+    rewrite (Union_comm). 
     rewrite (Union_Included_left).
-    apply Intersection_sym. 
+    apply Intersection_comm. 
     apply Complement_Included_flip. apply (Included_trans _ _ _ H0).
     rewrite H5. apply Intersection_Included_cancel_left. reflexivity.
     apply Disjoint_property_left. apply H3.
@@ -1985,13 +1976,13 @@ Hint Resolve less_irrefl less_dim.
           apply Union_Included_cancel_right; reflexivity. reflexivity.
           
         apply Disjoint_Intersection_condition.
-        rewrite Intersection_trans. rewrite (Intersection_sym _ (Minus S)).
+        rewrite Intersection_trans. rewrite (Intersection_comm _ (Minus S)).
         rewrite <- Intersection_trans.
         rewrite I_U_dist_r. assert (Disjoint Y (Minus S)). apply H3. 
         apply Disjoint_Intersection_condition in H. rewrite H.
         rewrite Empty_set_ident_right.
         rewrite H4. rewrite (Intersection_trans _ _ (Minus S)).
-        rewrite (Intersection_sym _ (Minus S)). rewrite Empty_set_property...
+        rewrite (Intersection_comm _ (Minus S)). rewrite Empty_set_property...
         rewrite Empty_set_zero_right...
 
     inversion H as [M].
@@ -2003,15 +1994,15 @@ Hint Resolve less_irrefl less_dim.
     rewrite H7, H5.
     repeat rewrite U_I_dist_r.
     rewrite Union_trans.
-    rewrite (Union_sym Y).
+    rewrite (Union_comm Y).
     rewrite <- Union_trans.
     repeat rewrite Intersection_trans.
     rewrite Intersection_Same_set_compat; try reflexivity.
-    rewrite (Union_sym _ Y). 
+    rewrite (Union_comm _ Y). 
     rewrite (Union_Included_left Y _).
-    rewrite (Union_sym). 
+    rewrite (Union_comm). 
     rewrite (Union_Included_left).
-    apply Intersection_sym. 
+    apply Intersection_comm. 
     apply Complement_Included_flip. apply (Included_trans _ _ _ H0).
     rewrite H4. apply Intersection_Included_cancel_left. reflexivity.
     apply Disjoint_property_left. apply H2.
@@ -2042,13 +2033,13 @@ Hint Resolve less_irrefl less_dim.
           apply Union_Included_cancel_right; reflexivity. reflexivity.
           
         apply Disjoint_Intersection_condition.
-        rewrite Intersection_trans. rewrite (Intersection_sym _ (Plus S)).
+        rewrite Intersection_trans. rewrite (Intersection_comm _ (Plus S)).
         rewrite <- Intersection_trans.
         rewrite I_U_dist_r. assert (Disjoint Y (Plus S)). apply H2. 
         apply Disjoint_Intersection_condition in H. rewrite H.
         rewrite Empty_set_ident_right.
         rewrite H5. rewrite (Intersection_trans _ _ (Plus S)).
-        rewrite (Intersection_sym _ (Plus S)). rewrite Empty_set_property...
+        rewrite (Intersection_comm _ (Plus S)). rewrite Empty_set_property...
         rewrite Empty_set_zero_right...
 
     inversion H as [P].
@@ -2060,15 +2051,15 @@ Hint Resolve less_irrefl less_dim.
     rewrite H, H4.
     repeat rewrite U_I_dist_r.
     rewrite Union_trans.
-    rewrite (Union_sym Y).
+    rewrite (Union_comm Y).
     rewrite <- Union_trans.
     repeat rewrite Intersection_trans.
     rewrite Intersection_Same_set_compat; try reflexivity.
-    rewrite (Union_sym _ Y). 
+    rewrite (Union_comm _ Y). 
     rewrite (Union_Included_left Y _).
-    rewrite (Union_sym). 
+    rewrite (Union_comm). 
     rewrite (Union_Included_left).
-    apply Intersection_sym. 
+    apply Intersection_comm. 
     apply Complement_Included_flip. apply (Included_trans _ _ _ H0).
     rewrite H5. apply Intersection_Included_cancel_left. reflexivity.
     apply Disjoint_property_left. apply H3.
@@ -2110,13 +2101,13 @@ Hint Resolve less_irrefl less_dim.
     rewrite H4.
     rewrite <- I_U_dist_r.
     assert ((√Plus T ∩ √Plus S) == (√Plus(Union S T))). 
-    rewrite Plus_Union. rewrite Union_Complement_compat... rewrite Union_sym...
+    rewrite Plus_Union. rewrite Union_Complement_compat... rewrite Union_comm...
     rewrite <- H5.
     rewrite <- Intersection_trans.
     assert ((Minus T ∪ Minus S) == (Minus (S ∪ T))). 
-    rewrite Minus_Union... rewrite Union_sym...
+    rewrite Minus_Union... rewrite Union_comm...
     rewrite <- H6. 
-    rewrite <- Union_sym, Union_trans...
+    rewrite <- Union_comm, Union_trans...
   Qed.
 
   (* This is a basic condition concerning decomposition *) 
@@ -2142,7 +2133,7 @@ Hint Resolve less_irrefl less_dim.
       assert (Included (Minus Z) (Minus S)). 
         rewrite HeqS. rewrite Minus_Union. apply Union_Included_cancel_left. reflexivity.
       apply Disjoint_Intersection_condition. apply (Included_Empty_set _ (P ∩ Minus S)). apply Intersection_Included_compat...
-      rewrite H2. rewrite Intersection_trans. rewrite (Intersection_sym _ (Minus S)). 
+      rewrite H2. rewrite Intersection_trans. rewrite (Intersection_comm _ (Minus S)). 
       rewrite Empty_set_property...
     inversion H1 as [N']; clear H1.
 
@@ -2202,7 +2193,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite Complement_Complement_compat.
     rewrite U_I_dist_l. 
     rewrite Intersection_trans. 
-    rewrite (Intersection_sym (M ∪ √Plus Z) _).
+    rewrite (Intersection_comm (M ∪ √Plus Z) _).
     rewrite <- Intersection_trans. 
     rewrite (I_U_dist_l (M ∪ Plus S)). 
     rewrite <- H2.
@@ -2247,7 +2238,7 @@ Hint Resolve less_irrefl less_dim.
       assert (Included (Plus T) (Plus S)). 
         rewrite HeqS. rewrite Plus_Union. apply Union_Included_cancel_right. reflexivity.
       apply Disjoint_Intersection_condition. apply (Included_Empty_set _ (M ∩ Plus S)). apply Intersection_Included_compat...
-      rewrite H3. rewrite Intersection_trans. rewrite (Intersection_sym _ (Plus S)). 
+      rewrite H3. rewrite Intersection_trans. rewrite (Intersection_comm _ (Plus S)). 
       rewrite Empty_set_property...
     inversion H1 as [N']; clear H1.
 
@@ -2256,11 +2247,11 @@ Hint Resolve less_irrefl less_dim.
       assert (K1: Plus Z == (Plus S) ∩ √(Plus T)). 
         rewrite HeqS. rewrite Plus_Union. rewrite I_U_dist_r.
         rewrite Empty_set_property. rewrite Empty_set_ident_left.
-        apply Disjoint_result... rewrite Intersection_sym...
+        apply Disjoint_result... rewrite Intersection_comm...
       assert (K2: Minus Z == (Minus S) ∩ √(Minus T)). rewrite HeqS. 
         rewrite Minus_Union. rewrite I_U_dist_r.
         rewrite Empty_set_property. rewrite Empty_set_ident_left.
-        apply Disjoint_result... rewrite Intersection_sym... 
+        apply Disjoint_result... rewrite Intersection_comm... 
       assert ((PlusMinus Z) == (PlusMinus S ∩ √(Plus T)) ∪ (Plus S ∩ (MinusPlus T)) ). 
         unfold MinusPlus, PlusMinus. rewrite K1, K2.
         rewrite (Intersection_Complement_compat).
@@ -2307,7 +2298,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite Complement_Complement_compat.
     rewrite U_I_dist_l. 
     rewrite Intersection_trans. 
-    rewrite (Intersection_sym (M ∪ √Plus Z) _).
+    rewrite (Intersection_comm (M ∪ √Plus Z) _).
     rewrite <- Intersection_trans. 
     rewrite (I_U_dist_l (M ∪ Plus S)). 
     rewrite <- H2.

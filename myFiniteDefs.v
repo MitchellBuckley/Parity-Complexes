@@ -63,7 +63,12 @@ Require Import Arith.
     inversion H4...
   assert (Q n)...
   Qed.
-  
+
+  Lemma le_total : forall n m, (n <= m) \/ (m <= n).
+  Proof with intuition.
+    apply NPeano.Nat.le_ge_cases. 
+  Qed.
+
   (** SETOID MORPHISMS **)
 
   Add Parametric Morphism U : (@Finite U) with 
@@ -149,38 +154,7 @@ Require Import Arith.
       intros; apply H1. rewrite <- H0; assumption.
   Qed. 
 
-
-  Lemma Finite_Included {U : Type} : 
-    (forall (A : Ensemble U), decidable A) -> 
-     forall (S : Ensemble U), Finite S -> 
-     forall T, Included T S -> Finite T.
-  Proof with finitecrush. 
-
-    intros alldec S SFinite.
-    induction SFinite...
-      - assert (T == Empty_set)... 
-        apply (Finite_Same_set _ (Finite_Empty_set) T)...
-
-      - assert (x ∈ T \/ ¬x ∈ T)... 
-          apply alldec.
-        + assert (T == Add U (Setminus T (Singleton U x)) x) as J.  
-            apply add_subtract...
-          rewrite J...   
-          constructor.
-          apply IHSFinite. 
-          unfold Included... 
-          unfold Setminus, In at 1 in H1... apply H0 in H3... 
-          idtac... 
-          unfold In, Setminus in H1...
-        + apply IHSFinite...
-          unfold Included...
-          assert (In (Add U A x) x0)... exfalso. subst...
-      
-      - apply IHSFinite...
-        rewrite <- H...
-  Qed.
-
-  Lemma Finite_Included' {U : Type} :  
+  Lemma Finite_Setminus_Included {U : Type} :  
   (* \ref{arxiv.org/pdf/math/9405204} for proof I followed *)
      forall (B: Ensemble U), 
        Finite B -> 
@@ -239,14 +213,14 @@ Require Import Arith.
       rewrite <- eqHyp...
   Qed.
 
-  Lemma Finite_Included'' {U : Type} : 
+  Lemma Finite_Included {U : Type} : 
      forall (B: Ensemble U), 
        Finite B -> 
      forall A, 
        A ⊆ B -> (forall x, x ∈ B -> ((x ∈ A) \/ ~(x ∈ A))) -> Finite A.
   Proof with intuition. 
     intros. 
-    apply (Finite_Included' B)...
+    apply (Finite_Setminus_Included B)...
     unfold Same_set, Included...
     assert (x ∈ A ∨ (x ∈ A → False)). apply H1... 
     inversion H3; clear H3...
@@ -412,17 +386,6 @@ Require Import Arith.
         apply In_Union in H... inversion H0; clear H0... 
   Qed.
 
-  Lemma le_total : forall n m, (n <= m) \/ (m <= n).
-  Proof with intuition.
-    intros n. 
-    induction n. 
-      - intros. left... 
-      - induction m. 
-        + right... 
-        + specialize IHn with (m := m). 
-          inversion IHn; clear IHn...
-  Qed.
-
   Lemma Finite_nat_have_maximum_le_element : 
     forall (T : Ensemble nat), Finite T -> Inhabited T -> 
       exists u, ((In T u) /\ (forall v, (In T v) -> v <= u)).
@@ -470,7 +433,6 @@ Require Import Arith.
         apply IHFinite in H0... 
         exists x... rewrite H1...  apply H3.  rewrite <- H1... 
   Qed. 
-
 
   Lemma decidable_nat_have_minimum_le_element : 
     forall (T : Ensemble nat), decidable T -> Inhabited T -> 
@@ -606,7 +568,7 @@ Require Import Arith.
   Lemma Setminus_Finite {U : Type} : 
     decidable_eq U ->
     forall A, @Finite U A ->
-    forall B, Finite B ->
+    forall B, @Finite U B ->
       Finite (Intersection A (Complement B)).
   Proof with intuition.
     intros Udec...
@@ -637,8 +599,9 @@ Require Import Arith.
 
   Lemma Setminus_Finite' {U : Type} :
     decidable_eq U ->
-   ∀ A : Ensemble U,
-     Finite A → ∀ B : Ensemble U, Finite B → Finite (Setminus A B).
+    forall A, @Finite U A -> 
+    forall B, @Finite U B -> 
+      Finite (Setminus A B).
   Proof with intuition.
     intros.
     rewrite Setminus_is_Intersection_Complement.

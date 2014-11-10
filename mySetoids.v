@@ -2,7 +2,7 @@
 (** Written by Mitchell Buckley. Started on 25/11/2013 while a PhD student at Macquarie University **)
 
 (**
-  This collection began as a set results needed for dealing with Parity complexes.
+  This collection began as a set of results needed for dealing with Parity Complexes.
   That is still its primary function, but it now covers a wide range of rewrite rules
   for Ensembles and a large library of basic results concerning Ensembles, Intersection,
   Union etc.
@@ -409,14 +409,14 @@ Ltac crush :=
     crush.
   Qed.
 
-  Lemma empty_def {U : Type} : forall (P : Ensemble U),  (forall x, (~(x ∈ P))) <-> (P == Empty_set).
+  Lemma Empty_set_def {U : Type} : forall (P : Ensemble U),  (forall x, (~(x ∈ P))) <-> (P == Empty_set).
   Proof with crush. 
     crush.
     apply H in H0...
     apply H0 in H... 
   Qed.
 
-  Lemma full_def {U : Type} : forall (P : Ensemble U),  (forall x, ((x ∈ P))) <-> (P == Full_set).
+  Lemma Full_set_def {U : Type} : forall (P : Ensemble U),  (forall x, ((x ∈ P))) <-> (P == Full_set).
   Proof with crush. 
     crush.
     apply H1...
@@ -472,7 +472,7 @@ Ltac crush :=
     left... right...
   Qed.
 
-  Lemma Union_sym {U : Type} : forall (S T : Ensemble U),
+  Lemma Union_comm {U : Type} : forall (S T : Ensemble U),
     (S ∪ T) == (T ∪ S).
   Proof with crush. 
     crush.
@@ -493,12 +493,18 @@ Ltac crush :=
     inversion H2...
   Qed.
 
-  Lemma Intersection_sym {U : Type} : forall (S T: Ensemble U), (S ∩ T) == (T ∩ S).
+  Lemma Intersection_comm {U : Type} : forall (S T: Ensemble U), (S ∩ T) == (T ∩ S).
   Proof with crush. 
     crush.
   Qed.
 
   Lemma Intersection_idemp {U : Type} : forall (S : Ensemble U), (S ∩ S) == S.
+  Proof with crush. 
+    crush.
+  Qed.
+
+  Lemma Full_set_ident_left {U : Type} :
+    forall (S : Ensemble U), Same_set (Intersection (Full_set) S) S.
   Proof with crush. 
     crush.
   Qed.
@@ -509,23 +515,17 @@ Ltac crush :=
     crush.
   Qed.
 
-  Lemma Empty_set_ident_right {U : Type} : forall (S : Ensemble U), (Union S (Empty_set)) == S.
-  Proof with crush. 
-    crush.
-  Qed.
-
   Lemma Empty_set_ident_left {U : Type} :
     forall (S : Ensemble U), Union Empty_set S == S.
   Proof with crush.
     crush.
   Qed.
 
-  Lemma Full_set_ident_left {U : Type} :
-    forall (S : Ensemble U), Same_set (Intersection (Full_set) S) S.
+  Lemma Empty_set_ident_right {U : Type} : forall (S : Ensemble U), (Union S (Empty_set)) == S.
   Proof with crush. 
     crush.
   Qed.
-
+  
   (** COMPLEMENT PROPERTIES **)
 
   Lemma Union_Complement_compat {U : Type} : forall (S T : Ensemble U),
@@ -688,7 +688,7 @@ Ltac crush :=
     crush.
   Qed.
 
-  Lemma add_subtract {U : Type} : 
+  Lemma Add_Setminus_cancel {U : Type} : 
     forall (A : Ensemble U) x, decidable (Singleton U x) -> (x ∈ A) -> (A == Add U (Setminus A (Singleton U x)) x).
   Proof with crush. 
     crush.
@@ -761,9 +761,9 @@ Ltac crush :=
       inversion H0... 
   Qed.
 
-  Lemma add_subtract' {U : Type} :
+  Lemma Union_Setminus_cancel {U : Type} :
   ∀ (A B: Ensemble U),
-    decidable (A) → Included A B → Union (Setminus B A) A == B. 
+    decidable A → Included A B → Union (Setminus B A) A == B. 
   Proof with intuition. 
     intros.
     unfold Same_set, Included...
@@ -784,7 +784,7 @@ Ltac crush :=
 
   Hint Resolve Same_set_sym Same_set_refl Same_set_trans.
   Hint Resolve Included_refl Included_trans.
-  Hint Resolve Union_trans Union_sym Union_idemp. 
-  Hint Resolve Intersection_trans Intersection_sym Intersection_idemp. 
+  Hint Resolve Union_trans Union_comm Union_idemp. 
+  Hint Resolve Intersection_trans Intersection_comm Intersection_idemp. 
   Hint Resolve Empty_set_ident_left Empty_set_ident_right Full_set_ident_left Full_set_ident_right. 
   Hint Resolve Empty_set_zero_left Empty_set_zero_right Full_set_zero_left Full_set_zero_right. 
