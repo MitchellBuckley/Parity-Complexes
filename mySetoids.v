@@ -50,7 +50,7 @@ Hint Unfold decidable.
 
 (** Tactics **)
 
-Ltac disj := 
+Ltac disj :=
   match goal with
     | H: ?P \/ ?Q |- _ => inversion H; clear H
     | H: (?P ∪ ?Q) ?x |- _ => inversion H as [a K aeq | b K beq]; [clear H aeq a | clear H beq b]; unfold In in K
@@ -58,7 +58,7 @@ Ltac disj :=
     | H: ?Q ?x |- (?P ∪ ?Q) ?x => right
  end.
 
-Ltac conj := 
+Ltac conj :=
   match goal with
     | H: (?P ∩ ?Q) ?x |- _ => inversion H as [a H1 H2 aeq]; clear H a aeq
     | H: ?P /\ ?Q |- _ => inversion H; clear H
@@ -81,15 +81,15 @@ Ltac misc :=
     | H: ?a = ?b |- _ => subst
     | H: Singleton ?a ?a |- _ => clear a
     | H: Singleton ?a ?b |- _ =>   inversion H as [K]; clear H; try rewrite K in *; clear K
-    | H: Disjoint ?a ?b |- _ => inversion H as [L]; clear H; unfold not, In in L 
+    | H: Disjoint ?a ?b |- _ => inversion H as [L]; clear H; unfold not, In in L
     | H: _ |- Disjoint ?a ?b => constructor; unfold In, not; intros
     | H: Inhabited ?S |- _ => inversion H; clear H
 end.
 
-Ltac crush := 
+Ltac crush :=
    autounfold with *;
-   intuition; 
-   repeat (conj || disj || neg || misc); 
+   intuition;
+   repeat (conj || disj || neg || misc);
    auto.
 
   (** Setoid relations and morphisms **)
@@ -130,7 +130,7 @@ Ltac crush :=
     crush; inversion H; eauto.
   Qed.
 
-  Add Parametric Morphism U : (@Intersection U) with 
+  Add Parametric Morphism U : (@Intersection U) with
     signature (@Same_set U) ==> (@Same_set U) ==> (@Same_set U) as Intersection_mor.
   Proof.
     apply Intersection_Same_set_compat.
@@ -143,11 +143,11 @@ Ltac crush :=
     ->
     (Union S T) == (Union S' T').
   Proof with crush.
-    crush. 
+    crush.
     left... right... left... right...
   Qed.
 
-  Add Parametric Morphism U : (@Union U) with 
+  Add Parametric Morphism U : (@Union U) with
     signature (@Same_set U) ==> (@Same_set U) ==> (@Same_set U) as Union_mor.
   Proof.
     apply Union_Same_set_compat.
@@ -161,47 +161,47 @@ Ltac crush :=
     crush.
   Qed.
 
-  Add Parametric Morphism U : (@Complement U) with 
+  Add Parametric Morphism U : (@Complement U) with
     signature (@Same_set U) ==> (@Same_set U) as Complement_mor.
   Proof.
     apply Complement_Same_set_compat.
   Qed.
 
-  Add Parametric Morphism U : (@Included U) with 
+  Add Parametric Morphism U : (@Included U) with
     signature (@Same_set U) ==> (@Same_set U) ==> (@iff) as Included_Same_set_mor.
   Proof with crush.
-    crush. 
+    crush.
   Qed.
 
-  Add Parametric Morphism U : (@Inhabited U) with 
+  Add Parametric Morphism U : (@Inhabited U) with
     signature (@Same_set U) ==> (@iff) as Inhabited_Same_set.
   Proof with crush.
     crush; exists x0...
   Qed.
 
-  Add Parametric Morphism U : (@Disjoint U) with 
+  Add Parametric Morphism U : (@Disjoint U) with
     signature (@Same_set U) ==> (@Same_set U) ==> (@iff) as Disjoint_Same_set.
   Proof with crush.
     crush.    (* why doesn't conj. find a match here? **)
-    inversion H2; clear H2; subst; unfold In in *. 
+    inversion H2; clear H2; subst; unfold In in *.
     apply (L x1)...
     inversion H2; clear H2; subst; unfold In in *.
     apply (L x1)...
   Qed.
 
-  Add Parametric Morphism U: (@Add U) with 
+  Add Parametric Morphism U: (@Add U) with
     signature (@Same_set U) ==> (@eq U) ==> (@Same_set U) as Add_mor.
   Proof with crush.
-    crush. left... left... 
+    crush. left... left...
   Qed.
 
-  Add Parametric Morphism U : (@In U) with 
+  Add Parametric Morphism U : (@In U) with
     signature (@Same_set U) ==> (@eq U) ==> (@iff) as In_Same_set_mor.
   Proof with crush.
     crush.
   Qed.
 
-  Add Parametric Morphism U : (@Setminus U) with 
+  Add Parametric Morphism U : (@Setminus U) with
     signature (@Same_set U) ==> (@Same_set U) ==> (@Same_set U) as Setminus_Same_set_mor.
   Proof with crush.
     crush.
@@ -227,47 +227,47 @@ Ltac crush :=
   as set_incl.
 
   Lemma Union_Included_compat {U : Type} :
-    forall (S T : Ensemble U), S ⊆ T 
-    → 
-    forall (S' T' : Ensemble U), S' ⊆ T' 
-    → 
+    forall (S T : Ensemble U), S ⊆ T
+    →
+    forall (S' T' : Ensemble U), S' ⊆ T'
+    →
     (S ∪ S') ⊆ (T ∪ T').
   Proof with crush.
     crush.
     left... right...
   Qed.
 
-  Add Parametric Morphism U : (@Union U) with 
+  Add Parametric Morphism U : (@Union U) with
     signature (@Included U) ==> (@Included U) ==> (@Included U) as Union_incl_mor.
   Proof.
     apply Union_Included_compat.
   Qed.
 
   Lemma Intersection_Included_compat {U : Type} :
-    forall (S T : Ensemble U), S ⊆ T 
-    → 
-    forall (S' T' : Ensemble U), S' ⊆ T' 
-    → 
+    forall (S T : Ensemble U), S ⊆ T
+    →
+    forall (S' T' : Ensemble U), S' ⊆ T'
+    →
     (S ∩ S') ⊆ (T ∩ T').
   Proof with crush.
     crush; inversion H1...
   Qed.
 
-  Add Parametric Morphism U : (@Intersection U) with 
+  Add Parametric Morphism U : (@Intersection U) with
     signature (@Included U) ==> (@Included U) ==> (@Included U) as Intersection_incl_mor.
   Proof.
     apply Intersection_Included_compat.
   Qed.
 
   Lemma Complement_Included_compat {U : Type} :
-    forall (T S : Ensemble U), S ⊆ T 
-    → 
+    forall (T S : Ensemble U), S ⊆ T
+    →
     Included (√ T) (√ S).
   Proof with crush.
     crush.
   Qed.
 
-  Add Parametric Morphism U : (@Complement U) with 
+  Add Parametric Morphism U : (@Complement U) with
     signature (@Included U) --> (@Included U) as Complement_incl_mor.
   Proof.
     apply (Complement_Included_compat).
@@ -282,72 +282,72 @@ Ltac crush :=
   as prop_iff.
 
   Lemma or_iff_compat :
-    forall (S T : Prop), iff S T 
-    → 
-    forall (S' T' : Prop), iff S' T' 
-    → 
+    forall (S T : Prop), iff S T
+    →
+    forall (S' T' : Prop), iff S' T'
+    →
     iff (S \/ S') (T \/ T').
-  Proof with intuition. 
-    autounfold with *... 
+  Proof with intuition.
+    autounfold with *...
   Qed.
 
-  Add Parametric Morphism : (@or) with 
+  Add Parametric Morphism : (@or) with
     signature (@iff) ==> (@iff) ==> (@iff) as or_iff_mor.
   Proof.
     apply or_iff_compat.
   Qed.
 
   Lemma and_iff_compat :
-    forall (S T : Prop), iff S T 
-    → 
-    forall (S' T' : Prop), iff S' T' 
-    → 
+    forall (S T : Prop), iff S T
+    →
+    forall (S' T' : Prop), iff S' T'
+    →
     iff (S /\ S') (T /\ T').
-  Proof with intuition. 
-    autounfold with *... 
+  Proof with intuition.
+    autounfold with *...
   Qed.
 
-  Add Parametric Morphism : (@and) with 
+  Add Parametric Morphism : (@and) with
     signature (@iff) ==> (@iff) ==> (@iff) as and_iff_mor.
   Proof.
     apply and_iff_compat.
   Qed.
 
   Lemma not_iff_compat :
-    forall (S T : Prop), iff S T 
-    → 
+    forall (S T : Prop), iff S T
+    →
     iff (not S) (not T).
-  Proof with intuition. 
-    autounfold with *... 
+  Proof with intuition.
+    autounfold with *...
   Qed.
 
-  Add Parametric Morphism : (@not) with 
+  Add Parametric Morphism : (@not) with
     signature (@iff) ==> (@iff) as not_iff_mor.
   Proof.
     apply not_iff_compat.
   Qed.
 
   (* IMPLICATION *)
-  
+
   Definition impl (S T : Prop) : Prop := S -> T.
 
   Lemma impl_iff_compat :
-    forall (S T : Prop), iff S T 
-    → 
-    forall (S' T' : Prop), iff S' T' 
-    → 
+    forall (S T : Prop), iff S T
+    →
+    forall (S' T' : Prop), iff S' T'
+    →
     iff (S -> S') (T -> T').
-  Proof with intuition. 
-    autounfold with *... 
+  Proof with intuition.
+    autounfold with *...
   Qed.
 
-  Add Parametric Morphism : (@impl) with 
+  Add Parametric Morphism : (@impl) with
     signature (@iff) ==> (@iff) ==> (@iff) as impl_iff_mor.
   Proof.
     apply impl_iff_compat.
   Qed.
 
-  Add Parametric Morphism {U : Type} : (@Disjoint U) with 
+  Add Parametric Morphism {U : Type} : (@Disjoint U) with
     signature (@Included U) --> (@Included U) --> (@impl) as Disjoint_impl_mor.
   Proof.
     unfold impl.
@@ -362,7 +362,7 @@ Ltac crush :=
     forall (S T R: Ensemble U), (S ∩ (Union T R)) == (Union (S ∩ T) (S ∩ R)).
   Proof with crush.
     crush.
-    left... 
+    left...
     right...
   Qed.
 
@@ -370,7 +370,7 @@ Ltac crush :=
     forall (S T R: Ensemble U), (Intersection (Union T R) S) == (Union (T ∩ S) (R ∩ S)) .
   Proof with crush.
     crush.
-    left... 
+    left...
     right...
   Qed.
 
@@ -379,14 +379,14 @@ Ltac crush :=
   Proof with crush.
     autounfold with *.
     intuition.
-    disj. conj. conj; left... conj; right... 
-    conj. disj. inversion H1. left; intuition. right... 
+    disj. conj. conj; left... conj; right...
+    conj. disj. inversion H1. left; intuition. right...
     inversion H1. right; auto. right; auto.
   Qed.
 
   Lemma U_I_dist_l {U : Type} :
     forall (S T R: Ensemble U), (Union S (T ∩ R)) == ((Union S T) ∩ (Union S R)).
-  Proof with crush. 
+  Proof with crush.
     autounfold with *.
     intuition.
     disj. conj. left... left... conj. conj. right... right...
@@ -397,27 +397,27 @@ Ltac crush :=
 
   Lemma Full_set_property {U : Type} :
     forall (S : Ensemble U), decidable S -> (Union (√ S) S) == (Full_set).
-  Proof with crush. 
+  Proof with crush.
     crush.
-    specialize H with (x:=x). 
+    specialize H with (x:=x).
     disj; [right | left]...
   Qed.
 
   Lemma Empty_set_property {U : Type} :
     forall (S : Ensemble U), (S ∩ (√ S)) == (Empty_set).
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
   Lemma Empty_set_def {U : Type} : forall (P : Ensemble U),  (forall x, (~(x ∈ P))) <-> (P == Empty_set).
-  Proof with crush. 
+  Proof with crush.
     crush.
     apply H in H0...
-    apply H0 in H... 
+    apply H0 in H...
   Qed.
 
   Lemma Full_set_def {U : Type} : forall (P : Ensemble U),  (forall x, ((x ∈ P))) <-> (P == Full_set).
-  Proof with crush. 
+  Proof with crush.
     crush.
     apply H1...
   Qed.
@@ -449,43 +449,43 @@ Ltac crush :=
 
   Lemma Complement_Full_set {U : Type} : √ (Full_set) == @Empty_set U.
   Proof with crush.
-    autounfold with *. split; intros. unfold not in H. exfalso. apply H. constructor. 
-    inversion H. 
+    autounfold with *. split; intros. unfold not in H. exfalso. apply H. constructor.
+    inversion H.
   Qed.
 
   Lemma Add_Empty_is_Singleton {U : Type} :
     forall (x : U), Add U (Empty_set) x == Singleton U x.
   Proof with crush.
     crush.
-  Qed. 
+  Qed.
 
   (** MONOID PROPERTIES OF UNION AND INTERSECTION **)
 
   Lemma Union_trans {U : Type} : forall (S T R : Ensemble U),
     (S ∪ T) ∪ R == S ∪ (T ∪ R).
-  Proof with crush. 
+  Proof with crush.
     crush.
-    inversion K. 
+    inversion K.
     left... right...
     right... left...
-    inversion K. 
+    inversion K.
     left... right...
   Qed.
 
   Lemma Union_comm {U : Type} : forall (S T : Ensemble U),
     (S ∪ T) == (T ∪ S).
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
   Lemma Union_idemp {U : Type} : forall (S : Ensemble U), (Union S S) == S.
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
   Lemma Intersection_trans {U : Type} : forall (S T R : Ensemble U),
     (S ∩ T) ∩ R == S ∩ (T ∩ R).
-  Proof with crush. 
+  Proof with crush.
     crush. crush.
     inversion H1...
     inversion H1...
@@ -494,24 +494,24 @@ Ltac crush :=
   Qed.
 
   Lemma Intersection_comm {U : Type} : forall (S T: Ensemble U), (S ∩ T) == (T ∩ S).
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
   Lemma Intersection_idemp {U : Type} : forall (S : Ensemble U), (S ∩ S) == S.
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
   Lemma Full_set_ident_left {U : Type} :
     forall (S : Ensemble U), Same_set (Intersection (Full_set) S) S.
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
   Lemma Full_set_ident_right {U : Type} :
     forall (S : Ensemble U), Same_set (S ∩ (Full_set)) S.
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
@@ -522,104 +522,104 @@ Ltac crush :=
   Qed.
 
   Lemma Empty_set_ident_right {U : Type} : forall (S : Ensemble U), (Union S (Empty_set)) == S.
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
-  
+
   (** COMPLEMENT PROPERTIES **)
 
   Lemma Union_Complement_compat {U : Type} : forall (S T : Ensemble U),
     (√S ∩ √T) == (√(Union S T)).
-  Proof with crush. 
+  Proof with crush.
     crush.
-    intros H1; apply H. left... 
-    intros H1; apply H. right... 
+    intros H1; apply H. left...
+    intros H1; apply H. right...
   Qed.
 
   Lemma Intersection_Complement_compat {U : Type} : forall (S T: Ensemble U), decidable S -> √(S ∩ T) == (Union (√S) (√T)).
-  Proof with crush. 
+  Proof with crush.
     crush.
     specialize H with (x:=x)...
-    right... apply H0... left... 
-    inversion H1... inversion H1... 
+    right... apply H0... left...
+    inversion H1... inversion H1...
   Qed.
 
   Lemma Complement_Complement_compat {U : Type} : forall (S: Ensemble U), decidable S -> (√(√S)) == S.
-  Proof with crush. 
+  Proof with crush.
     crush.
     specialize H with (x:=x)...
   Qed.
 
-  Lemma Complement_Included_flip {U : Type} : forall S T : Ensemble U, 
+  Lemma Complement_Included_flip {U : Type} : forall S T : Ensemble U,
     Included T (√ S) -> Included S (√ T).
   Proof with crush.
     autounfold with *...
     apply (H x)...
   Qed.
 
-  Lemma Complement_closure {U : Type}: 
-    forall S : Ensemble U, Included S (√ (√ S)). 
+  Lemma Complement_closure {U : Type}:
+    forall S : Ensemble U, Included S (√ (√ S)).
   Proof with intuition.
     autounfold with *...
   Qed.
 
   (** INCLUSION PROPERTIES **)
 
-  Lemma Union_Included_left {U : Type} : 
+  Lemma Union_Included_left {U : Type} :
     forall (S T: Ensemble U), S ⊆ T -> Union S T == T.
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
-  Lemma Union_Included_right {U : Type} : 
+  Lemma Union_Included_right {U : Type} :
     forall (S T: Ensemble U), S ⊆ T -> Union T S == T.
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
-  Lemma Intersection_Included_left {U : Type} : 
+  Lemma Intersection_Included_left {U : Type} :
     forall (S T: Ensemble U), S ⊆ T -> S ∩ T == S.
-  Proof with crush. 
-    crush. 
+  Proof with crush.
+    crush.
   Qed.
 
-  Lemma Inhabited_Included {U : Type} : 
+  Lemma Inhabited_Included {U : Type} :
     forall (S : Ensemble U), Inhabited S -> forall T, Included S T -> Inhabited T.
   Proof with crush.
     crush. apply (Inhabited_intro _ _ x)...
   Qed.
 
-  Lemma Included_Empty_set {U : Type} : 
+  Lemma Included_Empty_set {U : Type} :
     forall (S T : Ensemble U), Included S T -> T  == (Empty_set) -> S  == (Empty_set).
   Proof with crush.
     crush.
   Qed.
 
-  Lemma Included_Full_set {U : Type} : 
+  Lemma Included_Full_set {U : Type} :
     forall (S T : Ensemble U), Included S T -> S  == (Full_set) -> T == (Full_set).
   Proof with crush.
     crush.
   Qed.
 
-  Lemma Union_Included_cancel_right {U : Type} : forall S T R: (Ensemble U), 
+  Lemma Union_Included_cancel_right {U : Type} : forall S T R: (Ensemble U),
     Included S R -> Included S (Union R T).
   Proof with crush.
     crush. left...
   Qed.
 
-  Lemma Union_Included_cancel_left {U : Type} : forall S T R: (Ensemble U), 
+  Lemma Union_Included_cancel_left {U : Type} : forall S T R: (Ensemble U),
     Included S R -> Included S (Union T R).
   Proof with crush.
     crush... right...
   Qed.
 
-  Lemma Intersection_Included_cancel_right {U : Type} : forall S T R: (Ensemble U), 
+  Lemma Intersection_Included_cancel_right {U : Type} : forall S T R: (Ensemble U),
     Included S R -> Included (S ∩ T) R.
   Proof with crush.
     crush...
   Qed.
 
-  Lemma Intersection_Included_cancel_left {U : Type} : forall S T R: (Ensemble U), 
+  Lemma Intersection_Included_cancel_left {U : Type} : forall S T R: (Ensemble U),
     Included S R -> Included (T ∩ S) R.
   Proof with crush.
     crush...
@@ -627,27 +627,27 @@ Ltac crush :=
 
   (** PROPERTIES OF DISJOINT **)
 
-  Lemma Disjoint_Intersection_condition {U : Type} : 
+  Lemma Disjoint_Intersection_condition {U : Type} :
     forall (S T : Ensemble U), (Disjoint S T) <-> (S ∩ T == Empty_set).
-  Proof with crush. 
+  Proof with crush.
     crush.
-    exfalso. apply (L x)... assert (Empty_set x)... 
+    exfalso. apply (L x)... assert (Empty_set x)...
   Qed.
 
-  Lemma Disjoint_result {U : Type} : 
+  Lemma Disjoint_result {U : Type} :
     forall (S T : Ensemble U), S ∩ T == Empty_set -> S == S ∩ (√ T).
   Proof with crush.
-    crush. intros. assert (Empty_set x)... apply H0... 
+    crush. intros. assert (Empty_set x)... apply H0...
     inversion H...
   Qed.
 
-  Lemma Disjoint_property_left {U : Type} : forall S T: (Ensemble U), 
+  Lemma Disjoint_property_left {U : Type} : forall S T: (Ensemble U),
     Disjoint S T -> Included S (√ T).
   Proof with crush.
     crush... apply (L x)...
   Qed.
 
-  Lemma Disjoint_property_right {U : Type} : forall S T: (Ensemble U), 
+  Lemma Disjoint_property_right {U : Type} : forall S T: (Ensemble U),
     Disjoint S T -> Included T (√ S).
   Proof with crush.
     crush... apply (L x)...
@@ -671,8 +671,8 @@ Ltac crush :=
   Lemma In_Intersection {U : Type} :
     forall (x : U) (S T: Ensemble U), x ∈ (S ∩ T) <-> (x ∈ S) /\ (x ∈ T).
   Proof with crush.
-    crush. 
-  Qed. 
+    crush.
+  Qed.
 
   Lemma In_Complement {U : Type} :
     forall (S : Ensemble U) (x : U), (x ∈ (√ S)) <-> (~ (x ∈ S)).
@@ -684,13 +684,13 @@ Ltac crush :=
 
   Lemma Setminus_is_Intersection_Complement {U : Type} :
     forall (S T: Ensemble U), (Setminus S T) == (S ∩ (√ T)).
-  Proof with crush. 
+  Proof with crush.
     crush.
   Qed.
 
-  Lemma Add_Setminus_cancel {U : Type} : 
+  Lemma Add_Setminus_cancel {U : Type} :
     forall (A : Ensemble U) x, decidable (Singleton U x) -> (x ∈ A) -> (A == Add U (Setminus A (Singleton U x)) x).
-  Proof with crush. 
+  Proof with crush.
     crush.
     specialize H with (x0:=x0)...
     left...
@@ -705,12 +705,12 @@ Ltac crush :=
     unfold Included...
     inversion H1; clear H1; subst.
     inversion H; clear H.
-    assert (x0 ∈ Singleton U x). 
+    assert (x0 ∈ Singleton U x).
     apply H0...
     inversion H...
   Qed.
 
-  Lemma Singleton_Included {U : Type} : 
+  Lemma Singleton_Included {U : Type} :
     forall T u, Included (Singleton U u) T <-> In T u.
   Proof with intuition.
     intuition...
@@ -718,32 +718,32 @@ Ltac crush :=
     inversion H0; subst...
   Qed.
 
-  Lemma Add_Setminus_Singleton {U : Type} : 
-    (forall (a b : U), ((a=b) \/ ~(a=b))) -> 
-    forall x X, @In U X x -> 
+  Lemma Add_Setminus_Singleton {U : Type} :
+    (forall (a b : U), ((a=b) \/ ~(a=b))) ->
+    forall x X, @In U X x ->
       (X == Add U (Setminus X (Singleton U x)) x).
   Proof with intuition.
-    intros. 
+    intros.
     unfold Same_set, Included, Add, Setminus...
       - assert ((x0 = x) \/ ~(x0 = x))...
-        + right... rewrite H3... 
+        + right... rewrite H3...
         + left... unfold In at 1... inversion H2...
-      - apply In_Union in H1... 
+      - apply In_Union in H1...
         + unfold In at 1 in H2...
-        + inversion H2... rewrite <- H1... 
-  Qed.  
+        + inversion H2... rewrite <- H1...
+  Qed.
 
-  Lemma Disjoint_three {U : Type} : 
-    forall S T R, @Disjoint U S R /\ Disjoint T R -> 
+  Lemma Disjoint_three {U : Type} :
+    forall S T R, @Disjoint U S R /\ Disjoint T R ->
       Disjoint (Union S T) R.
   Proof with intuition.
     intros...
     constructor...
-    apply In_Intersection in H... 
-    apply In_Union in H2... 
-    inversion H0; clear H0... 
-      apply (H2 x)... 
-    inversion H1; clear H1... 
+    apply In_Intersection in H...
+    apply In_Union in H2...
+    inversion H0; clear H0...
+      apply (H2 x)...
+    inversion H1; clear H1...
       apply (H2 x)...
   Qed.
 
@@ -751,20 +751,20 @@ Ltac crush :=
   Proof with intuition.
     intros...
     crush.
-  Qed. 
+  Qed.
 
   Lemma Setminus_Empty_set {U : Type}: forall T, Setminus T (@Empty_set U) == T.
-  Proof with intuition. 
+  Proof with intuition.
     unfold Setminus, Same_set, Included...
       unfold In at 1 in H...
       unfold In at 1...
-      inversion H0... 
+      inversion H0...
   Qed.
 
   Lemma Union_Setminus_cancel {U : Type} :
   ∀ (A B: Ensemble U),
-    decidable A → Included A B → Union (Setminus B A) A == B. 
-  Proof with intuition. 
+    decidable A → Included A B → Union (Setminus B A) A == B.
+  Proof with intuition.
     intros.
     unfold Same_set, Included...
     apply In_Union in H1...
@@ -773,18 +773,18 @@ Ltac crush :=
     apply H.
   Qed.
 
-  Lemma Disjoint_Union_Setminus {U : Type} : 
+  Lemma Disjoint_Union_Setminus {U : Type} :
     forall S T R, @Disjoint U S T -> R == Union S T -> S == Setminus R T.
   Proof with intuition.
-    crush. 
-      apply H2; constructor... 
+    crush.
+      apply H2; constructor...
       apply (L x); constructor...
       apply H1 in H3; inversion H3...
   Qed.
 
   Hint Resolve Same_set_sym Same_set_refl Same_set_trans.
   Hint Resolve Included_refl Included_trans.
-  Hint Resolve Union_trans Union_comm Union_idemp. 
-  Hint Resolve Intersection_trans Intersection_comm Intersection_idemp. 
-  Hint Resolve Empty_set_ident_left Empty_set_ident_right Full_set_ident_left Full_set_ident_right. 
-  Hint Resolve Empty_set_zero_left Empty_set_zero_right Full_set_zero_left Full_set_zero_right. 
+  Hint Resolve Union_trans Union_comm Union_idemp.
+  Hint Resolve Intersection_trans Intersection_comm Intersection_idemp.
+  Hint Resolve Empty_set_ident_left Empty_set_ident_right Full_set_ident_left Full_set_ident_right.
+  Hint Resolve Empty_set_zero_left Empty_set_zero_right Full_set_zero_left Full_set_zero_right.
