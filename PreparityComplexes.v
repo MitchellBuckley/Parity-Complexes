@@ -1393,6 +1393,13 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H1 in H2...
   Qed.
 
+  Lemma setdim_Plus : forall T n, setdim T (S n) -> setdim (Plus T) n.
+  Proof with intuition.
+    unfold setdim...
+    inversion H0...  assert (S (dim x) = dim x0)... apply H in H2...
+    rewrite <- H1 in H2...
+  Qed.
+
   Lemma setdim_Included : forall R T, Included R T -> forall n, setdim T n -> setdim R n.
   Proof with intuition.
     unfold setdim...
@@ -1414,6 +1421,7 @@ Hint Resolve less_irrefl less_dim.
      | H : _ |- setdim (sup _ (S _)) _ => apply setdim_sup
      | H : _ |- setdim (sup _ _) _ => apply setdim_sup'
      | H : _ |- setdim (Minus _) _ => apply setdim_Minus
+     | H : _ |- setdim (Plus _) _ => apply setdim_Plus
      | H : _ |- setdim (Singleton _) _ => apply setdim_Singleton
     end;
     intuition;
