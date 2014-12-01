@@ -132,8 +132,8 @@ Arguments Full_set {U} _.
 
   Axiom carrier_decidable_eq : decidable_eq carrier.
 
-  Axiom plus_dim :            forall (x y : carrier), In (plus y) x -> S(dim x) = dim y.
-  Axiom minus_dim :           forall (x y : carrier), In (minus y) x -> S(dim x) = dim y.
+  Axiom plus_dim :            forall (x y : carrier), In (plus y) x -> S (dim x) = dim y.
+  Axiom minus_dim :           forall (x y : carrier), In (minus y) x -> S (dim x) = dim y.
   Axiom plus_Finite :         forall (x : carrier),   Finite (plus x).
   Axiom minus_Finite :        forall (x : carrier),   Finite (minus x).
   Axiom plus_Inhabited :      forall (x : carrier),   dim x > 0 -> (Inhabited (plus x)).
@@ -329,6 +329,37 @@ Arguments Full_set {U} _.
     match goal with
     | H: _ |- _ /\ _ => split; [idtac | try splits]
     end.
+
+ Lemma dim_lemma_a : forall x u, In (Minus (minus x)) u -> S (S (dim u)) = dim x.
+ Proof with intuition.
+   intros.
+   inversion H...
+   cut (S (dim u) = dim x0)...
+   rewrite H0...
+  Qed.
+ Lemma dim_lemma_b : forall x u, In (Plus (minus x)) u -> S (S (dim u)) = dim x.
+ Proof with intuition.
+   intros.
+   inversion H...
+   cut (S (dim u) = dim x0)...
+   rewrite H0...
+  Qed.
+ Lemma dim_lemma_c : forall x u, In (Minus (plus x)) u -> S (S (dim u)) = dim x.
+ Proof with intuition.
+   intros.
+   inversion H...
+   cut (S (dim u) = dim x0)...
+   rewrite H0...
+  Qed.
+ Lemma dim_lemma_d : forall x u, In (Plus (plus x)) u -> S (S (dim u)) = dim x.
+ Proof with intuition.
+   intros.
+   inversion H...
+   cut (S (dim u) = dim x0)...
+   rewrite H0...
+  Qed.
+ 
+  Hint Resolve dim_lemma_a dim_lemma_b dim_lemma_c dim_lemma_d.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* triangle_rest                                        *)
