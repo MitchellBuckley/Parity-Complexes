@@ -6025,10 +6025,16 @@ Qed.
     celldim (M, P) n -> forall x,
      receptive_x M x /\ receptive_x P x.
 
-  Lemma n_receptive_zero : n_receptive 0.
+ Lemma ggg : forall P Q : carrier -> Prop, (forall x, (P x) /\ (Q x)) <-> ((forall x, P x) /\ (forall x, Q x)).
+ Proof with intuition.
+ intuition. apply H... apply H...
+ Qed.
+
+  Lemma n_receptive_zero : Prop_3_3_st 0.
   Proof with intuition.
-    unfold n_receptive. 
-    intros M P MPcell MPdim x. 
+    unfold Prop_3_3_st, receptive. 
+    intros M P MPcell MPdim.
+    apply ggg; intros x.
     assert (sub M (S 0) == sub P (S 0)) as K.
       apply cell_dim_n_property...
     assert ((sub M 1) == Empty_set ∨ Inhabited (sub M 1)) as K2. 
@@ -6090,21 +6096,21 @@ Qed.
     inversion H1; repeat (basic; intuition). 
   Qed.
 
-  Lemma n_receptive_ind : forall n, (n_receptive n) -> (forall m, Lemma_3_2_b_st (S n) m) -> (forall m, Lemma_3_2_b_dual_st (S n) m) -> n_receptive (S n).
+  Lemma n_receptive_ind : forall n, (Prop_3_3_st n) -> (forall m, Lemma_3_2_b_st (S n) m) -> (forall m, Lemma_3_2_b_dual_st (S n) m) -> Prop_3_3_st (S n).
   Proof with intuition.
     intros n H L1 L2.
-    unfold n_receptive...
+    unfold Prop_3_3_st, receptive... 
     + apply fff. 
       assert ({dim x <= 1} + {2 <= dim x})...
         admit.
       right...
       assert ({dim x < (S (S (S n)))} + {dim x = (S (S (S n)))} + {(S (S (S n))) < dim x})...
         admit.
-      - unfold n_receptive in H.
+      - unfold Prop_3_3_st, receptive in H.
         assert (is_a_cell (source n (M, P))).
           apply source_is_a_cell...
         unfold source in H2.
-        apply (H) with (x:=x) in H2...
+        apply (H) in H2...
         Focus 2. apply source_dim...
         assert (receptive_x ((sub (sup M (S n))) (pred (dim x))) x).
           apply receptive_x_by_dimension... 
@@ -6195,7 +6201,7 @@ Qed.
       rewrite H1 in H3; inversion H3.
   Qed.    
 
-  Lemma Prop_all_receptive : (forall n, n_receptive n) -> forall M P,
+  Lemma Prop_all_receptive : (forall n, Prop_3_3_st n) -> forall M P,
   is_a_cell (M, P) -> receptive M /\ receptive P.
   Proof with intuition.
     unfold n_receptive...
@@ -6204,7 +6210,8 @@ Qed.
       set (n := pred (pred (dim x))).
       assert (is_a_cell (source n (M, P))).
         apply source_is_a_cell...
-      apply (H n) with (x:=x) in H2... 
+      unfold Prop_3_3_st, receptive in H.
+      apply (H n) in H2... 
       Focus 2. apply source_dim... 
       apply fff...     
       right... 
@@ -6218,7 +6225,8 @@ Qed.
       set (n := pred (pred (dim x))).
       assert (is_a_cell (target n (M, P))).
         apply target_is_a_cell...
-      apply (H n) with (x:=x) in H2... 
+      unfold Prop_3_3_st, receptive in H.
+      apply (H n) in H2... 
       Focus 2. apply target_dim... 
       apply fff...     
       right... 
@@ -6234,33 +6242,19 @@ Qed.
   Proof with intuition.
     induction n.
     + intros m; destruct m.
-      - split. 
-        apply Lemma_3_2_b_n_0.
-        apply Lemma_3_2_b_dual_n_0.
-      - split.
-        apply Lemma_3_2_Step_2.
-        apply Lemma_3_2_b_0_1.
-        apply Lemma_3_2_dual_Step_2.
-        apply Lemma_3_2_b_dual_0_1.
+      - split; [apply Lemma_3_2_b_n_0 | apply Lemma_3_2_b_dual_n_0].
+      - split; [apply Lemma_3_2_Step_2;      apply Lemma_3_2_b_0_1 |
+                apply Lemma_3_2_dual_Step_2; apply Lemma_3_2_b_dual_0_1 ].
     + intros m; destruct m.
+      - split; [ apply Lemma_3_2_b_n_0 |
+                 apply Lemma_3_2_b_dual_n_0 ]. 
       - split. 
-         apply Lemma_3_2_b_n_0. 
-         apply Lemma_3_2_b_dual_n_0. 
-      - split. 
-        apply Lemma_3_2_Step_2.
-        apply Lemma_3_2_Step_3...
-        apply IHn.
-        apply IHn.
-        destruct n. 
-        (* *) admit. 
-        (* *) admit. 
-        apply Lemma_3_2_dual_Step_2.
-        apply Lemma_3_2_dual_Step_3...
-        apply IHn.
-        apply IHn.
-        destruct n. 
-        (* *) admit. 
-        (* *) admit. 
+        * apply Lemma_3_2_Step_2;
+          apply Lemma_3_2_Step_3; intros; try apply IHn.
+          admit.
+        * apply Lemma_3_2_dual_Step_2;
+          apply Lemma_3_2_dual_Step_3; intros; try apply IHn.
+          admit. 
   Qed.
 
   Lemma Lemma_3_2_b :
@@ -6295,12 +6289,12 @@ Qed.
     is_a_cell (M, P) -> receptive M /\ receptive P.
   Proof with intuition.
     intros.
-    apply Prop_all_receptive; try assumption.
-    apply strong_induction...
-    apply n_receptive_zero.
-    apply n_receptive_ind...
-    apply Lemma_3_2_b.
-    apply Lemma_3_2_b_dual.
+    apply Prop_all_receptive...
+    induction n.
+    + apply n_receptive_zero.
+    + apply n_receptive_ind...
+      apply Lemma_3_2_b.
+      apply Lemma_3_2_b_dual.
   Qed.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
