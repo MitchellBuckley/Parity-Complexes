@@ -6201,8 +6201,9 @@ Qed.
       rewrite H1 in H3; inversion H3.
   Qed.    
 
-  Lemma Prop_all_receptive : (forall n, Prop_3_3_st n) -> forall M P,
-  is_a_cell (M, P) -> receptive M /\ receptive P.
+  Lemma Prop_all_receptive : 
+    (forall n, Prop_3_3_st n) -> 
+      forall M P, is_a_cell (M, P) -> receptive M /\ receptive P.
   Proof with intuition.
     unfold n_receptive...
     + unfold receptive... 
@@ -6237,36 +6238,64 @@ Qed.
       rewrite <- S_pred with (m:=0)...
   Qed.
 
-  Lemma Lemma_3_2_b_work :
-    forall n, forall m, (Lemma_3_2_b_st n m /\ Lemma_3_2_b_dual_st n m).
+  Lemma all_the_work :
+    forall n, (Prop_3_3_st n) /\ (forall m, (Lemma_3_2_b_st n m /\ Lemma_3_2_b_dual_st n m)).
   Proof with intuition.
+    intros.
     induction n.
-    + intros m; destruct m.
-      - split; [apply Lemma_3_2_b_n_0 | apply Lemma_3_2_b_dual_n_0].
-      - split; [apply Lemma_3_2_Step_2;      apply Lemma_3_2_b_0_1 |
-                apply Lemma_3_2_dual_Step_2; apply Lemma_3_2_b_dual_0_1 ].
-    + intros m; destruct m.
-      - split; [ apply Lemma_3_2_b_n_0 |
-                 apply Lemma_3_2_b_dual_n_0 ]. 
-      - split. 
-        * apply Lemma_3_2_Step_2;
-          apply Lemma_3_2_Step_3; intros; try apply IHn.
-          admit.
-        * apply Lemma_3_2_dual_Step_2;
-          apply Lemma_3_2_dual_Step_3; intros; try apply IHn.
-          admit. 
+    + split. 
+      - apply n_receptive_zero. 
+      - intros; split. 
+        * destruct m... 
+          apply Lemma_3_2_b_n_0.
+          apply Lemma_3_2_Step_2.
+          apply Lemma_3_2_b_0_1.
+        * destruct m... 
+          apply Lemma_3_2_b_dual_n_0.
+          apply Lemma_3_2_dual_Step_2.
+          apply Lemma_3_2_b_dual_0_1.
+    + split. 
+      - intuition. 
+        apply n_receptive_ind...
+        destruct m...
+          apply Lemma_3_2_b_n_0.
+        apply Lemma_3_2_Step_2.
+        apply Lemma_3_2_Step_3; [apply H0 | apply H0 | assumption ].
+        destruct m...
+          apply Lemma_3_2_b_dual_n_0.
+        apply Lemma_3_2_dual_Step_2.
+        apply Lemma_3_2_dual_Step_3; [apply H0 | apply H0 | assumption ]. 
+      - intuition.
+        * destruct m...
+            apply Lemma_3_2_b_n_0.
+          apply Lemma_3_2_Step_2.
+          apply Lemma_3_2_Step_3; [apply H0 | apply H0 | assumption ].
+        * destruct m...
+            apply Lemma_3_2_b_dual_n_0.
+          apply Lemma_3_2_dual_Step_2.
+          apply Lemma_3_2_dual_Step_3; [apply H0 | apply H0 | assumption ].
   Qed.
+
+  Prop_3_3_st Lemma_3_2_b_st
+
+  Lemma Prop_3_3 : forall M P,
+    is_a_cell (M, P) -> receptive M /\ receptive P.
+  Proof with intuition.
+    intros.
+    apply Prop_all_receptive...
+    apply all_the_work. 
+  Qed. 
 
   Lemma Lemma_3_2_b :
     forall n m, (Lemma_3_2_b_st n m).
   Proof.
-    apply Lemma_3_2_b_work...
+    apply all_the_work. 
   Qed.
 
   Lemma Lemma_3_2_b_dual :
     forall n m, (Lemma_3_2_b_dual_st n m).
   Proof.
-    apply Lemma_3_2_b_work...
+    apply all_the_work. 
   Qed.
 
   Lemma Lemma_3_2_c :
@@ -6283,18 +6312,6 @@ Qed.
     intros.
     apply Lemma_3_2_dual_Step_1.
     apply Lemma_3_2_b_dual.
-  Qed.
-
-  Lemma Prop_3_3 : forall M P,
-    is_a_cell (M, P) -> receptive M /\ receptive P.
-  Proof with intuition.
-    intros.
-    apply Prop_all_receptive...
-    induction n.
-    + apply n_receptive_zero.
-    + apply n_receptive_ind...
-      apply Lemma_3_2_b.
-      apply Lemma_3_2_b_dual.
   Qed.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
