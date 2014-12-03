@@ -1,0 +1,10 @@
+
+
+This package is still somewhat rudimentary (though the theorems and definitions are all working).
+
+In order to run it, compile each file in the following order:
+ - mySetoids.v
+ - myFiniteDefs.v
+ - PreparityComplexes.v
+ - ParityComplexes.v
+ 
