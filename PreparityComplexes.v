@@ -155,17 +155,17 @@ Arguments Full_set {U} _.
   Import M.
 
   Definition sub (R : Ensemble carrier) (n : nat) : Ensemble carrier :=
-    fun (x : carrier) => (In R x /\ S (dim x)  = n).
+    fun (x : carrier) => (x ∈ R /\ S (dim x)  = n).
   Definition sup (R : Ensemble carrier) (n : nat) : Ensemble carrier :=
-    fun (x : carrier) => (In R x /\ S (dim x) <= n).
+    fun (x : carrier) => (x ∈ R /\ S (dim x) <= n).
 
   Definition setdim (R : Ensemble carrier) (n : nat) : Prop :=
-    forall x, (In R x) -> dim x <= n.
+    forall x, (x ∈ R) -> dim x <= n.
 
   Definition Plus (X : Ensemble carrier) : Ensemble carrier :=
-    fun (y : carrier) => (exists (x : carrier), (In X x) /\ (In (plus x) y)).
+    fun (y : carrier) => (exists (x : carrier), (x ∈ X) /\ (In (plus x) y)).
   Definition Minus (X : Ensemble carrier) : Ensemble carrier :=
-    fun (y : carrier) => (exists (x : carrier), (In X x) /\ (In (minus x) y)).
+    fun (y : carrier) => (exists (x : carrier), (x ∈ X) /\ (In (minus x) y)).
 
   Definition PlusMinus (X : Ensemble carrier) : Ensemble carrier :=
     Intersection (Plus X) (Complement (Minus X)).
@@ -173,18 +173,18 @@ Arguments Full_set {U} _.
     Intersection (Minus X) (Complement (Plus X)).
 
   Definition Perp (X Y : Ensemble carrier) : Prop :=
-    (Intersection (Plus X) (Plus Y) == Empty_set) /\ (Intersection (Minus X) (Minus Y) == Empty_set).
+    ((Plus X) ∩ (Plus Y) == Empty_set) /\ ((Minus X) ∩ (Minus Y) == Empty_set).
   Definition perp (x y : carrier) : Prop :=
-    (Intersection (plus x) (plus y) == Empty_set) /\ (Intersection (minus x) (minus y) == Empty_set).
+    ((plus x) ∩ (plus y) == Empty_set) /\ ((minus x) ∩ (minus y) == Empty_set).
 
   Definition less (x y : carrier) : Prop :=
-    (Inhabited (Intersection (plus x) (minus y))).
+    (Inhabited ((plus x) ∩ (minus y))).
 
   Definition triangle : relation carrier :=
     clos_refl_trans_1n _ (less).
   Inductive triangle_rest (R : Ensemble carrier) : relation carrier :=
-    | tr_refl  : forall x, In R x -> triangle_rest R x x
-    | tr_trans : forall x y z, In R x -> less x y -> triangle_rest R y z -> triangle_rest R x z.
+    | tr_refl  : forall x, x ∈ R -> triangle_rest R x x
+    | tr_trans : forall x y z, x ∈ R -> less x y -> triangle_rest R y z -> triangle_rest R x z.
 
   Definition is_a_segment (R T : Ensemble carrier) : Prop :=
     R ⊆ T /\
@@ -208,22 +208,22 @@ Arguments Full_set {U} _.
     Plus Minus sup sub: sets v62.
 
   Definition moves_def (S M P : Ensemble carrier) : Prop :=
-    P == (Intersection (Union M ( Plus S)) (Complement (Minus S)))
+    P == (Intersection (M ∪ ( Plus S)) (Complement (Minus S)))
     /\
-    M == (Intersection (Union P (Minus S)) (Complement ( Plus S))).
+    M == (Intersection (P ∪ (Minus S)) (Complement ( Plus S))).
 
   Notation "S 'moves' M 'to' P" := (moves_def S M P) (at level 89).
 
   Definition well_formed (X : Ensemble carrier) : Prop :=
-    (forall (x y : carrier), In X x /\ In X y
+    (forall (x y : carrier), x ∈ X /\ y ∈ X
       -> (dim x = O -> dim y = 0 -> x = y))
     /\
-    (forall (x y : carrier), In X x /\ In X y
+    (forall (x y : carrier), x ∈ X /\ y ∈ X
       -> (forall (n : nat), dim x = S n -> dim y = S n -> not (perp x y) -> x = y)).
 
   Definition tight (R : Ensemble carrier) : Prop :=
     forall u v,
-      triangle u v ->  In R v -> Intersection (minus u) (PlusMinus R) == (Empty_set).
+      triangle u v ->  v ∈ R -> (minus u) ∩ (PlusMinus R) == (Empty_set).
 
   Hint Unfold moves_def well_formed tight : sets v62.
 
@@ -366,15 +366,15 @@ Arguments Full_set {U} _.
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
   Inductive triangle_rest' (R : Ensemble carrier) : relation carrier :=
-    | tr_refl'  : forall x, In R x -> triangle_rest' R x x
-    | tr_trans' : forall x y z, In R z -> less y z -> triangle_rest' R x y -> triangle_rest' R x z.
+    | tr_refl'  : forall x, x ∈ R -> triangle_rest' R x x
+    | tr_trans' : forall x y z, z ∈ R -> less y z -> triangle_rest' R x y -> triangle_rest' R x z.
 
   Inductive triangle_rest'' (R : Ensemble carrier) : relation carrier :=
-    | tr_clos'' : forall x y, In R x -> In R y -> less x y -> triangle_rest'' R x y
-    | tr_refl''  : forall x, In R x -> triangle_rest'' R x x
+    | tr_clos'' : forall x y, x ∈ R -> y ∈ R -> less x y -> triangle_rest'' R x y
+    | tr_refl''  : forall x, x ∈ R -> triangle_rest'' R x x
     | tr_trans'' : forall x y z, triangle_rest'' R x y -> triangle_rest'' R y z -> triangle_rest'' R x z.
 
-  Lemma triangle_rest_in_set : forall R, forall x y, triangle_rest R x y -> In R x /\ In R y.
+  Lemma triangle_rest_in_set : forall R, forall x y, triangle_rest R x y -> x ∈ R /\ y ∈ R.
   Proof with intuition.
     intros...
     induction H... induction H...
@@ -471,7 +471,7 @@ Arguments Full_set {U} _.
   Lemma less_decidable : forall x y, ((less x y) \/ ~(less x y)).
   Proof with intuition.
     intros.
-    assert (Finite (Intersection (plus x) (minus y))).
+    assert (Finite ((plus x) ∩ (minus y))).
       apply Finite_Intersection.
       apply minus_Finite.
       apply all_decidable...
@@ -484,7 +484,7 @@ Arguments Full_set {U} _.
   Qed.
 
   Lemma triangle_rest_Included : forall S x y, triangle_rest S x y ->
-    forall T, Included S T -> triangle_rest T x y.
+    forall T, S ⊆ T -> triangle_rest T x y.
   Proof with intuition.
     intros...
     induction H...
@@ -539,7 +539,7 @@ Arguments Full_set {U} _.
     | H : S ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply lt_Sn_n in H; assumption
     end.
 
-  Hint Extern 2 (In _ _) =>
+  Hint Extern 2 (_ ∈ _) =>
     match goal with
       | H : ?S == ?T, _: In ?T ?x |- In ?S ?x => rewrite H; assumption
       | H : ?S == ?T, _: In ?S ?x |- In ?T ?x => rewrite <- H; assumption
@@ -669,7 +669,7 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma sub_Included_Lemma : forall R T m, Included R (sub T (S m)) ->
-    forall x, (In R x -> dim x = m).
+    forall x, (x ∈ R -> dim x = m).
   Proof with crush.
     unfold setdim...
     assert (S (dim x) = S m)...
@@ -677,7 +677,7 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma sup_Included_Lemma : forall R T m, Included R (sup T (S m)) ->
-    forall x, (In R x -> dim x <= m).
+    forall x, (x ∈ R -> dim x <= m).
   Proof with crush.
     unfold setdim...
     assert (S (dim x) <= S m)...
@@ -731,19 +731,19 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve sub_Included_Lemma sub_def_Lemma sup_def_Lemma le_Sn_n n_Sn.
 
-  Lemma sub_Included : forall T n, Included (sub T n) T.
+  Lemma sub_Included : forall T n, (sub T n) ⊆ T.
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Included...
   Qed.
 
-  Lemma sup_Included : forall T n, Included (sup T n) T.
+  Lemma sup_Included : forall T n, (sup T n) ⊆ T.
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Included...
   Qed.
 
-  Lemma sub_sup_Included : forall T n, Included (sub T n) (sup T n).
+  Lemma sub_sup_Included : forall T n, (sub T n) ⊆ (sup T n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Included...
@@ -752,7 +752,7 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve sub_Included sup_Included sub_sup_Included.
 
-  Lemma sub_Union : forall T R n, sub (Union T R) n == Union (sub T n) (sub R n).
+  Lemma sub_Union : forall T R n, sub (T ∪ R) n == (sub T n) ∪ (sub R n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Same_set; unfold Included...
@@ -761,7 +761,7 @@ Hint Resolve less_irrefl less_dim.
     inversion H; inversion H0...
   Qed.
 
-  Lemma sup_Union : forall T R n, sup (Union T R) n == Union (sup T n) (sup R n).
+  Lemma sup_Union : forall T R n, sup (T ∪ R) n == (sup T n) ∪ (sup R n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Same_set; unfold Included...
@@ -780,13 +780,13 @@ Hint Resolve less_irrefl less_dim.
     autounfold with *. intuition.
   Qed.
 
-  Lemma sup_Intersection : forall T R n, sup (Intersection T R) n == Intersection (sup T n) (sup R n).
+  Lemma sup_Intersection : forall T R n, sup (T ∩ R) n == (sup T n) ∩ (sup R n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Same_set; unfold Included...
   Qed.
 
-  Lemma sub_Intersection : forall T R n, sub (Intersection T R) n == Intersection (sub T n) (sub R n).
+  Lemma sub_Intersection : forall T R n, sub (T ∩ R) n == (sub T n) ∩ (sub R n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
     unfold Same_set; unfold Included...
@@ -857,13 +857,13 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma sub_Setminus :
-    forall A B k, sub (Setminus A B) k == Setminus (sub A k) (sub B k).
+    forall A B k, sub (A \ B) k == Setminus (sub A k) (sub B k).
   Proof with intuition.
     crush.
   Qed.
 
   Lemma sup_Setminus :
-    forall A B k, sup (Setminus A B) k == Setminus (sup A k) (sup B k).
+    forall A B k, sup (A \ B) k == Setminus (sup A k) (sup B k).
   Proof with intuition.
     crush...
   Qed.
@@ -999,7 +999,7 @@ Hint Resolve less_irrefl less_dim.
     crush... apply H. rewrite H3 in H2...
   Qed.
 
-  Lemma sub_Included' : forall R T, Included R T -> forall n, Included (sub R (S n)) (sub T (S n)).
+  Lemma sub_Included' : forall R T, R ⊆ T -> forall n, Included (sub R (S n)) (sub T (S n)).
   Proof with intuition.
     crush.
   Qed.
@@ -1046,7 +1046,7 @@ Hint Resolve less_irrefl less_dim.
   Hint Resolve Finite_sub Finite_sup.
 
   Lemma dedede :
-    forall R T, Included R T -> forall n, sub T n == T -> sub R n == R.
+    forall R T, R ⊆ T -> forall n, sub T n == T -> sub R n == R.
   Proof with intuition.
     intros...
     unfold Same_set, Included...
@@ -1060,7 +1060,7 @@ Hint Resolve less_irrefl less_dim.
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
   Lemma Plus_Union : forall S T,
-     Plus (Union S T) == Union (Plus S) (Plus T).
+     Plus (S ∪ T) == (Plus S) ∪ (Plus T).
   Proof with intuition.
     autounfold with *...
     inversion H... inversion H1; [left |right]; unfold In; exists x0...
@@ -1070,7 +1070,7 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma Minus_Union : forall S T,
-     Minus (Union S T) == Union (Minus S) (Minus T).
+     Minus (S ∪ T) == (Minus S) ∪ (Minus T).
   Proof with repeat basic; unfold In; auto.
     intros. autounfold with sets. unfold Minus...
     inversion H.
@@ -1188,14 +1188,14 @@ Hint Resolve less_irrefl less_dim.
     right... apply In_Intersection in H1...
   Qed.
 
-  Lemma Minus_Included : forall X Y, Included X Y -> Included (Minus X) (Minus Y).
+  Lemma Minus_Included : forall X Y, X ⊆ Y -> (Minus X) ⊆ (Minus Y).
   Proof with intuition.
     crush...
     inversion H0; clear H0.
     exists x0...
   Qed.
 
-  Lemma Plus_Included : forall X Y, Included X Y -> Included (Plus X) (Plus Y).
+  Lemma Plus_Included : forall X Y, X ⊆ Y -> (Plus X) ⊆ (Plus Y).
   Proof with intuition.
     crush...
     inversion H0; clear H0.
@@ -1244,7 +1244,7 @@ Hint Resolve less_irrefl less_dim.
   (** WELL_FORMED PROPERTIES **)
 
   Lemma well_formed_Included :
-    forall T, well_formed T -> forall R, Included R T -> well_formed R.
+    forall T, well_formed T -> forall R, R ⊆ T -> well_formed R.
   Proof with intuition.
     autounfold with *...
     refine (H1 _ _ _ n _ _ _)...
@@ -1289,7 +1289,7 @@ Hint Resolve less_irrefl less_dim.
       forall A, well_formed A ->
       forall B, well_formed B ->
         (forall x y, x ∈ A /\ y ∈ B -> ~ (dim x = dim y)) ->
-        well_formed (Union A B).
+        well_formed (A ∪ B).
     Proof with intuition.
       unfold well_formed...
         inversion H7; clear H7; subst...
@@ -1311,8 +1311,8 @@ Hint Resolve less_irrefl less_dim.
   (** MAXIMAL and MINIMAL ELEMENTS **)
 
   Lemma Finite_carrier_have_max_dim_element :
-    forall (T : Ensemble carrier), Finite T -> Inhabited T -> exists u, ((In T u) /\
-      (forall v, (In T v) -> dim v <= dim u)).
+    forall (T : Ensemble carrier), Finite T -> Inhabited T -> exists u, ((u ∈ T) /\
+      (forall v, (v ∈ T) -> dim v <= dim u)).
   Proof with repeat basic; auto.
     intros.
     induction H.
@@ -1391,7 +1391,7 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve Finite_sub Finite_sup PlusMinus_Finite MinusPlus_Finite Plus_Finite Minus_Finite.
 
-  Lemma setdim_Union : forall S T n, (setdim S n /\ setdim T n) <-> setdim (Union S T) n.
+  Lemma setdim_Union : forall S T n, (setdim S n /\ setdim T n) <-> setdim (S ∪ T) n.
   Proof with intuition.
     unfold setdim... basic...
   Qed.
@@ -1412,7 +1412,7 @@ Hint Resolve less_irrefl less_dim.
     unfold setdim, sup... unfold In at 1 in H0... apply (le_trans _ k)...
   Qed.
 
-  Lemma setdim_Setminus : forall R T n, setdim R n -> setdim (Setminus R T) n.
+  Lemma setdim_Setminus : forall R T n, setdim R n -> setdim (R \ T) n.
   Proof with intuition.
     unfold setdim, Setminus... unfold In at 1 in H0...
   Qed.
@@ -1431,7 +1431,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H1 in H2...
   Qed.
 
-  Lemma setdim_Included : forall R T, Included R T -> forall n, setdim T n -> setdim R n.
+  Lemma setdim_Included : forall R T, R ⊆ T -> forall n, setdim T n -> setdim R n.
   Proof with intuition.
     unfold setdim...
   Qed.
@@ -1541,7 +1541,7 @@ Hint Resolve less_irrefl less_dim.
    intros...
    unfold is_a_segment...
    apply (H1 x z)...
-   assert (In T y)...
+   assert (y ∈ T)...
      inversion H4...
    apply (tr_trans _ _ y)...
    left...
@@ -1562,7 +1562,7 @@ Hint Resolve less_irrefl less_dim.
     revert H2.
     apply triangle_rest_equiv in H4.
     induction H4...
-      assert (In S y).
+      assert (y ∈ S).
         apply (H5 z0)...
         right with z...
         inversion H4...
@@ -1571,11 +1571,11 @@ Hint Resolve less_irrefl less_dim.
 
   Lemma initial_property : forall S T M,
     is_initial_segment S M ->
-    Included T M ->
+    T ⊆ M ->
     Disjoint S T ->
       forall a b,
-        In S a ->
-        In T b ->
+        a ∈ S ->
+        b ∈ T ->
         less b a -> False.
   Proof with intuition.
     intros...
@@ -1587,11 +1587,11 @@ Hint Resolve less_irrefl less_dim.
 
   Lemma final_property : forall T S M,
     is_final_segment T M ->
-    Included S M ->
+    S ⊆ M ->
     Disjoint S T ->
       forall a b,
-        In S a ->
-        In T b ->
+        a ∈ S ->
+        b ∈ T ->
         less b a -> False.
   Proof with intuition.
     intros...
@@ -1619,7 +1619,7 @@ Hint Resolve less_irrefl less_dim.
   Lemma segment_lemma :
     forall R T, is_a_segment R T ->
       forall x y, triangle_rest T x y ->
-        In R x -> In R y -> triangle_rest R x y.
+        x ∈ R -> y ∈ R -> triangle_rest R x y.
   Proof with intuition.
     unfold is_a_segment...
     induction H.
@@ -1632,7 +1632,7 @@ Hint Resolve less_irrefl less_dim.
   Lemma initial_final_lemma :
     forall R T, is_initial_segment R T ->
       forall Q, is_final_segment Q R ->
-        is_initial_segment (Setminus R Q) T.
+        is_initial_segment (R \ Q) T.
   Proof with intuition.
     unfold is_initial_segment, is_final_segment...
     - apply Included_trans with R...
@@ -1651,7 +1651,7 @@ Hint Resolve less_irrefl less_dim.
   Lemma final_initial_lemma :
     forall R T, is_final_segment R T ->
       forall Q, is_initial_segment Q R ->
-        is_final_segment (Setminus R Q) T.
+        is_final_segment (R \ Q) T.
   Proof with intuition.
     unfold is_initial_segment, is_final_segment...
     - apply Included_trans with R...
@@ -1668,7 +1668,7 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma special_is_segment :
-    forall R w, In R w ->
+    forall R w, w ∈ R ->
       is_final_segment (fun y => y ∈ R ∧ triangle_rest R w y) R.
   Proof with intuition.
     intros R w K.
@@ -1681,7 +1681,7 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma special_is_segment' :
-    forall R w, In R w ->
+    forall R w, w ∈ R ->
       is_initial_segment (fun y => y ∈ R ∧ triangle_rest R y w) R.
   Proof with intuition.
     intros R w K.
@@ -1694,8 +1694,8 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma Perp_thing :
-    forall U V, Disjoint U V -> well_formed (Union U V) -> Finite U -> Finite V ->
-       (forall a b, In U a /\ In V b -> dim a = dim b) ->
+    forall U V, Disjoint U V -> well_formed (U ∪ V) -> Finite U -> Finite V ->
+       (forall a b, a ∈ U /\ b ∈ V -> dim a = dim b) ->
        (Plus U ∩ Plus V == Empty_set ∧ Minus U ∩ Minus V == Empty_set).
   Proof with intuition.
     intros...
@@ -1759,8 +1759,8 @@ Hint Resolve less_irrefl less_dim.
     well_formed S ->
     well_formed T ->
     Perp S T ->
-    sub (Union S T) 1 == Empty_set ->
-    well_formed (Union S T).
+    sub (S ∪ T) 1 == Empty_set ->
+    well_formed (S ∪ T).
   Proof with intuition.
   intros...
   unfold well_formed in *...
@@ -2123,7 +2123,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite H0.
     rewrite H2.
     rewrite <- I_U_dist_r.
-    assert ((√Minus S ∩ √Minus T) == (√Minus(Union S T))).
+    assert ((√Minus S ∩ √Minus T) == (√Minus(S ∪ T))).
     rewrite Minus_Union. rewrite Union_Complement_compat...
     rewrite <- H5.
     rewrite <- Intersection_trans.
@@ -2139,7 +2139,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite H0.
     rewrite H4.
     rewrite <- I_U_dist_r.
-    assert ((√Plus T ∩ √Plus S) == (√Plus(Union S T))).
+    assert ((√Plus T ∩ √Plus S) == (√Plus(S ∪ T))).
     rewrite Plus_Union. rewrite Union_Complement_compat... rewrite Union_comm...
     rewrite <- H5.
     rewrite <- Intersection_trans.
@@ -2155,13 +2155,13 @@ Hint Resolve less_irrefl less_dim.
   (* this has an obvious dual *)
   Lemma Prop_2_4 :
     forall (T Z M P : Ensemble carrier),
-    Finite Z -> Finite T -> (Union T Z) moves M to P ->
-    Included (PlusMinus Z) P ->
+    Finite Z -> Finite T -> (T ∪ Z) moves M to P ->
+    (PlusMinus Z) ⊆ P ->
     Perp T Z ->
     exists N N', (N == N') /\ (T moves M to N) /\ (Z moves N' to P).
   Proof with repeat basic; auto.
     intros T Z M P ZFin TFin.
-    remember (Union T Z) as S.
+    remember (T ∪ Z) as S.
     intros.
     assert (Finite S) as SFin. rewrite HeqS. apply Finite_Union...
     unfold moves_def in H...
@@ -2169,7 +2169,7 @@ Hint Resolve less_irrefl less_dim.
     assert (exists N, Z moves N to P).
     apply Prop_2_1_dual. assumption.
       split; try assumption.
-      assert (Included (Minus Z) (Minus S)).
+      assert ((Minus Z) ⊆ (Minus S)).
         rewrite HeqS. rewrite Minus_Union. apply Union_Included_cancel_left. reflexivity.
       apply Disjoint_Intersection_condition. apply (Included_Empty_set _ (P ∩ Minus S)). apply Intersection_Included_compat...
       rewrite H2. rewrite Intersection_trans. rewrite (Intersection_comm _ (Minus S)).
@@ -2197,7 +2197,7 @@ Hint Resolve less_irrefl less_dim.
         inversion H1; apply In_Intersection in H6...
         auto. auto.
 
-      assert (M == (Union M (Intersection (Minus S) P))).
+      assert (M == (Union M ((Minus S) ∩ P))).
       unfold Same_set; unfold Included...
         inversion H6... symmetry in H3. rewrite <- H3...
         rewrite H2 in H9...
@@ -2236,12 +2236,12 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- Intersection_trans.
     rewrite (I_U_dist_l (M ∪ Plus S)).
     rewrite <- H2.
-    assert ((Minus Z) ⊆ Union (MinusPlus S) (Plus S)).
-      assert ((Union (MinusPlus S) (Plus S)) == (Union (Minus S) (Plus S))).
+    assert ((Minus Z) ⊆ (MinusPlus S) ∪ (Plus S)).
+      assert (((MinusPlus S) ∪ (Plus S)) == ((Minus S) ∪ (Plus S))).
         unfold MinusPlus. rewrite U_I_dist_r. rewrite Full_set_property. rewrite Full_set_ident_right...
         auto.
       rewrite H10. rewrite HeqS. rewrite Minus_Union. left; right...
-    assert ((MinusPlus S ∪ Plus S) ⊆ (Union M (Plus S))).
+    assert ((MinusPlus S ∪ Plus S) ⊆ (M ∪ (Plus S))).
       unfold MinusPlus. rewrite H3. apply Union_Included_compat.
       apply Intersection_Included_compat. apply Union_Included_cancel_left.
       reflexivity. reflexivity. reflexivity.
@@ -2260,13 +2260,13 @@ Hint Resolve less_irrefl less_dim.
 
   Lemma Prop_2_4_dual :
     forall (T Z M P : Ensemble carrier),
-    Finite Z -> Finite T -> (Union T Z) moves M to P ->
-    Included (MinusPlus T) M ->
+    Finite Z -> Finite T -> (T ∪ Z) moves M to P ->
+    (MinusPlus T) ⊆ M ->
     Perp T Z ->
     (exists N N', (N == N') /\ (T moves M to N) /\ (Z moves N' to P)).
   Proof with repeat basic; auto.
     intros T Z M P ZFin TFin.
-    remember (Union T Z) as S.
+    remember (T ∪ Z) as S.
     intros.
     assert (Finite S) as SFin. rewrite HeqS. apply Finite_Union...
     unfold moves_def in H...
@@ -2274,7 +2274,7 @@ Hint Resolve less_irrefl less_dim.
     assert (exists N, T moves M to N).
     apply Prop_2_1. assumption.
       split; try assumption.
-      assert (Included (Plus T) (Plus S)).
+      assert ((Plus T) ⊆ (Plus S)).
         rewrite HeqS. rewrite Plus_Union. apply Union_Included_cancel_right. reflexivity.
       apply Disjoint_Intersection_condition. apply (Included_Empty_set _ (M ∩ Plus S)). apply Intersection_Included_compat...
       rewrite H3. rewrite Intersection_trans. rewrite (Intersection_comm _ (Plus S)).
@@ -2302,7 +2302,7 @@ Hint Resolve less_irrefl less_dim.
         inversion H1; apply In_Intersection in H6...
         auto. auto.
 
-      assert (P == (Union P (Intersection (Plus S) M))).
+      assert (P == (Union P ((Plus S) ∩ M))).
       unfold Same_set; unfold Included...
         inversion H6... symmetry in H2. rewrite <- H2...
         rewrite H3 in H9...
@@ -2341,12 +2341,12 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- Intersection_trans.
     rewrite (I_U_dist_l (M ∪ Plus S)).
     rewrite <- H2.
-    assert ((Minus Z) ⊆ Union (MinusPlus S) (Plus S)).
-      assert ((Union (MinusPlus S) (Plus S)) == (Union (Minus S) (Plus S))).
+    assert ((Minus Z) ⊆ (MinusPlus S) ∪ (Plus S)).
+      assert (((MinusPlus S) ∪ (Plus S)) == ((Minus S) ∪ (Plus S))).
         unfold MinusPlus. rewrite U_I_dist_r. rewrite Full_set_property. rewrite Full_set_ident_right...
         auto.
       rewrite H10. rewrite HeqS. rewrite Minus_Union. left; right...
-    assert ((MinusPlus S ∪ Plus S) ⊆ (Union M (Plus S))).
+    assert ((MinusPlus S ∪ Plus S) ⊆ (M ∪ (Plus S))).
       unfold MinusPlus. rewrite H3. apply Union_Included_compat.
       apply Intersection_Included_compat. apply Union_Included_cancel_left.
       reflexivity. reflexivity. reflexivity.
@@ -2366,8 +2366,8 @@ Hint Resolve less_irrefl less_dim.
   (* this remembers some of the essential data to the proof above *)
   Lemma Prop_2_4_exact :
     forall (T Z M P : Ensemble carrier),
-    Finite Z -> Finite T -> (Union T Z) moves M to P ->
-    Included (PlusMinus Z) P ->
+    Finite Z -> Finite T -> (T ∪ Z) moves M to P ->
+    (PlusMinus Z) ⊆ P ->
     Perp T Z ->
     (T moves M to (M ∪ Plus T) ∩ √Minus T) /\
     (Z moves (P ∪ Minus Z) ∩ √Plus Z to P) /\
@@ -2390,8 +2390,8 @@ Hint Resolve less_irrefl less_dim.
 
   Lemma Prop_2_4_dual_exact :
     forall (T Z M P : Ensemble carrier),
-    Finite Z -> Finite T -> (Union T Z) moves M to P ->
-    Included (MinusPlus T) M ->
+    Finite Z -> Finite T -> (T ∪ Z) moves M to P ->
+    (MinusPlus T) ⊆ M ->
     Perp T Z ->
     (T moves M to (M ∪ Plus T) ∩ √Minus T) /\
     (Z moves (P ∪ Minus Z) ∩ √Plus Z to P) /\
@@ -2412,7 +2412,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H4, <- H5...
   Qed.
 
-      Definition less_than := fun R T => (fun x => (exists y, In T y /\ triangle_rest R x y)).
+      Definition less_than := fun R T => (fun x => (exists y, y ∈ T /\ triangle_rest R x y)).
 
       Lemma Singleton_segment :
         forall R z, is_a_segment (less_than R (Singleton z)) R.
@@ -2446,7 +2446,7 @@ Hint Resolve less_irrefl less_dim.
       Qed.
 
       Lemma ge_final_segment :
-        forall R w, In R w -> is_final_segment (fun x => (In R x /\ triangle_rest R w x)) R.
+        forall R w, w ∈ R -> is_final_segment (fun x => (x ∈ R /\ triangle_rest R w x)) R.
       Proof with intuition.
         unfold is_final_segment...
         + unfold Included, In at 1...
@@ -2457,7 +2457,7 @@ Hint Resolve less_irrefl less_dim.
       Qed.
 
       Lemma le_initial_segment :
-        forall R w, In R w -> is_initial_segment (fun x => (In R x /\ triangle_rest R x w)) R.
+        forall R w, w ∈ R -> is_initial_segment (fun x => (x ∈ R /\ triangle_rest R x w)) R.
       Proof with intuition.
         unfold is_initial_segment...
         + unfold Included, In at 1...
@@ -2468,7 +2468,7 @@ Hint Resolve less_irrefl less_dim.
       Qed.
 
       Lemma final_less_than_segment :
-        forall R T, Included R T -> is_final_segment R (less_than R T).
+        forall R T, R ⊆ T -> is_final_segment R (less_than R T).
       Proof with intuition.
         unfold less_than, is_final_segment...
         + unfold Included, In at 2...

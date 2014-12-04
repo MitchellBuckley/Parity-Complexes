@@ -29,7 +29,7 @@ Require Import Arith.
   Inductive Finite {U : Type} : Ensemble U -> Prop :=
   |  Finite_Empty_set : Finite (Empty_set)
   |  Finite_Add : forall A : Ensemble U, Finite A ->
-                   forall x : U, ~x ∈ A ->
+                   forall x : U, ~(x ∈ A) ->
                     Finite (Add U A x)
   |  Finite_Same_set : forall T, Finite T ->
                         forall S, S == T ->
@@ -39,7 +39,7 @@ Require Import Arith.
   | Cardinal_Empty_set : Cardinal (Empty_set) 0
   | Cardinal_Add : forall (A : Ensemble U) (n : nat),
                      Cardinal A n ->
-                      forall x : U, ~ In A x ->
+                      forall x : U, ~ x ∈ A ->
                        Cardinal (Add U A x) (S n)
   | Cardinal_Same_set : forall A n, Cardinal A n ->
                          forall B, A == B ->
@@ -160,7 +160,7 @@ Require Import Arith.
        Finite B ->
      forall A,
        A ⊆ B ->
-       B == Union A (Setminus B A) ->
+       B == A ∪ (B \ A) ->
        Finite A.
   Proof with finitecrush.
     intros B BFinite.
@@ -169,7 +169,7 @@ Require Import Arith.
       - apply (Finite_Same_set _ (Finite_Empty_set) _).
         apply (Included_Empty_set _ _ Hyp2)...
 
-      - assert (Finite (Intersection A B')) as AB'Finite.
+      - assert (Finite (A ∩ B')) as AB'Finite.
           apply IndHyp.
           unfold Included...
           rewrite Setminus_is_Intersection_Complement.
@@ -190,7 +190,7 @@ Require Import Arith.
 
       inversion J as [a G | a G]; clear J; subst.
         +
-        assert (A == Add U (Intersection A B') p).
+        assert (A == Add U (A ∩ B') p).
           unfold Add, Same_set, Included...
           assert (In (Add U B' p) x). apply Hyp2...
           unfold Add in H1.
@@ -201,7 +201,7 @@ Require Import Arith.
         inversion H0; clear H0... subst...
 
         +
-        assert (A == (Intersection A B')).
+        assert (A == (A ∩ B')).
           unfold Same_set, Included...
           assert (In (Add U B' p) x). apply Hyp2...
           unfold Add in H1.
@@ -227,14 +227,14 @@ Require Import Arith.
     inversion H2... subst. unfold Setminus, In at 1 in H3...
   Qed.
 
-  Lemma Finite_Union {U : Type} : forall (S T : Ensemble U), decidable S -> Finite T -> Finite S -> Finite (Union S T).
+  Lemma Finite_Union {U : Type} : forall (S T : Ensemble U), decidable S -> Finite T -> Finite S -> Finite (S ∪ T).
   Proof with finitecrush.
     intros...
     induction H0; intros.
       - eapply (Finite_Same_set S)...
 
       -
-      assert ((x ∈ S) \/ (¬x ∈ S))... apply H.
+      assert ((x ∈ S) \/ (~x ∈ S))... apply H.
       +
         assert (S ∪ Add U A x == S ∪ A). unfold Same_set; unfold Included...
         subst...
@@ -248,7 +248,7 @@ Require Import Arith.
       - rewrite H2...
   Qed.
 
-  Lemma Finite_Intersection {U : Type} : forall (S: Ensemble U), Finite S -> forall T, decidable T -> Finite (Intersection T S).
+  Lemma Finite_Intersection {U : Type} : forall (S: Ensemble U), Finite S -> forall T, decidable T -> Finite (T ∩ S).
   Proof with finitecrush.
     intros S SFin.
     induction SFin; intros.
@@ -388,7 +388,7 @@ Require Import Arith.
 
   Lemma Finite_nat_have_maximum_le_element :
     forall (T : Ensemble nat), Finite T -> Inhabited T ->
-      exists u, ((In T u) /\ (forall v, (In T v) -> v <= u)).
+      exists u, ((u ∈ T) /\ (forall v, (v ∈ T) -> v <= u)).
   Proof with finitecrush.
     intros.
     induction H.
@@ -412,7 +412,7 @@ Require Import Arith.
 
   Lemma Finite_nat_have_minimum_le_element :
     forall (T : Ensemble nat), Finite T -> Inhabited T ->
-      exists u, ((In T u) /\ (forall v, (In T v) -> u <= v)).
+      exists u, ((u ∈ T) /\ (forall v, (v ∈ T) -> u <= v)).
   Proof with finitecrush.
     intros.
     induction H.
@@ -436,7 +436,7 @@ Require Import Arith.
 
   Lemma decidable_nat_have_minimum_le_element :
     forall (T : Ensemble nat), decidable T -> Inhabited T ->
-      exists u, ((In T u) /\ (forall v, (In T v) -> u <= v)).
+      exists u, ((u ∈ T) /\ (forall v, (v ∈ T) -> u <= v)).
   Proof with finitecrush.
 
   assert (forall P: nat -> Prop,
@@ -450,7 +450,7 @@ Require Import Arith.
   intros T decT inhabT.
   inversion inhabT as [w winT]; clear inhabT.
   set (Z := fun s => T s /\ s <= w).
-  assert (Included Z T) as K.
+  assert (Z ⊆ T) as K.
     unfold Z, Included, In at 1...
   assert (∃ u : nat, u ∈ Z ∧ (∀ v : nat, v ∈ Z → u <= v)).
     apply Finite_nat_have_minimum_le_element...
@@ -467,7 +467,7 @@ Require Import Arith.
   apply (le_trans _ w)... apply H0... unfold Z, In at 1...
   Qed.
 
-  Lemma Cardinal_Sn {U : Type} : forall T n, @Cardinal U T (S n) -> Inhabited T.
+  Lemma Cardinal_Sn {U : Type} : forall (T : Ensemble U) n, Cardinal T (S n) -> Inhabited T.
   Proof with intuition.
     intros.
     remember (S n) as W.
@@ -476,8 +476,8 @@ Require Import Arith.
       rewrite <- H0...
   Qed.
 
-  Lemma Finite_Inhabited_Cardinal_Sn {U : Type} : forall X,
-    @Finite U X -> Inhabited X ->
+  Lemma Finite_Inhabited_Cardinal_Sn {U : Type} : forall (X : Ensemble U),
+    Finite X -> Inhabited X ->
       exists n, Cardinal X (S n).
   Proof with intuition.
     intros.
@@ -492,8 +492,8 @@ Require Import Arith.
 
   Lemma Cardinal_Setminus {U : Type} :
     decidable_eq U ->
-      forall n T, @Cardinal U T n ->
-         forall u, In T u -> Cardinal (Setminus T (Singleton U u)) (pred n).
+      forall n (T : Ensemble U), Cardinal T n ->
+         forall u, u ∈ T -> Cardinal (Setminus T (Singleton U u)) (pred n).
   Proof with intuition.
     intuition.
     induction H0...
@@ -517,9 +517,9 @@ Require Import Arith.
 
   Lemma Cardinal_le {U : Type} :
     decidable_eq U ->
-    forall T n, @Cardinal U T n ->
-      forall R m, @Cardinal U R m ->
-        Included T R ->
+    forall (T : Ensemble U) n, Cardinal T n ->
+      forall (R : Ensemble U) m, Cardinal R m ->
+        T ⊆ R ->
           n <= m.
   Proof with intuition.
     intros Udec T n Tcard.
@@ -547,7 +547,7 @@ Require Import Arith.
   Lemma Finite_decidable_existence {U : Type}:
     forall W, Finite W ->
       forall P : U -> Prop, (forall c, P c \/ ~(P c)) ->
-        ((exists x, In W x /\ P x) \/ ~((exists x, In W x /\ P x))).
+        ((exists x, x ∈ W /\ P x) \/ ~((exists x, x ∈ W /\ P x))).
   Proof with intuition.
     intros W WFin.
     induction WFin...
@@ -567,8 +567,8 @@ Require Import Arith.
 
   Lemma Setminus_Finite {U : Type} :
     decidable_eq U ->
-    forall A, @Finite U A ->
-    forall B, @Finite U B ->
+    forall (A : Ensemble U), Finite A ->
+    forall (B : Ensemble U), Finite B ->
       Finite (Intersection A (Complement B)).
   Proof with intuition.
     intros Udec...
@@ -579,7 +579,7 @@ Require Import Arith.
       rewrite I_U_dist_r.
       apply Finite_Union...
       apply Finite_are_decidable...
-      assert (In B x \/ ~(In B x)).
+      assert (x ∈ B \/ ~(x ∈ B)).
         apply Finite_are_decidable...
       inversion H2; clear H2.
       + apply (Finite_Same_set Empty_set).
@@ -601,14 +601,14 @@ Require Import Arith.
     decidable_eq U ->
     forall A, @Finite U A ->
     forall B, @Finite U B ->
-      Finite (Setminus A B).
+      Finite (A \ B).
   Proof with intuition.
     intros.
     rewrite Setminus_is_Intersection_Complement.
     apply Setminus_Finite...
   Qed.
 
-  Lemma Setminus_Included {U : Type}: forall S T, @Included U (Setminus S T) S.
+  Lemma Setminus_Included {U : Type}: forall (S T : Ensemble U), (S \ T) ⊆ S.
   Proof with intuition.
     crush.
   Qed.

@@ -32,14 +32,15 @@ Hint Unfold Complement.
 
 (** Notation **)
 
-Notation "A == B"      := (Same_set A B) (at level 79).
+Notation "A == B"      := (Same_set A B) (at level 71).
+Notation "A ⊆ B"       := (Included A B) (at level 71).
+Notation "x ∈ A"       := (In A x) (at level 71).
+Notation "A == B == C" := ((A == B) /\ (B == C)) (at level 71, B at next level).
+Notation "A ⊆ B ⊆ C"   := ((A ⊆ B) /\ (B ⊆ C)) (at level 71, B at next level).
 Notation "A ∪ B"       := (Union A B) (at level 61).
 Notation "A ∩ B"       := (Intersection A B) (at level 61).
-Notation "A ⊆ B"       := (Included A B) (at level 79).
-Notation "x ∈ A"       := (In A x) (at level 71).
-Notation "√ A"         := (Complement A) (at level 51).
-Notation "A == B == C" := ((A == B) /\ (B == C)) (at level 79, B at next level).
-Notation "A ⊆ B ⊆ C"   := ((A ⊆ B) /\ (B ⊆ C)) (at level 79, B at next level).
+Notation "A '\' B"     := (Setminus A B) (at level 61).
+Notation "√ A"         := (Complement A) (at level 59).
 
 (** Definition of decidability **)
 
@@ -141,7 +142,7 @@ Ltac crush :=
     ->
     forall (T T': Ensemble U), T == T'
     ->
-    (Union S T) == (Union S' T').
+    (S ∪ T) == (S' ∪ T').
   Proof with crush.
     crush.
     left... right... left... right...
@@ -210,13 +211,13 @@ Ltac crush :=
   (** Inclusion: *)
 
   Lemma Included_trans {U : Type} :
-    forall (S T R : Ensemble U), Included S T -> Included T R -> Included S R.
+    forall (S T R : Ensemble U), S ⊆ T -> T ⊆ R -> S ⊆ R.
   Proof with crush.
     crush.
   Qed.
 
   Lemma Included_refl {U : Type} :
-    forall (S : Ensemble U), Included S S.
+    forall (S : Ensemble U), S ⊆ S.
   Proof with crush.
     crush.
   Qed.
@@ -262,7 +263,7 @@ Ltac crush :=
   Lemma Complement_Included_compat {U : Type} :
     forall (T S : Ensemble U), S ⊆ T
     →
-    Included (√ T) (√ S).
+    (√ T) ⊆ (√ S).
   Proof with crush.
     crush.
   Qed.
@@ -359,7 +360,7 @@ Ltac crush :=
   (** Distribition laws **)
 
   Lemma I_U_dist_l {U : Type} :
-    forall (S T R: Ensemble U), (S ∩ (Union T R)) == (Union (S ∩ T) (S ∩ R)).
+    forall (S T R: Ensemble U), (S ∩ (T ∪ R)) == ((S ∩ T) ∪ (S ∩ R)).
   Proof with crush.
     crush.
     left...
@@ -367,7 +368,7 @@ Ltac crush :=
   Qed.
 
   Lemma I_U_dist_r {U : Type} :
-    forall (S T R: Ensemble U), (Intersection (Union T R) S) == (Union (T ∩ S) (R ∩ S)) .
+    forall (S T R: Ensemble U), ((T ∪ R) ∩ S) == ((T ∩ S) ∪ (R ∩ S)) .
   Proof with crush.
     crush.
     left...
@@ -375,7 +376,7 @@ Ltac crush :=
   Qed.
 
   Lemma U_I_dist_r {U : Type} :
-    forall (S T R: Ensemble U), (Union (T ∩ R) S) == ((Union T S) ∩ (Union R S)).
+    forall (S T R: Ensemble U), ((T ∩ R) ∪ S) == ((T ∪ S) ∩ (R ∪ S)).
   Proof with crush.
     autounfold with *.
     intuition.
@@ -385,7 +386,7 @@ Ltac crush :=
   Qed.
 
   Lemma U_I_dist_l {U : Type} :
-    forall (S T R: Ensemble U), (Union S (T ∩ R)) == ((Union S T) ∩ (Union S R)).
+    forall (S T R: Ensemble U), (S ∪ (T ∩ R)) == ((S ∪ T) ∩ (S ∪ R)).
   Proof with crush.
     autounfold with *.
     intuition.
@@ -396,7 +397,7 @@ Ltac crush :=
   (** Properties of Full_set and Empty_set **)
 
   Lemma Full_set_property {U : Type} :
-    forall (S : Ensemble U), decidable S -> (Union (√ S) S) == (Full_set).
+    forall (S : Ensemble U), decidable S -> ((√ S) ∪ S) == (Full_set).
   Proof with crush.
     crush.
     specialize H with (x:=x).
@@ -432,12 +433,12 @@ Ltac crush :=
     crush.
   Qed.
 
-  Lemma Full_set_zero_right {U : Type} : forall T : (Ensemble U), Union T (Full_set) == (Full_set).
+  Lemma Full_set_zero_right {U : Type} : forall T : (Ensemble U), T ∪ (Full_set) == (Full_set).
   Proof with crush.
     crush. crush.
   Qed.
 
-  Lemma Full_set_zero_left  {U : Type} : forall T : (Ensemble U), Union (Full_set) T == (Full_set).
+  Lemma Full_set_zero_left  {U : Type} : forall T : (Ensemble U), (Full_set) ∪ T == (Full_set).
   Proof with crush.
     crush. crush.
   Qed.
@@ -478,7 +479,7 @@ Ltac crush :=
     crush.
   Qed.
 
-  Lemma Union_idemp {U : Type} : forall (S : Ensemble U), (Union S S) == S.
+  Lemma Union_idemp {U : Type} : forall (S : Ensemble U), (S ∪ S) == S.
   Proof with crush.
     crush.
   Qed.
@@ -504,7 +505,7 @@ Ltac crush :=
   Qed.
 
   Lemma Full_set_ident_left {U : Type} :
-    forall (S : Ensemble U), Same_set (Intersection (Full_set) S) S.
+    forall (S : Ensemble U), Same_set ((Full_set) ∩ S) S.
   Proof with crush.
     crush.
   Qed.
@@ -516,12 +517,12 @@ Ltac crush :=
   Qed.
 
   Lemma Empty_set_ident_left {U : Type} :
-    forall (S : Ensemble U), Union Empty_set S == S.
+    forall (S : Ensemble U), Empty_set ∪ S == S.
   Proof with crush.
     crush.
   Qed.
 
-  Lemma Empty_set_ident_right {U : Type} : forall (S : Ensemble U), (Union S (Empty_set)) == S.
+  Lemma Empty_set_ident_right {U : Type} : forall (S : Ensemble U), (S ∪ (Empty_set)) == S.
   Proof with crush.
     crush.
   Qed.
@@ -529,14 +530,14 @@ Ltac crush :=
   (** COMPLEMENT PROPERTIES **)
 
   Lemma Union_Complement_compat {U : Type} : forall (S T : Ensemble U),
-    (√S ∩ √T) == (√(Union S T)).
+    (√S ∩ √T) == (√(S ∪ T)).
   Proof with crush.
     crush.
     intros H1; apply H. left...
     intros H1; apply H. right...
   Qed.
 
-  Lemma Intersection_Complement_compat {U : Type} : forall (S T: Ensemble U), decidable S -> √(S ∩ T) == (Union (√S) (√T)).
+  Lemma Intersection_Complement_compat {U : Type} : forall (S T: Ensemble U), decidable S -> √(S ∩ T) == ((√S) ∪ (√T)).
   Proof with crush.
     crush.
     specialize H with (x:=x)...
@@ -551,7 +552,7 @@ Ltac crush :=
   Qed.
 
   Lemma Complement_Included_flip {U : Type} : forall S T : Ensemble U,
-    Included T (√ S) -> Included S (√ T).
+    T ⊆ (√ S) -> S ⊆ (√ T).
   Proof with crush.
     autounfold with *...
     apply (H x)...
@@ -566,13 +567,13 @@ Ltac crush :=
   (** INCLUSION PROPERTIES **)
 
   Lemma Union_Included_left {U : Type} :
-    forall (S T: Ensemble U), S ⊆ T -> Union S T == T.
+    forall (S T: Ensemble U), S ⊆ T -> S ∪ T == T.
   Proof with crush.
     crush.
   Qed.
 
   Lemma Union_Included_right {U : Type} :
-    forall (S T: Ensemble U), S ⊆ T -> Union T S == T.
+    forall (S T: Ensemble U), S ⊆ T -> T ∪ S == T.
   Proof with crush.
     crush.
   Qed.
@@ -584,43 +585,43 @@ Ltac crush :=
   Qed.
 
   Lemma Inhabited_Included {U : Type} :
-    forall (S : Ensemble U), Inhabited S -> forall T, Included S T -> Inhabited T.
+    forall (S : Ensemble U), Inhabited S -> forall T, S ⊆ T -> Inhabited T.
   Proof with crush.
     crush. apply (Inhabited_intro _ _ x)...
   Qed.
 
   Lemma Included_Empty_set {U : Type} :
-    forall (S T : Ensemble U), Included S T -> T  == (Empty_set) -> S  == (Empty_set).
+    forall (S T : Ensemble U), S ⊆ T -> T  == (Empty_set) -> S  == (Empty_set).
   Proof with crush.
     crush.
   Qed.
 
   Lemma Included_Full_set {U : Type} :
-    forall (S T : Ensemble U), Included S T -> S  == (Full_set) -> T == (Full_set).
+    forall (S T : Ensemble U), S ⊆ T -> S  == (Full_set) -> T == (Full_set).
   Proof with crush.
     crush.
   Qed.
 
   Lemma Union_Included_cancel_right {U : Type} : forall S T R: (Ensemble U),
-    Included S R -> Included S (Union R T).
+    S ⊆ R -> S ⊆ (R ∪ T).
   Proof with crush.
     crush. left...
   Qed.
 
   Lemma Union_Included_cancel_left {U : Type} : forall S T R: (Ensemble U),
-    Included S R -> Included S (Union T R).
+    S ⊆ R -> S ⊆ (T ∪ R).
   Proof with crush.
     crush... right...
   Qed.
 
   Lemma Intersection_Included_cancel_right {U : Type} : forall S T R: (Ensemble U),
-    Included S R -> Included (S ∩ T) R.
+    S ⊆ R -> (S ∩ T) ⊆ R.
   Proof with crush.
     crush...
   Qed.
 
   Lemma Intersection_Included_cancel_left {U : Type} : forall S T R: (Ensemble U),
-    Included S R -> Included (T ∩ S) R.
+    S ⊆ R -> (T ∩ S) ⊆ R.
   Proof with crush.
     crush...
   Qed.
@@ -642,13 +643,13 @@ Ltac crush :=
   Qed.
 
   Lemma Disjoint_property_left {U : Type} : forall S T: (Ensemble U),
-    Disjoint S T -> Included S (√ T).
+    Disjoint S T -> S ⊆ (√ T).
   Proof with crush.
     crush... apply (L x)...
   Qed.
 
   Lemma Disjoint_property_right {U : Type} : forall S T: (Ensemble U),
-    Disjoint S T -> Included T (√ S).
+    Disjoint S T -> T ⊆ (√ S).
   Proof with crush.
     crush... apply (L x)...
   Qed.
@@ -683,13 +684,13 @@ Ltac crush :=
   (** OTHER MISCELLANEOUS RESULTS **)
 
   Lemma Setminus_is_Intersection_Complement {U : Type} :
-    forall (S T: Ensemble U), (Setminus S T) == (S ∩ (√ T)).
+    forall (S T: Ensemble U), (S \ T) == (S ∩ (√ T)).
   Proof with crush.
     crush.
   Qed.
 
   Lemma Add_Setminus_cancel {U : Type} :
-    forall (A : Ensemble U) x, decidable (Singleton U x) -> (x ∈ A) -> (A == Add U (Setminus A (Singleton U x)) x).
+    forall (A : Ensemble U) x, decidable (Singleton U x) -> (x ∈ A) -> (A == Add U (A \ (Singleton U x)) x).
   Proof with crush.
     crush.
     specialize H with (x0:=x0)...
@@ -697,8 +698,8 @@ Ltac crush :=
     inversion K...
   Qed.
 
-  Lemma Included_Singleton {U : Type} : forall S, @Inhabited U S ->
-     forall a, Included S (Singleton U a) -> S == (Singleton U a).
+  Lemma Included_Singleton {U : Type} : forall (S : Ensemble U), Inhabited S ->
+     forall a, S ⊆ (Singleton U a) -> S == (Singleton U a).
   Proof with intuition.
     intros.
     unfold Same_set...
@@ -711,7 +712,7 @@ Ltac crush :=
   Qed.
 
   Lemma Singleton_Included {U : Type} :
-    forall T u, Included (Singleton U u) T <-> In T u.
+    forall T u, (Singleton U u) ⊆ T <-> u ∈ T.
   Proof with intuition.
     intuition...
     unfold Included...
@@ -720,8 +721,8 @@ Ltac crush :=
 
   Lemma Add_Setminus_Singleton {U : Type} :
     (forall (a b : U), ((a=b) \/ ~(a=b))) ->
-    forall x X, @In U X x ->
-      (X == Add U (Setminus X (Singleton U x)) x).
+    forall (x : U) X, x ∈ X ->
+      (X == Add U (X \ (Singleton U x)) x).
   Proof with intuition.
     intros.
     unfold Same_set, Included, Add, Setminus...
@@ -734,8 +735,8 @@ Ltac crush :=
   Qed.
 
   Lemma Disjoint_three {U : Type} :
-    forall S T R, @Disjoint U S R /\ Disjoint T R ->
-      Disjoint (Union S T) R.
+    forall (S T R : Ensemble U), Disjoint S R /\ Disjoint T R ->
+      Disjoint (S ∪ T) R.
   Proof with intuition.
     intros...
     constructor...
@@ -747,13 +748,13 @@ Ltac crush :=
       apply (H2 x)...
   Qed.
 
-  Lemma Setminus_cancel {U : Type} : forall S, Setminus S S == @Empty_set U.
+  Lemma Setminus_cancel {U : Type} : forall (S : Ensemble U), S \ S == Empty_set.
   Proof with intuition.
     intros...
     crush.
   Qed.
 
-  Lemma Setminus_Empty_set {U : Type}: forall T, Setminus T (@Empty_set U) == T.
+  Lemma Setminus_Empty_set {U : Type}: forall (T : Ensemble U), T \ Empty_set == T.
   Proof with intuition.
     unfold Setminus, Same_set, Included...
       unfold In at 1 in H...
@@ -763,18 +764,18 @@ Ltac crush :=
 
   Lemma Union_Setminus_cancel {U : Type} :
   ∀ (A B: Ensemble U),
-    decidable A → Included A B → Union (Setminus B A) A == B.
+    decidable A → A ⊆ B → (B \ A) ∪ A == B.
   Proof with intuition.
     intros.
     unfold Same_set, Included...
     apply In_Union in H1...
     unfold Setminus, In at 1 in H2...
-    assert ((In A x) \/ ~(In A x))...
+    assert ((x ∈ A) \/ ~(x ∈ A))...
     apply H.
   Qed.
 
   Lemma Disjoint_Union_Setminus {U : Type} :
-    forall S T R, @Disjoint U S T -> R == Union S T -> S == Setminus R T.
+    forall (S T R : Ensemble U), Disjoint S T -> R == S ∪ T -> S == R \ T.
   Proof with intuition.
     crush.
       apply H2; constructor...
