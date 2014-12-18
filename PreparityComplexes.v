@@ -40,17 +40,19 @@ Arguments Full_set {U} _.
     (forall n : nat, (forall m, m <= n -> P m) -> P (S n)) ->
     forall n : nat, P n.
   Proof with intuition.
-
     intros P.
     set (Q := fun n => (forall m, m <= n -> P m)).
 
     intros.
-    assert (Q 0). unfold Q... inversion H1...
-    assert (forall l, Q l -> Q (S l)). unfold Q...
-    inversion H3...
-    assert (Q n) as D.
+    assert (Q 0) as A. 
+      unfold Q... inversion H1...
+    assert (forall l, Q l -> Q (S l)) as B. 
+      unfold Q...
+      inversion H2...
+    assert (Q n) as C.
       apply (nat_ind Q)...
-    apply (D n). left.
+    apply (C n). 
+    left.
   Qed.
 
   Lemma lt_eq_eq_lt_dec: forall k m, {k < m} + {k = m} + {k = S m} + {S m < k}.

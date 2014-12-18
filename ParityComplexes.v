@@ -25,7 +25,7 @@ Module Type ParityComplex.
 
   Axiom axiom1 :
     forall (x : carrier),
-      Union (Plus (plus x)) (Minus (minus x)) == Union (Plus (minus x)) (Minus (plus x)).
+      (Plus (plus x)) ∪ (Minus (minus x)) == (Plus (minus x)) ∪ (Minus (plus x)).
 
   Axiom axiom2a :
     forall x, well_formed (plus x).
