@@ -9,7 +9,6 @@ Require Import Arith.
   Ltac finitecrush := 
    repeat (repeat (conj || disj || neg || misc); intuition); intuition.
 
-
   Inductive Finite {U : Type} : Ensemble U -> Prop :=
   |  Finite_Empty_set : Finite (Empty_set)
   |  Finite_Add : forall A : Ensemble U, Finite A ->
@@ -37,15 +36,15 @@ Require Import Arith.
        (forall n, (forall m, m <= n -> P m) -> P (S n)) ->
        (forall n, P n) .
   Proof with intuition.
-  intros P.
-  set (Q := fun n => (forall m, m <= n -> P m)).
-  pose (nat_ind Q).
-  intros.
-  assert (Q 0); unfold Q...
-    inversion H1...
-  assert ((∀ n : nat, Q n → Q (S n))); unfold Q...
-    inversion H4...
-  assert (Q n)...
+    intros P.
+    set (Q := fun n => (forall m, m <= n -> P m)).
+    pose (nat_ind Q).
+    intros.
+    assert (Q 0); unfold Q...
+      inversion H1...
+    assert ((∀ n : nat, Q n → Q (S n))); unfold Q...
+      inversion H4...
+    assert (Q n)...
   Qed.
 
   Lemma le_total : forall n m, (n <= m) \/ (m <= n).
@@ -67,8 +66,8 @@ Require Import Arith.
     signature (@Same_set U) ==> (@iff) as decidable_mor.
   Proof with intuition.
     unfold Same_set, Included, decidable...
-    specialize H with (x0 := x0). inversion H; clear H...
-    specialize H with (x  := x0). inversion H; clear H...
+    specialize H with (x0 := x0)...
+    specialize H with (x  := x0)...
   Qed.
 
   Add Parametric Morphism U : (@Cardinal U) with
@@ -98,7 +97,6 @@ Require Import Arith.
   Proof with intuition.
     intros dec_eq.
     unfold decidable...
-
     induction H.
     + right... inversion H.
     + intuition. 
@@ -114,17 +112,15 @@ Require Import Arith.
   Lemma Finite_Intersection {U : Type} : forall (S: Ensemble U), Finite S -> forall T, decidable T -> Finite (T ∩ S).
   Proof with finitecrush.
     intros S SFin.
-    induction SFin; intros.
+    induction SFin...
       - apply (Finite_Same_set Empty_set)...
       - assert ((x ∈ T) \/ (¬x ∈ T))... 
           apply H0.
-        + assert ((T ∩ Add U A x) == (Add U (T ∩ A) x)).
-            crush.
-          rewrite H1...
+        + apply (Finite_Same_set (Add U (T ∩ A) x))... 
           constructor...
-        + assert ((T ∩ Add U A x) == (T ∩ A)).
-            crush.
-          rewrite H1...
+          crush.
+        + apply (Finite_Same_set (T ∩ A))... 
+          crush.
       - rewrite H...
   Qed.
 
@@ -145,6 +141,7 @@ Require Import Arith.
       - rewrite H2...
   Qed.
 
+  Hint Resolve Finite_Union Finite_Intersection.
 
   Lemma Finite_Setminus_Included {U : Type} :
   (* \ref{arxiv.org/pdf/math/9405204} for proof I followed *)
@@ -202,6 +199,8 @@ Require Import Arith.
     crush.
     assert (x ∈ A ∨ (x ∈ A → False))... 
   Qed.
+
+  Hint Resolve Finite_Included Finite_Setminus_Included.
 
   (** CARDINALITY **)
 
@@ -275,6 +274,8 @@ Require Import Arith.
       right; rewrite H0...
   Qed.
 
+  Hint Resolve Finite_Empty_or_Inhabited.
+
   Lemma Finite_Singleton {U : Type} :
     forall x : U, Finite (Singleton x).
   Proof with finitecrush.
@@ -282,6 +283,8 @@ Require Import Arith.
     apply (Finite_Same_set (Add U (Empty_set) x))...
     crush. 
   Qed.
+
+  Hint Resolve Finite_Singleton.
 
   Lemma lt_n_is_Finite : forall n, Finite (fun m => (m < n)).
   Proof with intuition.
@@ -503,18 +506,16 @@ Require Import Arith.
       Finite (Intersection A (Complement B)).
   Proof with intuition.
     intros Udec...
-    induction H.
+    induction H...
     - apply (Finite_Same_set Empty_set)...
     - unfold Add.
       rewrite I_U_dist_r.
       apply Finite_Union...
-      assert (x ∈ B \/ ~(x ∈ B)).
+      assert (x ∈ B \/ ~(x ∈ B))...
         apply Finite_are_decidable...
-      inversion H2; clear H2.
       + apply (Finite_Same_set Empty_set)...
         crush. 
       + apply (Finite_Same_set (Singleton x))...
-        apply Finite_Singleton...
         crush.
     - rewrite H1...
   Qed.
@@ -528,11 +529,6 @@ Require Import Arith.
     intros.
     rewrite Setminus_is_Intersection_Complement.
     apply Setminus_Finite...
-  Qed.
-
-  Lemma Setminus_Included {U : Type}: forall (S T : Ensemble U), (S \ T) ⊆ S.
-  Proof with intuition.
-    crush.
   Qed.
 
   Lemma Cardinal_eq_Included_Same_set {U : Type} :

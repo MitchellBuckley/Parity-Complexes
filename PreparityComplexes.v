@@ -11,8 +11,6 @@ Require Import Arith.
 Require Import Setoid.
 Require Import Recdef.
 
-Hint Constructors Finite Cardinal Singleton Full_set.
-
 (* Implicits *)
 
 Arguments In : default implicits.

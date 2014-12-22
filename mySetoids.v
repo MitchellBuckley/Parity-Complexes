@@ -29,6 +29,7 @@ Arguments Singleton : default implicits.
 Arguments Empty_set {U} _.
 Arguments Full_set {U} _.
 
+Hint Constructors Singleton Full_set Empty_set Inhabited.
 Hint Unfold Complement.
 
 (** Notation **)
@@ -41,7 +42,7 @@ Notation "A ⊆ B ⊆ C"   := ((A ⊆ B) /\ (B ⊆ C)) (at level 71, B at next l
 Notation "A ∪ B"       := (Union A B) (at level 61).
 Notation "A ∩ B"       := (Intersection A B) (at level 61).
 Notation "A '\' B"     := (Setminus A B) (at level 61).
-Notation "√ A"         := (Complement A) (at level 59).
+Notation "√ A"        := (Complement A) (at level 59).
 
 (** Definition of decidability **)
 
@@ -121,7 +122,7 @@ Ltac crush :=
     crush.
   Qed.
 
-  Hint Resolve In_Union In_Intersection In_Complement.
+  Hint Resolve In_Union In_Intersection In_Complement. 
 
   (** Setoid relations and morphisms **)
 
@@ -431,7 +432,6 @@ Ltac crush :=
   Lemma Full_set_def {U : Type} : forall (P : Ensemble U),  (forall x, ((x ∈ P))) <-> (P == Full_set).
   Proof with crush.
     crush.
-    apply H1...
   Qed.
 
   Lemma Empty_set_zero_right {U : Type} : forall T : (Ensemble U), T ∩ (Empty_set) == (Empty_set).
@@ -737,6 +737,11 @@ Ltac crush :=
     crush.
       apply (H1 x)...
       apply H in H3... 
+  Qed.
+
+  Lemma Setminus_Included {U : Type}: forall (S T : Ensemble U), (S \ T) ⊆ S.
+  Proof with intuition.
+    crush.
   Qed.
 
   Hint Resolve Same_set_sym Same_set_refl Same_set_trans.
