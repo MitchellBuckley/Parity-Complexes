@@ -10,6 +10,7 @@ Require Import Max Le.
 Require Import Arith.
 Require Import Setoid.
 Require Import Recdef.
+Require Import extra_nat_results.
 
 (* Implicits *)
 
@@ -29,111 +30,28 @@ Arguments Empty_set {U} _.
 Arguments Full_set {U} _.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(* Independent Lemmas                                   *)
-(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-
-  Lemma strong_induction :
-    forall P : nat -> Prop,
-    P O ->
-    (forall n : nat, (forall m, m <= n -> P m) -> P (S n)) ->
-    forall n : nat, P n.
-  Proof with intuition.
-    intros P.
-    set (Q := fun n => (forall m, m <= n -> P m)).
-
-    intros.
-    assert (Q 0) as A. 
-      unfold Q... inversion H1...
-    assert (forall l, Q l -> Q (S l)) as B. 
-      unfold Q...
-      inversion H2...
-    assert (Q n) as C.
-      apply (nat_ind Q)...
-    apply (C n). 
-    left.
-  Qed.
-
-  Lemma lt_eq_eq_lt_dec: forall k m, {k < m} + {k = m} + {k = S m} + {S m < k}.
-  Proof with intuition.
-   intros.
-   pose (lt_eq_lt_dec k m)...
-   unfold lt in b.
-   apply le_lt_eq_dec in b...
-  Qed.
-
-  Lemma lt_Sn_n : forall n, ~(S n < n).
-  Proof with intuition.
-    intros n.
-    induction n...
-    apply (lt_n_0) in H...
-  Qed.
-
-  Lemma lt_SSn : ∀ n : nat, ¬S (S n) < n.
-  Proof with intuition.
-    intros n.
-    induction n...
-      inversion H...
-  Qed.
-
-  Lemma le_SSn : ∀ n : nat, ¬S (S n) <= n.
-  Proof with intuition.
-    intros n.
-    induction n...
-      inversion H...
-  Qed.
-
-  Lemma lt_SSSn : ∀ n : nat, ¬S (S (S n)) < n.
-  Proof with intuition.
-    intros n.
-    induction n...
-      inversion H...
-  Qed.
-
-  Lemma le_SSSn : ∀ n : nat, ¬S (S (S n)) <= n.
-  Proof with intuition.
-     intros n.
-    induction n...
-      inversion H...
-  Qed.
-
-  Lemma SSn_n : forall n, ¬S (S n) = n.
-  Proof with intuition.
-    intros...
-    induction n...
-    inversion H...
-  Qed.
-
-  Lemma le_SSn_n : forall n, ¬S (S n) <= n.
-  Proof with intuition.
-    intros...
-    induction n...
-    inversion H...
-  Qed.
-
-  Hint Resolve SSn_n le_SSn_n.
-
-  Lemma Sn_minus_1 : forall n, (S n - 1 = n).
-  Proof.
-    intros.
-    simpl.
-    symmetry.
-    apply minus_n_O.
-  Qed.
-
-(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Pre-Parity Complex Definitions                       *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
   Module Type PreParity.
 
+  (* The carrier type, a dimension operator, and face-set operators *)
+
   Parameter carrier : Type.
   Parameter dim : carrier -> nat.
   Parameter plus minus : carrier -> Ensemble carrier.
 
+  (* the carrier type has decidable equality *)
+  
   Axiom carrier_decidable_eq : decidable_eq carrier.
+
+  (* face-sets are one dimension below their argument *)
 
   Axiom plus_dim :            forall (x y : carrier), In (plus y) x -> S (dim x) = dim y.
   Axiom minus_dim :           forall (x y : carrier), In (minus y) x -> S (dim x) = dim y.
+  
+  (* face-sets are disjoint, finite and non-empty *)
+
   Axiom plus_Finite :         forall (x : carrier),   Finite (plus x).
   Axiom minus_Finite :        forall (x : carrier),   Finite (minus x).
   Axiom plus_Inhabited :      forall (x : carrier),   dim x > 0 -> (Inhabited (plus x)).
@@ -154,6 +72,8 @@ Arguments Full_set {U} _.
 
   Import M.
 
+  (* find subsets of a given set by specifying dimension *)
+
   Definition sub (R : Ensemble carrier) (n : nat) : Ensemble carrier :=
     fun (x : carrier) => (x ∈ R /\ S (dim x)  = n).
   Definition sup (R : Ensemble carrier) (n : nat) : Ensemble carrier :=
@@ -168,23 +88,32 @@ Arguments Full_set {U} _.
     fun (y : carrier) => (exists (x : carrier), (x ∈ X) /\ (In (minus x) y)).
 
   Definition PlusMinus (X : Ensemble carrier) : Ensemble carrier :=
-    Intersection (Plus X) (Complement (Minus X)).
+    Intersection (Plus X) (√ (Minus X)).
   Definition MinusPlus (X : Ensemble carrier) : Ensemble carrier :=
-    Intersection (Minus X) (Complement (Plus X)).
+    Intersection (Minus X) (√ (Plus X)).
 
   Definition Perp (X Y : Ensemble carrier) : Prop :=
     ((Plus X) ∩ (Plus Y) == Empty_set) /\ ((Minus X) ∩ (Minus Y) == Empty_set).
   Definition perp (x y : carrier) : Prop :=
     ((plus x) ∩ (plus y) == Empty_set) /\ ((minus x) ∩ (minus y) == Empty_set).
 
+  (* less-than ordering on elements of the carrier type *)
+
   Definition less (x y : carrier) : Prop :=
     (Inhabited ((plus x) ∩ (minus y))).
 
+  (* triangle ordering is the reflexive transitive closure of the less-than ordering *)
+
   Definition triangle : relation carrier :=
     clos_refl_trans_1n _ (less).
+
+  (* the triangle ordering can be restricted to individual sets *)
+
   Inductive triangle_rest (R : Ensemble carrier) : relation carrier :=
     | tr_refl  : forall x, x ∈ R -> triangle_rest R x x
     | tr_trans : forall x y z, x ∈ R -> less x y -> triangle_rest R y z -> triangle_rest R x z.
+
+  (* Definitions of segment, initial and final segments under the triangle_rest ordering *)
 
   Definition is_a_segment (R T : Ensemble carrier) : Prop :=
     R ⊆ T /\
@@ -207,12 +136,16 @@ Arguments Full_set {U} _.
   Hint Unfold PlusMinus MinusPlus Perp perp less triangle
     Plus Minus sup sub: sets v62.
 
+  (* Definition of movement, with notation *)
+
   Definition moves_def (S M P : Ensemble carrier) : Prop :=
-    P == (Intersection (M ∪ ( Plus S)) (Complement (Minus S)))
+    P == (Intersection (M ∪ ( Plus S)) (√ (Minus S)))
     /\
-    M == (Intersection (P ∪ (Minus S)) (Complement ( Plus S))).
+    M == (Intersection (P ∪ (Minus S)) (√ ( Plus S))).
 
   Notation "S 'moves' M 'to' P" := (moves_def S M P) (at level 89).
+
+  (* Definition of well-formed sets *)
 
   Definition well_formed (X : Ensemble carrier) : Prop :=
     (forall (x y : carrier), x ∈ X /\ y ∈ X
@@ -220,6 +153,8 @@ Arguments Full_set {U} _.
     /\
     (forall (x y : carrier), x ∈ X /\ y ∈ X
       -> (forall (n : nat), dim x = S n -> dim y = S n -> not (perp x y) -> x = y)).
+
+  (* Definition of tightness *)
 
   Definition tight (R : Ensemble carrier) : Prop :=
     forall u v,
@@ -230,6 +165,8 @@ Arguments Full_set {U} _.
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* decidability and Finite                           *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+  (* Since we insist that the carrier type is has decidable equality, all finite sets are decidable *)
 
   Lemma all_decidable : forall (R : Ensemble carrier), Finite R -> decidable R.
   Proof.
@@ -365,6 +302,8 @@ Arguments Full_set {U} _.
 (* triangle_rest                                        *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* there are two other ways to define triangle_rest, that are equivalent to the first *)
+
   Inductive triangle_rest' (R : Ensemble carrier) : relation carrier :=
     | tr_refl'  : forall x, x ∈ R -> triangle_rest' R x x
     | tr_trans' : forall x y z, z ∈ R -> less y z -> triangle_rest' R x y -> triangle_rest' R x z.
@@ -373,12 +312,6 @@ Arguments Full_set {U} _.
     | tr_clos'' : forall x y, x ∈ R -> y ∈ R -> less x y -> triangle_rest'' R x y
     | tr_refl''  : forall x, x ∈ R -> triangle_rest'' R x x
     | tr_trans'' : forall x y z, triangle_rest'' R x y -> triangle_rest'' R y z -> triangle_rest'' R x z.
-
-  Lemma triangle_rest_in_set : forall R, forall x y, triangle_rest R x y -> x ∈ R /\ y ∈ R.
-  Proof with intuition.
-    intros...
-    induction H... induction H...
-  Qed.
 
   Lemma triangle_rest_equiv' : forall S, forall x y, triangle_rest S x y <-> triangle_rest'' S x y.
   Proof with intuition.
@@ -425,7 +358,17 @@ Arguments Full_set {U} _.
     assumption.
   Qed.
 
+  (* the restricted triangle ordering implies set membership *)
+
+  Lemma triangle_rest_in_set : forall R, forall x y, triangle_rest R x y -> x ∈ R /\ y ∈ R.
+  Proof with intuition.
+    intros...
+    induction H... induction H...
+  Qed.
+
   Hint Resolve triangle_rest_in_set.
+
+  (* restricted triangle ordering is transitive *)
 
   Lemma triangle_rest_trans : forall X, forall y z, triangle_rest X y z -> forall x, triangle_rest X z x -> triangle_rest X y x.
   Proof with intuition.
@@ -434,6 +377,8 @@ Arguments Full_set {U} _.
     induction H...
       right with y...
   Qed.
+
+  (* an alternative induction principle for the restricted triangle ordering *)
 
   Lemma triangle_rest_ind' :
     forall (S : Ensemble carrier) (P : carrier → carrier → Prop),
@@ -449,6 +394,8 @@ Arguments Full_set {U} _.
       inversion H3...
   Qed.
 
+  (* the restricted triangle ordering implies the unrestricted triangle ordering *)
+
   Lemma rest_implies_full : forall S x y, triangle_rest S x y -> triangle x y.
   Proof with intuition.
     intros.
@@ -456,6 +403,8 @@ Arguments Full_set {U} _.
       left.
       apply (Relation_Operators.rt1n_trans _ _ _ y)...
   Qed.
+
+  (* the triangle ordering only applies to elements of equal dimension *)
 
   Lemma equal_dim : forall x y, triangle x y -> (dim x = dim y).
   Proof with repeat basic; auto.
@@ -467,6 +416,8 @@ Arguments Full_set {U} _.
       apply plus_dim in H. apply minus_dim in H3. rewrite <- H1. rewrite <- H3.
       rewrite <- H...
   Qed.
+
+  (* the less-than ordering is logically decidable *)
 
   Lemma less_decidable : forall x y, ((less x y) \/ ~(less x y)).
   Proof with intuition.
@@ -483,6 +434,8 @@ Arguments Full_set {U} _.
       inversion H1.
   Qed.
 
+  (* the restricted triangle ordering is stable under set inclusion *)
+
   Lemma triangle_rest_Included : forall S x y, triangle_rest S x y ->
     forall T, S ⊆ T -> triangle_rest T x y.
   Proof with intuition.
@@ -493,6 +446,8 @@ Arguments Full_set {U} _.
   Qed.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+  (* A more practical way of saying that face-sets are disjoint *)
 
   Lemma plus_minus_Disjoint_Lemma : forall x y, In (plus y) x -> In (minus y) x -> False.
   Proof with intuition.
@@ -553,12 +508,16 @@ Arguments Full_set {U} _.
 (* less lemmas                                          *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+(* The less relation is irreflexive *)
+
 Lemma less_irrefl : forall x, less x x -> False.
 Proof with intuition.
   intros.
   inversion H.
   apply In_Intersection in H0...
 Qed.
+
+(* The less-than relation only holds on elements of equal dimension *)
 
 Lemma less_dim : forall x y, less x y -> dim x = dim y.
 Proof with intuition.
@@ -576,6 +535,16 @@ Hint Resolve less_irrefl less_dim.
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Setoid rewrite stuff                                 *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+  (* 
+    The following set operations are closed under the Same_set relation:
+    - Plus, Minus, PlusMinus, MinusPlus
+    - sub, sup, 
+    - setdim
+    - moves_def
+    - triangle_rest
+    - well_formed
+  *)
 
   Add Parametric Morphism : (@Plus) with
     signature (@Same_set carrier) ==> (@Same_set carrier) as Plus_Same_set.
@@ -656,6 +625,10 @@ Hint Resolve less_irrefl less_dim.
 (* sub and sup                                          *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+(* 
+  Basic properties of sub and sup:
+  - 
+*)
 
   Lemma sub_zero : forall R, sub R 0 == Empty_set.
   Proof with crush.
@@ -752,6 +725,8 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve sub_Included sup_Included sub_sup_Included.
 
+  (* sub and sup are stable under union *)
+
   Lemma sub_Union : forall T R n, sub (T ∪ R) n == (sub T n) ∪ (sub R n).
   Proof with repeat (basic || subsuptac); auto.
     intros.
@@ -769,6 +744,8 @@ Hint Resolve less_irrefl less_dim.
     inversion H; [left | right]...
     inversion H; inversion H0...
   Qed.
+
+  (* sub and sup are stable under inclusion *)
 
   Lemma sub_Included_compat : forall R T, R ⊆ T -> forall m, (sub R m) ⊆ (sub T m).
   Proof.
@@ -791,6 +768,8 @@ Hint Resolve less_irrefl less_dim.
     intros.
     unfold Same_set; unfold Included...
   Qed.
+
+  (* sub and sup are idempotent *)
 
   Lemma sub_idemp : forall n R, sub (sub R n) n == sub R n.
   Proof with intuition.
@@ -857,13 +836,13 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 
   Lemma sub_Setminus :
-    forall A B k, sub (A \ B) k == Setminus (sub A k) (sub B k).
+    forall A B k, sub (A \ B) k == (sub A k) \ (sub B k).
   Proof with intuition.
     crush.
   Qed.
 
   Lemma sup_Setminus :
-    forall A B k, sup (A \ B) k == Setminus (sup A k) (sup B k).
+    forall A B k, sup (A \ B) k == (sup A k) \ (sup B k).
   Proof with intuition.
     crush...
   Qed.
@@ -1027,6 +1006,8 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H in H1. subsuptac...
   Qed.
 
+  (* Finite sets are closed under sub and sup *)
+
   Lemma Finite_sub : forall T, Finite T -> forall n, Finite (sub T n).
   Proof with intuition.
     intros.
@@ -1058,6 +1039,8 @@ Hint Resolve less_irrefl less_dim.
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Plus and Minus results *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+  (* Plus and Minus preserve Union *)
 
   Lemma Plus_Union : forall S T,
      Plus (S ∪ T) == (Plus S) ∪ (Plus T).
@@ -1122,6 +1105,8 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H2...
     unfold In in *...
   Qed.
+
+  (* Finite sets are closed under plus and minus *)
 
   Lemma Plus_Finite :
     forall A, Finite A ->

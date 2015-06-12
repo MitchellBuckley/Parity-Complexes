@@ -30,28 +30,6 @@ Require Import Arith.
 
   Hint Constructors Finite Cardinal.
 
-  Lemma strong_induction :
-    forall P : nat -> Prop,
-       P 0 ->
-       (forall n, (forall m, m <= n -> P m) -> P (S n)) ->
-       (forall n, P n) .
-  Proof with intuition.
-    intros P.
-    set (Q := fun n => (forall m, m <= n -> P m)).
-    pose (nat_ind Q).
-    intros.
-    assert (Q 0); unfold Q...
-      inversion H1...
-    assert ((∀ n : nat, Q n → Q (S n))); unfold Q...
-      inversion H4...
-    assert (Q n)...
-  Qed.
-
-  Lemma le_total : forall n m, (n <= m) \/ (m <= n).
-  Proof with intuition.
-    apply NPeano.Nat.le_ge_cases.
-  Qed.
-
   (** SETOID MORPHISMS **)
 
   Add Parametric Morphism U : (@Finite U) with
@@ -89,7 +67,7 @@ Require Import Arith.
   (** COMPATIBILITY WITH UNION ETC. **)
 
   Definition decidable_eq (U : Type) : Prop :=
-   forall (a b : U), (a = b \/ ~(a = b)).
+    forall (a b : U), (a = b \/ ~(a = b)).
 
   Lemma Finite_are_decidable {U : Type}:
     decidable_eq U ->
@@ -108,6 +86,8 @@ Require Import Arith.
   Qed.
 
   Hint Resolve Finite_are_decidable.
+
+  (* Finite sets are closed under Intersection and Complement *)
 
   Lemma Finite_Intersection {U : Type} : forall (S: Ensemble U), Finite S -> forall T, decidable T -> Finite (T ∩ S).
   Proof with finitecrush.
@@ -204,6 +184,8 @@ Require Import Arith.
 
   (** CARDINALITY **)
 
+  (* Sets are finite precisely when they have a cardinality *)
+
   Lemma Cardinality_exists {U : Type} :
     forall (T : Ensemble U), Finite T -> exists n, Cardinal T n.
   Proof with finitecrush.
@@ -222,6 +204,8 @@ Require Import Arith.
       rewrite <- H...
   Qed.
 
+  (* A set is empty precisely when it has cardinality zero *)
+
   Lemma Cardinality_zero_Empty_set {U : Type} :
     forall (T : Ensemble U), Cardinal T 0 -> T == (Empty_set).
   Proof with finitecrush.
@@ -238,6 +222,8 @@ Require Import Arith.
     intros.
     rewrite H...
   Qed.
+
+  (* A set is a singleton precisely when it has cardinality one *)
 
   Lemma Cardinality_one_Singleton {U : Type} :
     forall (T : Ensemble U), Cardinal T 1 -> exists x, T == (Singleton x).
@@ -265,6 +251,8 @@ Require Import Arith.
     unfold Same_set, Included...
   Qed.
 
+  (* Finite sets are either empty or Inhabited *)
+
   Lemma Finite_Empty_or_Inhabited {U : Type} :
     forall A : (Ensemble U), Finite A -> ((A == Empty_set) \/ (Inhabited A)).
   Proof with intuition.
@@ -276,6 +264,8 @@ Require Import Arith.
 
   Hint Resolve Finite_Empty_or_Inhabited.
 
+  (* Singletons are finite *)
+
   Lemma Finite_Singleton {U : Type} :
     forall x : U, Finite (Singleton x).
   Proof with finitecrush.
@@ -285,6 +275,8 @@ Require Import Arith.
   Qed.
 
   Hint Resolve Finite_Singleton.
+
+  (* some basic sets of natural numbers are finite *)
 
   Lemma lt_n_is_Finite : forall n, Finite (fun m => (m < n)).
   Proof with intuition.
@@ -317,6 +309,8 @@ Require Import Arith.
         * unfold In in H... inversion H...
         * crush. 
   Qed.
+
+  (* Finite non-empty sets of natural numbers have maximum and minimum elements *)
 
   Lemma Finite_nat_have_maximum_le_element :
     forall (T : Ensemble nat), Finite T -> Inhabited T ->
@@ -368,6 +362,8 @@ Require Import Arith.
         exists x... rewrite H1...  apply H3.  rewrite <- H1...
   Qed.
 
+  (* decidable sets of natural numbers have minimum elements *)
+
   Lemma decidable_nat_have_minimum_le_element :
     forall (T : Ensemble nat), decidable T -> Inhabited T ->
       exists u, ((u ∈ T) /\ (forall v, (v ∈ T) -> u <= v)).
@@ -401,6 +397,8 @@ Require Import Arith.
   apply (le_trans _ w)... apply H0... unfold Z, In at 1...
   Qed.
 
+  (* Finite sets are inhabited precisely when they have non-zero cardinality *)
+
   Lemma Cardinal_Sn {U : Type} : forall (T : Ensemble U) n, Cardinal T (S n) -> Inhabited T.
   Proof with intuition.
     intros.
@@ -424,10 +422,12 @@ Require Import Arith.
       exists n...
   Qed.
 
+  (* Setminus reduces cardinality by one *)
+
   Lemma Cardinal_Setminus {U : Type} :
     decidable_eq U ->
       forall n (T : Ensemble U), Cardinal T n ->
-         forall u, u ∈ T -> Cardinal (Setminus T (Singleton u)) (pred n).
+         forall u, u ∈ T -> Cardinal (T \ (Singleton u)) (pred n).
   Proof with intuition.
     intuition.
     induction H0...
@@ -449,6 +449,8 @@ Require Import Arith.
     - rewrite H2 in *...
   Qed.
 
+  (* Inclusion of finite sets implies ordering of cardinality *)
+  
   Lemma Cardinal_le {U : Type} :
     decidable_eq U ->
     forall (T : Ensemble U) n, Cardinal T n ->
@@ -478,6 +480,9 @@ Require Import Arith.
       crush. 
   Qed.
 
+  (* For all propositions P and finite sets W, 
+     W either contains an element satisfying P, or it does not *)
+
   Lemma Finite_decidable_existence {U : Type}:
     forall W, Finite W ->
       forall P : U -> Prop, (forall c, P c \/ ~(P c)) ->
@@ -499,11 +504,13 @@ Require Import Arith.
         + right... apply H2. inversion H1 as [ a A]; exists a... rewrite <- H...
   Qed.
 
+  (* Finite sets are closed under setminus *)
+
   Lemma Setminus_Finite {U : Type} :
     decidable_eq U ->
     forall (A : Ensemble U), Finite A ->
     forall (B : Ensemble U), Finite B ->
-      Finite (Intersection A (Complement B)).
+      Finite (A ∩ (√ B)).
   Proof with intuition.
     intros Udec...
     induction H...
@@ -522,8 +529,8 @@ Require Import Arith.
 
   Lemma Setminus_Finite' {U : Type} :
     decidable_eq U ->
-    forall A, @Finite U A ->
-    forall B, @Finite U B ->
+    forall (A : Ensemble U), Finite A ->
+    forall (B : Ensemble U), Finite B ->
       Finite (A \ B).
   Proof with intuition.
     intros.
@@ -531,11 +538,13 @@ Require Import Arith.
     apply Setminus_Finite...
   Qed.
 
+  (* Among finite sets of equal cardinality, inclusion implies same_set *)
+
   Lemma Cardinal_eq_Included_Same_set {U : Type} :
     decidable_eq U ->
-    forall n Z, Cardinal Z n ->
+    forall n (Z : Ensemble U), Cardinal Z n ->
         forall X, Cardinal X n ->
-            @Included U Z X -> X == Z.
+            Z ⊆ X -> X == Z.
   Proof with intuition.
     intros Udec n Z Zcard.
     induction Zcard...

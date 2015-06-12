@@ -11,6 +11,7 @@ Require Import Arith.
 Require Import Setoid.
 Require Import Recdef.
 Require Import PreparityComplexes.
+Require Import extra_nat_results.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Parity Complex Definitions                           *)
@@ -850,45 +851,40 @@ Module ParityComplexTheory (M : ParityComplex).
 (* Cells                                                *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-    Definition Same_pair (A B: Ensemble carrier * Ensemble carrier) : Prop.
-  inversion A as [M  P ].
-  inversion B as [M' P'].
-  exact (M == M' /\ P == P').
-  Defined.
+  Definition Same_pair (A B: Ensemble carrier * Ensemble carrier) : Prop :=
+    let (M, P) := A in let (M', P') := B in 
+    (M == M') /\ (P == P') .
 
   Hint Unfold Same_pair.
 
   Notation " F === G" := (Same_pair F G) (at level 89).
 
-  Definition is_a_cell (G : Ensemble carrier * Ensemble carrier) : Prop.
-  inversion G as [M P].
-  exact ( Inhabited M  /\ Inhabited P /\
+  Definition is_a_cell (G : Ensemble carrier * Ensemble carrier) : Prop :=
+    let (M, P) := G in 
+  ( Inhabited M  /\ Inhabited P /\
     well_formed M /\ well_formed P /\
     Finite M /\ Finite P /\
     (M moves M to P) /\ (P moves M to P)).
-  Defined.
 
-  Definition celldim (G : Ensemble carrier * Ensemble carrier) (n : nat) : Prop.
-    inversion G as [M P].
-    exact (setdim (M ∪ P) n).
-  Defined.
+  Definition celldim (G : Ensemble carrier * Ensemble carrier) (n : nat) : Prop :=
+    let (M, P) := G in 
+    (setdim (M ∪ P) n).
 
-  Definition source (n : nat) (G : Ensemble carrier * Ensemble carrier) : Ensemble carrier * Ensemble carrier.
-    inversion G as [M P]. exact ( sup M (S n) , sub M (S n) ∪ sup P n).
-  Defined.
+  Definition source (n : nat) (G : Ensemble carrier * Ensemble carrier) : Ensemble carrier * Ensemble carrier :=
+    let (M, P) := G in 
+    ( sup M (S n) , sub M (S n) ∪ sup P n).
 
-  Definition target (n : nat) (G : Ensemble carrier * Ensemble carrier) : Ensemble carrier * Ensemble carrier.
-    inversion G as [M P]. exact ( sub P (S n) ∪ sup M n , sup P (S n) ).
-  Defined.
+  Definition target (n : nat) (G : Ensemble carrier * Ensemble carrier) : Ensemble carrier * Ensemble carrier :=
+    let (M, P) := G in 
+    ( sub P (S n) ∪ sup M n , sup P (S n) ).
 
   Definition composable (n : nat) (A B : Ensemble carrier * Ensemble carrier) : Prop :=
     target n A === source n B.
 
-  Definition composite (n : nat) (A B : Ensemble carrier * Ensemble carrier) : Ensemble carrier * Ensemble carrier.
-   inversion A as [M P].
-   inversion B as [N Q].
-   exact ((M ∪ (N ∩ √(sub N (S n)))), ((P ∩ √(sub P (S n))) ∪ Q)).
-  Defined.
+  Definition composite (n : nat) (A B : Ensemble carrier * Ensemble carrier) : Ensemble carrier * Ensemble carrier :=
+    let (M, P) := A in 
+    let (N, Q) := B in 
+    ((M ∪ (N ∩ √(sub N (S n)))), ((P ∩ √(sub P (S n))) ∪ Q)).
 
   Definition receptive_x (S : Ensemble carrier) (x : carrier) : Prop :=
     ((Plus (minus x)) ∩ (Plus (plus x)) ⊆ S ->
@@ -920,15 +916,12 @@ Module ParityComplexTheory (M : ParityComplex).
       rewrite    H...
   Qed.
 
-  Definition cell_receptive (G : Ensemble carrier * Ensemble carrier) : Prop.
-    inversion G as [M P].
-    exact (receptive M /\ receptive P).
-  Qed.
-
+  Definition cell_receptive (G : Ensemble carrier * Ensemble carrier) : Prop :=
+    let (M, P) := G in 
+   (receptive M /\ receptive P).
   Hint Unfold is_a_cell.
 
   Definition is_a_cell' (S T : Ensemble carrier) := is_a_cell (S, T).
-
   Hint Unfold is_a_cell'.
 
   Add Parametric Morphism : (is_a_cell') with

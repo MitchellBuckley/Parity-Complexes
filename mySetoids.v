@@ -104,6 +104,8 @@ Ltac crush :=
 
   (** EXTRA MEMBERSHIP PROPERTIES **)
 
+  (* Fundamental relationship between union/or, intersection/and, complement/not *)
+
   Lemma In_Union {U : Type} :
     forall (x : U) (S T: Ensemble U),  x ∈ (S ∪ T) <-> (x ∈ S) \/ (x ∈ T).
   Proof with crush.
@@ -128,6 +130,8 @@ Ltac crush :=
 
   (** Same_set: **)
 
+  (* Same_set is symmetric, reflexive and transitive *)
+
   Lemma Same_set_sym {U : Type} :
     forall (S T : Ensemble U), S == T -> T == S.
   Proof with crush.
@@ -151,6 +155,8 @@ Ltac crush :=
     symmetry proved by (Same_set_sym (U:=U))
     transitivity proved by (Same_set_trans (U:=U))
   as set_eq.
+
+  (* Same_set is stable under Intersection, Union, Complement *)
 
   Lemma Intersection_Same_set_compat {U : Type} :
     forall (S S': Ensemble U), S == S'
@@ -198,6 +204,8 @@ Ltac crush :=
     apply Complement_Same_set_compat.
   Qed.
 
+  (* Inclusion, Inhabited, Disjunction, Add, In, and Setminus are all compatible with Same_set  *)
+
   Add Parametric Morphism U : (@Included U) with
     signature (@Same_set U) ==> (@Same_set U) ==> (@iff) as Included_Same_set_mor.
   Proof with crush.
@@ -235,6 +243,8 @@ Ltac crush :=
   Qed.
 
   (** Inclusion: *)
+
+  (* Inclusion is transitive and reflexive *)
 
   Lemma Included_trans {U : Type} :
     forall (S T R : Ensemble U), S ⊆ T -> T ⊆ R -> S ⊆ R.
@@ -382,11 +392,15 @@ Ltac crush :=
 
   (** Distribition laws **)
 
+  (* Intersection distributes over Union on the left *)
+
   Lemma I_U_dist_l {U : Type} :
     forall (S T R: Ensemble U), (S ∩ (T ∪ R)) == ((S ∩ T) ∪ (S ∩ R)).
   Proof with crush.
     crush.
   Qed.
+
+  (* Intersection distributes over Union on the right *)
 
   Lemma I_U_dist_r {U : Type} :
     forall (S T R: Ensemble U), ((T ∪ R) ∩ S) == ((T ∩ S) ∪ (R ∩ S)) .
@@ -394,11 +408,15 @@ Ltac crush :=
     crush.
   Qed.
 
+  (* Union distributes over Intersection on the right *)
+
   Lemma U_I_dist_r {U : Type} :
     forall (S T R: Ensemble U), ((T ∩ R) ∪ S) == ((T ∪ S) ∩ (R ∪ S)).
   Proof with crush.
     crush.
   Qed.
+
+  (* Union distributes over Intersection on the left *)
 
   Lemma U_I_dist_l {U : Type} :
     forall (S T R: Ensemble U), (S ∪ (T ∩ R)) == ((S ∪ T) ∩ (S ∪ R)).
@@ -407,6 +425,8 @@ Ltac crush :=
   Qed.
 
   (** Properties of Full_set and Empty_set **)
+
+  (*  *)
 
   Lemma Full_set_property {U : Type} :
     forall (S : Ensemble U), decidable S -> ((√ S) ∪ S) == (Full_set).
@@ -422,6 +442,8 @@ Ltac crush :=
     crush.
   Qed.
 
+  (* Definitive property of the empty set *)
+
   Lemma Empty_set_def {U : Type} : forall (P : Ensemble U),  (forall x, (~(x ∈ P))) <-> (P == Empty_set).
   Proof with crush.
     crush. 
@@ -429,10 +451,14 @@ Ltac crush :=
     apply H1 in H0...
   Qed.
 
+  (* Definitive property of the full set *)
+
   Lemma Full_set_def {U : Type} : forall (P : Ensemble U),  (forall x, ((x ∈ P))) <-> (P == Full_set).
   Proof with crush.
     crush.
   Qed.
+
+  (* The empty set is zero under Intersection *)
 
   Lemma Empty_set_zero_right {U : Type} : forall T : (Ensemble U), T ∩ (Empty_set) == (Empty_set).
   Proof with crush.
@@ -444,6 +470,8 @@ Ltac crush :=
     crush.
   Qed.
 
+  (* The full set is zero under Union *)
+ 
   Lemma Full_set_zero_right {U : Type} : forall T : (Ensemble U), T ∪ (Full_set) == (Full_set).
   Proof with crush.
     crush.
@@ -454,6 +482,8 @@ Ltac crush :=
     crush.
   Qed.
 
+  (* The empty set and the full set are dual under complement *)
+ 
   Lemma Complement_Empty_set {U : Type} : √ (Empty_set) == @Full_set U.
   Proof with crush.
     crush.
@@ -465,6 +495,8 @@ Ltac crush :=
     exfalso; apply H... 
   Qed.
 
+  (* Adding one to the empty set creates a singleton *)
+
   Lemma Add_Empty_is_Singleton {U : Type} :
     forall (x : U), Add U (Empty_set) x == Singleton x.
   Proof with crush.
@@ -472,6 +504,8 @@ Ltac crush :=
   Qed.
 
   (** MONOID PROPERTIES OF UNION AND INTERSECTION **)
+
+  (* Union is associative, commutative and idempotent *)
 
   Lemma Union_trans {U : Type} : forall (S T R : Ensemble U),
     (S ∪ T) ∪ R == S ∪ (T ∪ R).
@@ -490,6 +524,8 @@ Ltac crush :=
     crush.
   Qed.
 
+  (* Intersection is associative, commutative and idempotent *)
+
   Lemma Intersection_trans {U : Type} : forall (S T R : Ensemble U),
     (S ∩ T) ∩ R == S ∩ (T ∩ R).
   Proof with crush.
@@ -506,6 +542,8 @@ Ltac crush :=
     crush.
   Qed.
 
+  (* The full set is identity for Intersection *)
+
   Lemma Full_set_ident_left {U : Type} :
     forall (S : Ensemble U), Same_set ((Full_set) ∩ S) S.
   Proof with crush.
@@ -517,6 +555,8 @@ Ltac crush :=
   Proof with crush.
     crush.
   Qed.
+
+  (* The full set is identity for Union *)
 
   Lemma Empty_set_ident_left {U : Type} :
     forall (S : Ensemble U), Empty_set ∪ S == S.
@@ -531,6 +571,8 @@ Ltac crush :=
 
   (** COMPLEMENT PROPERTIES **)
 
+  (* Complement preserves Intersection/Union *)
+  
   Lemma Union_Complement_compat {U : Type} : forall (S T : Ensemble U),
     (√S ∩ √T) == (√(S ∪ T)).
   Proof with crush.
@@ -545,6 +587,8 @@ Ltac crush :=
     right...
   Qed.
 
+  (* Complement is involutive *)
+  
   Lemma Complement_Complement_compat {U : Type} : forall (S: Ensemble U), decidable S -> (√(√S)) == S.
   Proof with crush.
     crush.
@@ -560,7 +604,7 @@ Ltac crush :=
   Qed.
 
   Lemma Complement_closure {U : Type}:
-    forall S : Ensemble U, Included S (√ (√ S)).
+    forall S : Ensemble U, S ⊆ (√ (√ S)).
   Proof with intuition.
     crush. 
   Qed.
@@ -630,6 +674,8 @@ Ltac crush :=
 
   (** PROPERTIES OF DISJOINT **)
 
+  (* Definitive property of disjoint sets *)
+
   Lemma Disjoint_Intersection_condition {U : Type} :
     forall (S T : Ensemble U), (Disjoint S T) <-> (S ∩ T == Empty_set).
   Proof with crush.
@@ -658,6 +704,8 @@ Ltac crush :=
     crush... 
     apply (H0 x)...
   Qed.
+
+  (* Disjunction is symmetric *)
 
   Lemma Disjoint_sym {U : Type} : forall S T: (Ensemble U), Disjoint S T <-> Disjoint T S.
   Proof with crush.
