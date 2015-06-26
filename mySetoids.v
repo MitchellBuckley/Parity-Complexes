@@ -10,9 +10,9 @@
 
 (** Import libraries **)
 
+Require Import Utf8_core.
 Require Import Ensembles.
 Require Import Setoid.
-Require Import Utf8_core.
 
 (** Set Implicit variables **)
 
@@ -106,25 +106,38 @@ Ltac crush :=
 
   (* Fundamental relationship between union/or, intersection/and, complement/not *)
 
-  Lemma In_Union {U : Type} :
-    forall (x : U) (S T: Ensemble U),  x ∈ (S ∪ T) <-> (x ∈ S) \/ (x ∈ T).
+  Lemma Union_inv {U : Type} :
+    forall (x : U) (S T: Ensemble U),  x ∈ (S ∪ T) -> (x ∈ S) \/ (x ∈ T).
   Proof with crush.
     crush.
   Qed.
 
-  Lemma In_Intersection {U : Type} :
-    forall (x : U) (S T: Ensemble U), x ∈ (S ∩ T) <-> (x ∈ S) /\ (x ∈ T).
+  Lemma Intersection_inv {U : Type} :
+    forall (x : U) (S T: Ensemble U), x ∈ (S ∩ T) -> (x ∈ S) /\ (x ∈ T).
   Proof with crush.
     crush.
   Qed.
 
-  Lemma In_Complement {U : Type} :
+  Lemma Complement_intro {U : Type} :
+    forall (S : Ensemble U) (x : U), ((x ∈ S) -> False) -> (x ∈ √S).
+  Proof with crush.
+    crush.
+  Qed.
+ 
+  Lemma Complement_inv {U : Type} :
+    forall (S : Ensemble U) (x : U), (x ∈ √S) -> ~(x ∈ S).
+  Proof with crush.
+    crush.
+  Qed.
+
+(*  Lemma In_Complement {U : Type} :
     forall (S : Ensemble U) (x : U), (x ∈ (√ S)) <-> (~ (x ∈ S)).
   Proof with crush.
     crush.
   Qed.
+*)
 
-  Hint Resolve In_Union In_Intersection In_Complement. 
+  Hint Resolve Union_inv Intersection_inv Complement_inv Complement_intro. 
 
   (** Setoid relations and morphisms **)
 
@@ -556,7 +569,7 @@ Ltac crush :=
     crush.
   Qed.
 
-  (* The full set is identity for Union *)
+  (* The empty_set is identity for Union *)
 
   Lemma Empty_set_ident_left {U : Type} :
     forall (S : Ensemble U), Empty_set ∪ S == S.
@@ -584,7 +597,6 @@ Ltac crush :=
     crush.
     unfold decidable in H...
     specialize H with (x:=x)...
-    right...
   Qed.
 
   (* Complement is involutive *)
@@ -707,9 +719,9 @@ Ltac crush :=
 
   (* Disjunction is symmetric *)
 
-  Lemma Disjoint_sym {U : Type} : forall S T: (Ensemble U), Disjoint S T <-> Disjoint T S.
+  Lemma Disjoint_sym {U : Type} : forall S T: (Ensemble U), Disjoint S T -> Disjoint T S.
   Proof with crush.
-    crush;
+    crush.
     apply H0 with x... 
   Qed.
 
@@ -798,3 +810,102 @@ Ltac crush :=
   Hint Resolve Intersection_trans Intersection_comm Intersection_idemp.
   Hint Resolve Empty_set_ident_left Empty_set_ident_right Full_set_ident_left Full_set_ident_right.
   Hint Resolve Empty_set_zero_left Empty_set_zero_right Full_set_zero_left Full_set_zero_right.
+
+  (* These directly copied from the Constructive_sets library June 2015 *)
+  (* names may be adjusted at some point *)
+
+  Lemma Noone_in_empty {U : Type} : forall x:U, ~(In (Empty_set) x).
+  Proof with intuition.
+    crush.
+  Qed.
+
+  Lemma Included_Empty {U : Type} : forall A : Ensemble U, Included (Empty_set) A.
+  Proof with intuition.
+    crush.
+  Qed.
+
+  Lemma Add_intro1 {U : Type} :
+    forall (A:Ensemble U) (x y:U), In A y -> In (Add U A x) y.
+  Proof with intuition.
+    crush.
+  Qed.
+
+  Lemma Add_intro2 {U : Type} : forall (A:Ensemble U) (x:U), In (Add U A x) x.
+  Proof with intuition.
+    crush.
+  Qed.
+
+  Lemma Inhabited_add {U : Type} : forall (A:Ensemble U) (x:U), Inhabited (Add U A x).
+  Proof with intuition.
+    crush.
+    exists x...
+    right...
+  Qed.
+
+  Lemma Inhabited_not_empty {U : Type} :
+    forall X:Ensemble U, Inhabited X -> ~(X == Empty_set).
+  Proof with intuition.
+    crush.
+    assert (In Empty_set x)...
+    inversion H0.
+  Qed.
+
+  Lemma Add_not_Empty {U : Type} : forall (A:Ensemble U) (x:U), ~(Add U A x == Empty_set).
+  Proof with intuition.
+    crush.
+    assert (In Empty_set x)... 
+    Admitted.
+
+  Lemma not_Empty_Add {U : Type} : forall (A:Ensemble U) (x:U), ~ (Empty_set == Add U A x).
+  Proof with intuition.
+    crush.
+    assert (In Empty_set x)... apply H1... right...
+    inversion H.
+  Qed.
+
+  Lemma Singleton_inv {U : Type} : forall x y:U, In (Singleton x) y -> x = y.
+  Proof with intuition.
+    crush.
+  Qed.
+
+  Lemma Singleton_intro {U : Type} : forall x y:U, x = y -> In (Singleton x) y.
+  Proof with intuition.
+    crush.
+  Qed.
+
+  (*
+
+  Lemma Union_inv {U : Type} :
+    forall (B C:Ensemble U) (x:U), In (Union B C) x -> In B x \/ In C x.
+  Proof with intuition.
+    crush.
+  Qed.
+
+  *)
+
+  Lemma Add_inv {U : Type} :
+    forall (A:Ensemble U) (x y:U), In (Add U A x) y -> In A y \/ x = y.
+  Proof with intuition.
+    crush.
+  Qed.
+
+(*  Lemma Intersection_inv {U : Type} :
+    forall (B C:Ensemble U) (x:U),
+      In U (Intersection U B C) x -> In U B x /\ In U C x.
+
+  Lemma Couple_inv {U : Type} : forall x y z:U, In U (Couple U x y) z -> z = x \/ z = y.
+*)
+
+  Lemma Setminus_intro {U : Type} :
+    forall (A B:Ensemble U) (x:U),
+      In A x -> (In B x -> False) -> In (Setminus A B) x.
+  Proof with intuition.
+    crush.
+  Qed.
+
+Hint Resolve Singleton_inv Singleton_intro Add_intro1 Add_intro2
+  Intersection_inv
+ (* Couple_inv Setminus_intro Strict_Included_intro
+  Strict_Included_strict *) Noone_in_empty Inhabited_not_empty Add_not_Empty
+  not_Empty_Add Inhabited_add Included_Empty.
+Hint Resolve Union_inv.

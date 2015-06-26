@@ -1,11 +1,11 @@
 
-Require Import Ensembles Constructive_sets.
-Require Import Relations.
-Require Import mySetoids.
-Require Import Setoid.
-Require Import Utf8_core.
-Require Import Arith.
-
+  Require Import Utf8_core.
+  Require Import extra_nat_results.
+  Require Import Ensembles.
+  Require Import mySetoids.
+  Require Import Setoid.
+  Require Import Arith.
+  
   Ltac finitecrush := 
    repeat (repeat (conj || disj || neg || misc); intuition); intuition.
 
@@ -452,7 +452,7 @@ Require Import Arith.
   (* Inclusion of finite sets implies ordering of cardinality *)
   
   Lemma Cardinal_le {U : Type} :
-    decidable_eq U ->
+    decidable_eq U -> 
     forall (T : Ensemble U) n, Cardinal T n ->
       forall (R : Ensemble U) m, Cardinal R m ->
         T ⊆ R ->
@@ -497,7 +497,7 @@ Require Import Arith.
         + assert ((∃ x : U, x ∈ A ∧ P x) ∨ ((∃ x : U, x ∈ A ∧ P x) → False))...
       left... inversion H3 as [ a D]; exists a...
       right... apply H3... inversion H1 as [ a D]; exists a...
-      unfold Add in H4. apply In_Union in H4... exfalso. inversion H6... rewrite <- H4 in H5...
+      unfold Add in H4. apply Union_inv in H4... exfalso. inversion H6... rewrite <- H4 in H5...
 
       - assert ((∃ x : U, x ∈ T ∧ P x) ∨ ((∃ x : U, x ∈ T ∧ P x) → False))...
         + left... inversion H2 as [a A]; exists a... rewrite H...
@@ -565,5 +565,4 @@ Require Import Arith.
         unfold Add in H2...
       - rewrite <- H. apply IHZcard... rewrite H...
   Qed.
-
-
+ 
