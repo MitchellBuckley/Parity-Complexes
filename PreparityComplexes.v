@@ -4,9 +4,9 @@
 Require Import Utf8_core.
 Require Import Ensembles. 
 Require Import Setoid.
-Require Import myFiniteDefs.
-Require Import mySetoids.
-Require Import extra_nat_results.
+Require Import Finite_Ensembles.
+Require Import Ensembles_setoids.
+Require Import basic_nat.
 Require Import Relations. (* required for reflexive, transitive closure *)
 Require Import Arith.
 

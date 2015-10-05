@@ -1,8 +1,8 @@
 
   Require Import Utf8_core.
-  Require Import extra_nat_results.
+  Require Import basic_nat.
   Require Import Ensembles.
-  Require Import mySetoids.
+  Require Import Ensembles_setoids.
   Require Import Setoid.
   Require Import Arith.
 
@@ -92,7 +92,7 @@
 
   Hint Resolve Finite_are_decidable.
 
-  (* Finite sets are closed under Intersection, Union and Setminus *)
+  (* Finite sets are closed under Intersection and Union *)
 
   Lemma Finite_Intersection {U : Type} : forall (S: Ensemble U), Finite S -> forall T, decidable T -> Finite (T ∩ S).
   Proof with finitecrush.
@@ -124,38 +124,6 @@
           rewrite H3...
           constructor... 
       - rewrite H2...
-  Qed.
-
-  Lemma Setminus_Finite {U : Type} :
-    decidable_eq U ->
-    forall (A : Ensemble U), Finite A ->
-    forall (B : Ensemble U), Finite B ->
-      Finite (A ∩ (√ B)).
-  Proof with intuition.
-    intros Udec...
-    induction H...
-    - apply (Finite_Same_set Empty_set)...
-    - unfold Add.
-      rewrite I_U_dist_r.
-      apply Finite_Union...
-      assert (x ∈ B \/ ~(x ∈ B))...
-        apply Finite_are_decidable...
-      + apply (Finite_Same_set Empty_set)...
-        crush. 
-      + apply (Finite_Same_set (Singleton x))...
-        crush.
-    - rewrite H1...
-  Qed.
-
-  Lemma Setminus_Finite' {U : Type} :
-    decidable_eq U ->
-    forall (A : Ensemble U), Finite A ->
-    forall (B : Ensemble U), Finite B ->
-      Finite (A \ B).
-  Proof with intuition.
-    intros.
-    rewrite Setminus_is_Intersection_Complement.
-    apply Setminus_Finite...
   Qed.
 
   Hint Resolve Finite_Union Finite_Intersection.
@@ -572,3 +540,34 @@
       - rewrite <- H. apply IHZcard... rewrite H...
   Qed.
  
+  Lemma Setminus_Finite {U : Type} :
+    decidable_eq U ->
+    forall (A : Ensemble U), Finite A ->
+    forall (B : Ensemble U), Finite B ->
+      Finite (A ∩ (√ B)).
+  Proof with intuition.
+    intros Udec...
+    induction H...
+    - apply (Finite_Same_set Empty_set)...
+    - unfold Add.
+      rewrite I_U_dist_r.
+      apply Finite_Union...
+      assert (x ∈ B \/ ~(x ∈ B))...
+        apply Finite_are_decidable...
+      + apply (Finite_Same_set Empty_set)...
+        crush. 
+      + apply (Finite_Same_set (Singleton x))...
+        crush.
+    - rewrite H1...
+  Qed.
+
+  Lemma Setminus_Finite' {U : Type} :
+    decidable_eq U ->
+    forall (A : Ensemble U), Finite A ->
+    forall (B : Ensemble U), Finite B ->
+      Finite (A \ B).
+  Proof with intuition.
+    intros.
+    rewrite Setminus_is_Intersection_Complement.
+    apply Setminus_Finite...
+  Qed.

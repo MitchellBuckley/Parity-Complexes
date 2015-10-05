@@ -4,11 +4,11 @@
 Require Import Utf8_core.
 Require Import Ensembles.
 Require Import Relations.
-Require Import mySetoids.
+Require Import Ensembles_setoids.
 Require Import Arith.
 Require Import Setoid.
-Require Import extra_nat_results.
-Require Import myFiniteDefs.
+Require Import basic_nat.
+Require Import Finite_Ensembles.
 Require Import PreparityComplexes.
 Require Import Recdef.
 
