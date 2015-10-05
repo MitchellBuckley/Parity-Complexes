@@ -1,3 +1,16 @@
+(** 
+
+  Written by Mitchell Buckley. Started on 25/11/2013 while a 
+  PhD student at Macquarie University
+
+  This collection began as a set of results needed for dealing with Finite sets
+  among parity complexes.
+  That is still its primary function, but it now presents a different definition
+  than the standard library and covers a wide range of rewrite rules.
+
+**)
+
+(** Import libraries **)
 
   Require Import Utf8_core.
   Require Import basic_nat.
@@ -5,6 +18,8 @@
   Require Import Ensembles_setoids.
   Require Import Setoid.
   Require Import Arith.
+
+(* Borrow some tactics from Ensembles_setoids *)
 
   Ltac finitecrush := 
    repeat (repeat (conj || disj || neg || misc); intuition); intuition.
@@ -540,6 +555,8 @@
       - rewrite <- H. apply IHZcard... rewrite H...
   Qed.
  
+  (* Finite sets are closed under Setminus *)
+
   Lemma Setminus_Finite {U : Type} :
     decidable_eq U ->
     forall (A : Ensemble U), Finite A ->

@@ -71,6 +71,10 @@ Arguments Full_set {U} _.
   Import M.
 
   (* find subsets of a given set by specifying dimension *)
+  (* The reason that we used S (dim x) = 0) is so that sub S 0 is 
+     always empty. This is a hack that means we don't have to 
+    implement a special (-1) case. It means that all uses of sub 
+    should increment their parameter n by default. *)
 
   Definition sub (R : Ensemble carrier) (n : nat) : Ensemble carrier :=
     fun (x : carrier) => (x ∈ R /\ S (dim x)  = n).

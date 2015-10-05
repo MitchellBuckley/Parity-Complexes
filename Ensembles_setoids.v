@@ -56,6 +56,7 @@ Hint Unfold decidable.
 
 (** Ensemble-specific tactics **)
 
+(* The following three tactics unfold membership in Intersection, Union, Complement *)
 Ltac disj :=
   match goal with
     | H: In (_ ∪ _) ?x |- _ => inversion H; clear H
@@ -75,17 +76,7 @@ Ltac neg :=
     | H: _ |- In (√(_)) ?x => unfold Complement, not, In at 1
   end.
 
-Ltac misc_2 :=
-  match goal with
-    | H: _ |- _ == _ => unfold Same_set
-    | H: ?S == ?T |- _ => unfold Same_set in H
-    | H: _ |- Included ?S ?T => unfold Included
-    | H: Included ?S ?T |- _ => unfold Included in H
-    | H: Disjoint ?a ?b |- _ => inversion H; clear H
-    | H: _ |- Disjoint ?a ?b => constructor; unfold not; intros
-    | H: Inhabited ?S |- _ => inversion H; clear H
- end.
-
+(* The following tactic unfolds all membership scenarios *)
 Ltac misc :=
   match goal with
     | H: _ |- In (Setminus ?S ?T) _ => unfold Setminus, In at 1
@@ -100,7 +91,20 @@ Ltac misc :=
     | H: In (Singleton ?a) ?b |- _ => inversion H as [K]; clear H; try rewrite K in *; clear K
 end.
 
+(* This tactic is a last-ditch effort, it will unfold basic definitions *)
+Ltac misc_2 :=
+  match goal with
+    | H: _ |- _ == _ => unfold Same_set
+    | H: ?S == ?T |- _ => unfold Same_set in H
+    | H: _ |- Included ?S ?T => unfold Included
+    | H: Included ?S ?T |- _ => unfold Included in H
+    | H: Disjoint ?a ?b |- _ => inversion H; clear H
+    | H: _ |- Disjoint ?a ?b => constructor; unfold not; intros
+    | H: Inhabited ?S |- _ => inversion H; clear H
+ end.
 
+(* The crush tactic will attempt to prove set-based results using basic rules of membership in Union, Intersection etc. *)
+(* The final component misc_2 is a last-ditch effort, and will unfold some definitions *)
 Ltac crush := 
    repeat (repeat (conj || disj || neg || misc || misc_2); intuition); intuition.
 
@@ -132,13 +136,6 @@ Ltac crush :=
   Proof with crush.
     crush.
   Qed.
-
-(*  Lemma In_Complement {U : Type} :
-    forall (S : Ensemble U) (x : U), (x ∈ (√ S)) <-> (~ (x ∈ S)).
-  Proof with crush.
-    crush.
-  Qed.
-*)
 
   Hint Resolve Union_inv Intersection_inv Complement_inv Complement_intro. 
 
