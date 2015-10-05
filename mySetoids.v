@@ -1,11 +1,14 @@
 
-(** Written by Mitchell Buckley. Started on 25/11/2013 while a PhD student at Macquarie University **)
+(** 
 
-(**
+  Written by Mitchell Buckley. Started on 25/11/2013 while a 
+  PhD student at Macquarie University
+
   This collection began as a set of results needed for dealing with Parity Complexes.
   That is still its primary function, but it now covers a wide range of rewrite rules
   for Ensembles and a large library of basic results concerning Ensembles, Intersection,
   Union etc.
+
 **)
 
 (** Import libraries **)
@@ -32,7 +35,7 @@ Arguments Full_set {U} _.
 Hint Constructors Singleton Full_set Empty_set Inhabited.
 Hint Unfold Complement.
 
-(** Notation **)
+(** Set notation using UTF-8 characters **)
 
 Notation "A == B"      := (Same_set A B) (at level 71).
 Notation "A ⊆ B"       := (Included A B) (at level 71).
@@ -51,25 +54,25 @@ Definition decidable {A : Type} (X : Ensemble A) : Prop :=
 
 Hint Unfold decidable.
 
-(** Tactics **)
+(** Ensemble-specific tactics **)
 
 Ltac disj :=
   match goal with
-    | H: In (?P ∪ ?Q) ?x |- _ => inversion H; clear H
-    | H: In ?P ?x |- In (?P ∪ ?Q) ?x => left
-    | H: In ?Q ?x |- In (?P ∪ ?Q) ?x => right
+    | H: In (_ ∪ _) ?x |- _ => inversion H; clear H
+    | H: In ?P ?x |- In (?P ∪  _) ?x => left
+    | H: In ?P ?x |- In (_  ∪ ?P) ?x => right
  end.
 
 Ltac conj :=
   match goal with
     | H: In (Intersection _ _) _ |- _ => inversion H; clear H
-    | H: _ |- In (?P ∩ ?Q) ?x => constructor
+    | H: _ |- In (_ ∩ _) ?x => constructor
   end.
 
 Ltac neg :=
   match goal with
-    | H: In (√(?P)) ?x |- _ => unfold Complement, not, In at 1 in H
-    | H: _ |- In (√(?P)) ?x => unfold Complement, not, In at 1
+    | H: In (√(_)) ?x |- _ => unfold Complement, not, In at 1 in H
+    | H: _ |- In (√(_)) ?x => unfold Complement, not, In at 1
   end.
 
 Ltac misc_2 :=
@@ -104,7 +107,7 @@ Ltac crush :=
 
   (** EXTRA MEMBERSHIP PROPERTIES **)
 
-  (* Fundamental relationship between union/or, intersection/and, complement/not *)
+  (* Fundamental relationships between union/or, intersection/and, complement/not *)
 
   Lemma Union_inv {U : Type} :
     forall (x : U) (S T: Ensemble U),  x ∈ (S ∪ T) -> (x ∈ S) \/ (x ∈ T).
@@ -141,7 +144,7 @@ Ltac crush :=
 
   (** Setoid relations and morphisms **)
 
-  (** Same_set: **)
+  (** Same_set **)
 
   (* Same_set is symmetric, reflexive and transitive *)
 
@@ -217,7 +220,7 @@ Ltac crush :=
     apply Complement_Same_set_compat.
   Qed.
 
-  (* Inclusion, Inhabited, Disjunction, Add, In, and Setminus are all compatible with Same_set  *)
+  (* Same_set is `stable' under Inclusion, Inhabited, Disjunction, Add, In, and Setminus  *)
 
   Add Parametric Morphism U : (@Included U) with
     signature (@Same_set U) ==> (@Same_set U) ==> (@iff) as Included_Same_set_mor.
@@ -276,6 +279,8 @@ Ltac crush :=
     transitivity proved by (Included_trans (U:=U))
   as set_incl.
 
+  (* Inclusion is `stable' under Union, Intersection and Complement *)
+
   Lemma Union_Included_compat {U : Type} :
     forall (S T : Ensemble U), S ⊆ T
     →
@@ -322,14 +327,17 @@ Ltac crush :=
     apply Complement_Included_compat.
   Qed.
 
-  (** Iff: *)
+  (** If-and-only-iff (Iff) (<->) *)
 
+  (* Iff is an equivalence relation *)
   Add Parametric Relation : (Prop) (@iff)
     reflexivity proved by (iff_refl)
     symmetry proved by (iff_sym)
     transitivity proved by (iff_trans)
   as prop_iff.
 
+
+  (* Iff is `stable' under or, and and not *)
   Lemma or_iff_compat :
     forall (S T : Prop), iff S T
     →
@@ -376,10 +384,11 @@ Ltac crush :=
     apply not_iff_compat.
   Qed.
 
-  (* IMPLICATION *)
+  (* Implication (if-then) (->) *)
 
   Definition impl (S T : Prop) : Prop := S -> T.
 
+  (* Implication is transitive and reflexive *)
   Lemma impl_iff_compat :
     forall (S T : Prop), iff S T
     →
@@ -389,6 +398,8 @@ Ltac crush :=
   Proof with intuition.
     intuition. 
   Qed.
+
+  (* Implication is `stable' under Iff and disjointness *)
 
   Add Parametric Morphism : (@impl) with
     signature (@iff) ==> (@iff) ==> (@iff) as impl_iff_mor.
@@ -405,7 +416,7 @@ Ltac crush :=
 
   (** Distribition laws **)
 
-  (* Intersection distributes over Union on the left *)
+  (* Intersection distributes over Union on the left and right *)
 
   Lemma I_U_dist_l {U : Type} :
     forall (S T R: Ensemble U), (S ∩ (T ∪ R)) == ((S ∩ T) ∪ (S ∩ R)).
@@ -413,23 +424,13 @@ Ltac crush :=
     crush.
   Qed.
 
-  (* Intersection distributes over Union on the right *)
-
   Lemma I_U_dist_r {U : Type} :
     forall (S T R: Ensemble U), ((T ∪ R) ∩ S) == ((T ∩ S) ∪ (R ∩ S)) .
   Proof with crush.
     crush.
   Qed.
 
-  (* Union distributes over Intersection on the right *)
-
-  Lemma U_I_dist_r {U : Type} :
-    forall (S T R: Ensemble U), ((T ∩ R) ∪ S) == ((T ∪ S) ∩ (R ∪ S)).
-  Proof with crush.
-    crush.
-  Qed.
-
-  (* Union distributes over Intersection on the left *)
+  (* Union distributes over Intersection on the left and right *)
 
   Lemma U_I_dist_l {U : Type} :
     forall (S T R: Ensemble U), (S ∪ (T ∩ R)) == ((S ∪ T) ∩ (S ∪ R)).
@@ -437,9 +438,15 @@ Ltac crush :=
     crush.
   Qed.
 
+  Lemma U_I_dist_r {U : Type} :
+    forall (S T R: Ensemble U), ((T ∩ R) ∪ S) == ((T ∪ S) ∩ (R ∪ S)).
+  Proof with crush.
+    crush.
+  Qed.
+
   (** Properties of Full_set and Empty_set **)
 
-  (*  *)
+  (* Note sure how to describe these two though they are trivial *)
 
   Lemma Full_set_property {U : Type} :
     forall (S : Ensemble U), decidable S -> ((√ S) ∪ S) == (Full_set).
@@ -455,7 +462,7 @@ Ltac crush :=
     crush.
   Qed.
 
-  (* Definitive property of the empty set *)
+  (* Defining property of the empty set *)
 
   Lemma Empty_set_def {U : Type} : forall (P : Ensemble U),  (forall x, (~(x ∈ P))) <-> (P == Empty_set).
   Proof with crush.
@@ -464,14 +471,14 @@ Ltac crush :=
     apply H1 in H0...
   Qed.
 
-  (* Definitive property of the full set *)
+  (* Defining property of the full set *)
 
   Lemma Full_set_def {U : Type} : forall (P : Ensemble U),  (forall x, ((x ∈ P))) <-> (P == Full_set).
   Proof with crush.
     crush.
   Qed.
 
-  (* The empty set is zero under Intersection *)
+  (* The empty set is zero under Intersection on the left and right *)
 
   Lemma Empty_set_zero_right {U : Type} : forall T : (Ensemble U), T ∩ (Empty_set) == (Empty_set).
   Proof with crush.
@@ -483,7 +490,7 @@ Ltac crush :=
     crush.
   Qed.
 
-  (* The full set is zero under Union *)
+  (* The full set is zero under Union on the left and right *)
  
   Lemma Full_set_zero_right {U : Type} : forall T : (Ensemble U), T ∪ (Full_set) == (Full_set).
   Proof with crush.
@@ -508,7 +515,7 @@ Ltac crush :=
     exfalso; apply H... 
   Qed.
 
-  (* Adding one to the empty set creates a singleton *)
+  (* Adding one element to the empty set creates a singleton *)
 
   Lemma Add_Empty_is_Singleton {U : Type} :
     forall (x : U), Add U (Empty_set) x == Singleton x.
@@ -584,7 +591,7 @@ Ltac crush :=
 
   (** COMPLEMENT PROPERTIES **)
 
-  (* Complement preserves Intersection/Union *)
+  (* Complement preserves Intersection and Union *)
   
   Lemma Union_Complement_compat {U : Type} : forall (S T : Ensemble U),
     (√S ∩ √T) == (√(S ∪ T)).
@@ -600,7 +607,7 @@ Ltac crush :=
   Qed.
 
   (* Complement is involutive *)
-  
+
   Lemma Complement_Complement_compat {U : Type} : forall (S: Ensemble U), decidable S -> (√(√S)) == S.
   Proof with crush.
     crush.
@@ -608,12 +615,16 @@ Ltac crush :=
     specialize H with (x:=x)...
   Qed.
 
+  (* Complement is contravariant on Inclusion *)
+
   Lemma Complement_Included_flip {U : Type} : forall S T : Ensemble U,
     T ⊆ (√ S) -> S ⊆ (√ T).
   Proof with crush.
     crush.
     apply H in H1... 
   Qed.
+
+  (* Double complement is decreasing *)
 
   Lemma Complement_closure {U : Type}:
     forall S : Ensemble U, S ⊆ (√ (√ S)).
@@ -623,6 +634,7 @@ Ltac crush :=
 
   (** INCLUSION PROPERTIES **)
 
+  (* Absorption properies of Union and Intersection with respect to Inclusion *)
   Lemma Union_Included_left {U : Type} :
     forall (S T: Ensemble U), S ⊆ T -> S ∪ T == T.
   Proof with crush.
@@ -641,6 +653,13 @@ Ltac crush :=
     crush.
   Qed.
 
+  Lemma Intersection_Included_right {U : Type} :
+    forall (S T: Ensemble U), S ⊆ T -> T ∩ S == S.
+  Proof with crush.
+    crush.
+  Qed.
+
+  (* Inclusion is `stable' under Inhabited, Empty and Fullset *)
   Lemma Inhabited_Included {U : Type} :
     forall (S : Ensemble U), Inhabited S -> forall T, S ⊆ T -> Inhabited T.
   Proof with crush.
@@ -660,6 +679,8 @@ Ltac crush :=
     crush.
   Qed.
 
+ (* Union and Intersection are meet and join for Inclusion *)
+
   Lemma Union_Included_cancel_right {U : Type} : forall S T R: (Ensemble U),
     S ⊆ R -> S ⊆ (R ∪ T).
   Proof with crush.
@@ -667,7 +688,7 @@ Ltac crush :=
   Qed.
 
   Lemma Union_Included_cancel_left {U : Type} : forall S T R: (Ensemble U),
-    S ⊆ R -> S ⊆ (T ∪ R).
+    S ⊆ T -> S ⊆ (R ∪ T).
   Proof with crush.
     crush. 
   Qed.
@@ -686,7 +707,7 @@ Ltac crush :=
 
   (** PROPERTIES OF DISJOINT **)
 
-  (* Definitive property of disjoint sets *)
+  (* Defining property of disjoint sets *)
 
   Lemma Disjoint_Intersection_condition {U : Type} :
     forall (S T : Ensemble U), (Disjoint S T) <-> (S ∩ T == Empty_set).
@@ -695,6 +716,8 @@ Ltac crush :=
     exfalso. apply (H0 x)... 
     assert (In Empty_set x)...
   Qed.
+
+  (* Not sure how to name these three *)
 
   Lemma Disjoint_result {U : Type} :
     forall (S T : Ensemble U), S ∩ T == Empty_set -> S == S ∩ (√ T).
@@ -727,11 +750,15 @@ Ltac crush :=
 
   (** OTHER MISCELLANEOUS RESULTS **)
 
+  (* Defining property of Setminus *)
+
   Lemma Setminus_is_Intersection_Complement {U : Type} :
     forall (S T: Ensemble U), (S \ T) == (S ∩ (√ T)).
   Proof with crush.
     crush.
   Qed.
+
+  (* *)
 
   Lemma Add_Setminus_cancel {U : Type} :
     forall (A : Ensemble U) x, decidable (Singleton x) -> (x ∈ A) -> (A == Add U (A \ (Singleton x)) x).

@@ -5,9 +5,11 @@
   Require Import mySetoids.
   Require Import Setoid.
   Require Import Arith.
-  
+
   Ltac finitecrush := 
    repeat (repeat (conj || disj || neg || misc); intuition); intuition.
+
+  (* New definitions of Finite and Cardinal with extra constructor *)
 
   Inductive Finite {U : Type} : Ensemble U -> Prop :=
   |  Finite_Empty_set : Finite (Empty_set)
@@ -32,6 +34,7 @@
 
   (** SETOID MORPHISMS **)
 
+  (* Iff is stable under decidable, Finite, Cardinal *)
   Add Parametric Morphism U : (@Finite U) with
     signature (@Same_set U) ==> (@iff) as Finite_mor.
   Proof with intuition.
@@ -69,6 +72,8 @@
   Definition decidable_eq (U : Type) : Prop :=
     forall (a b : U), (a = b \/ ~(a = b)).
 
+  (* Finite sets are decidable sets if the type has decidable equality *)
+
   Lemma Finite_are_decidable {U : Type}:
     decidable_eq U ->
       forall (T : Ensemble U), Finite T -> decidable T.
@@ -87,7 +92,7 @@
 
   Hint Resolve Finite_are_decidable.
 
-  (* Finite sets are closed under Intersection and Complement *)
+  (* Finite sets are closed under Intersection, Union and Setminus *)
 
   Lemma Finite_Intersection {U : Type} : forall (S: Ensemble U), Finite S -> forall T, decidable T -> Finite (T ∩ S).
   Proof with finitecrush.
@@ -121,8 +126,41 @@
       - rewrite H2...
   Qed.
 
+  Lemma Setminus_Finite {U : Type} :
+    decidable_eq U ->
+    forall (A : Ensemble U), Finite A ->
+    forall (B : Ensemble U), Finite B ->
+      Finite (A ∩ (√ B)).
+  Proof with intuition.
+    intros Udec...
+    induction H...
+    - apply (Finite_Same_set Empty_set)...
+    - unfold Add.
+      rewrite I_U_dist_r.
+      apply Finite_Union...
+      assert (x ∈ B \/ ~(x ∈ B))...
+        apply Finite_are_decidable...
+      + apply (Finite_Same_set Empty_set)...
+        crush. 
+      + apply (Finite_Same_set (Singleton x))...
+        crush.
+    - rewrite H1...
+  Qed.
+
+  Lemma Setminus_Finite' {U : Type} :
+    decidable_eq U ->
+    forall (A : Ensemble U), Finite A ->
+    forall (B : Ensemble U), Finite B ->
+      Finite (A \ B).
+  Proof with intuition.
+    intros.
+    rewrite Setminus_is_Intersection_Complement.
+    apply Setminus_Finite...
+  Qed.
+
   Hint Resolve Finite_Union Finite_Intersection.
 
+  (* If set B is finite, A is a subset of B and ... then A is also finite *)
   Lemma Finite_Setminus_Included {U : Type} :
   (* \ref{arxiv.org/pdf/math/9405204} for proof I followed *)
      forall (B: Ensemble U),
@@ -168,6 +206,7 @@
         rewrite <- eqHyp...
   Qed.
 
+  (* This is essentially the same as the previous Lemma, the statement is just different *)
   Lemma Finite_Included {U : Type} :
      forall (B: Ensemble U),
        Finite B ->
@@ -278,6 +317,7 @@
 
   (* some basic sets of natural numbers are finite *)
 
+  (* {x | x <  n} is finite for all n *)
   Lemma lt_n_is_Finite : forall n, Finite (fun m => (m < n)).
   Proof with intuition.
     intros.
@@ -294,6 +334,7 @@
         inversion H...
   Qed.
 
+  (* {x | x <= n} is finite for all n *)
   Lemma le_n_is_Finite : forall n, Finite (fun m => (m <= n)).
   Proof with intuition.
     intros.
@@ -311,7 +352,6 @@
   Qed.
 
   (* Finite non-empty sets of natural numbers have maximum and minimum elements *)
-
   Lemma Finite_nat_have_maximum_le_element :
     forall (T : Ensemble nat), Finite T -> Inhabited T ->
       exists u, ((u ∈ T) /\ (forall v, (v ∈ T) -> v <= u)).
@@ -480,7 +520,7 @@
       crush. 
   Qed.
 
-  (* For all propositions P and finite sets W, 
+  (* For all decidable propositions P and finite sets W, 
      W either contains an element satisfying P, or it does not *)
 
   Lemma Finite_decidable_existence {U : Type}:
@@ -502,40 +542,6 @@
       - assert ((∃ x : U, x ∈ T ∧ P x) ∨ ((∃ x : U, x ∈ T ∧ P x) → False))...
         + left... inversion H2 as [a A]; exists a... rewrite H...
         + right... apply H2. inversion H1 as [ a A]; exists a... rewrite <- H...
-  Qed.
-
-  (* Finite sets are closed under setminus *)
-
-  Lemma Setminus_Finite {U : Type} :
-    decidable_eq U ->
-    forall (A : Ensemble U), Finite A ->
-    forall (B : Ensemble U), Finite B ->
-      Finite (A ∩ (√ B)).
-  Proof with intuition.
-    intros Udec...
-    induction H...
-    - apply (Finite_Same_set Empty_set)...
-    - unfold Add.
-      rewrite I_U_dist_r.
-      apply Finite_Union...
-      assert (x ∈ B \/ ~(x ∈ B))...
-        apply Finite_are_decidable...
-      + apply (Finite_Same_set Empty_set)...
-        crush. 
-      + apply (Finite_Same_set (Singleton x))...
-        crush.
-    - rewrite H1...
-  Qed.
-
-  Lemma Setminus_Finite' {U : Type} :
-    decidable_eq U ->
-    forall (A : Ensemble U), Finite A ->
-    forall (B : Ensemble U), Finite B ->
-      Finite (A \ B).
-  Proof with intuition.
-    intros.
-    rewrite Setminus_is_Intersection_Complement.
-    apply Setminus_Finite...
   Qed.
 
   (* Among finite sets of equal cardinality, inclusion implies same_set *)

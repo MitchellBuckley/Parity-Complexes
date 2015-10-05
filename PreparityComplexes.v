@@ -484,12 +484,12 @@ Arguments Full_set {U} _.
 
   Hint Extern 2 (False) =>
     match goal with
-    | H : S ?n < ?n |- False => apply lt_Sn_n in H; assumption
+    | H : S ?n < ?n |- False => apply lt_Sn in H; assumption
     | H :   ?n < ?n |- False => apply lt_irrefl in H; assumption
     | H :   ?m < ?n , H' : ?n = ?m |- False => rewrite H' in H; apply lt_irrefl in H; assumption
     | H :   ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply lt_irrefl in H; assumption
-    | H : S ?m < ?n , H' : ?n = ?m |- False => rewrite H' in H; apply lt_Sn_n in H; assumption
-    | H : S ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply lt_Sn_n in H; assumption
+    | H : S ?m < ?n , H' : ?n = ?m |- False => rewrite H' in H; apply lt_Sn in H; assumption
+    | H : S ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply lt_Sn in H; assumption
     end.
 
   Hint Extern 2 (_ ∈ _) =>
@@ -500,7 +500,7 @@ Arguments Full_set {U} _.
       | H : In (sup ?S _) ?x |- In ?S ?x => unfold sup, In at 1 in H; apply H
     end.
 
-  Hint Resolve lt_irrefl le_lt_dec lt_Sn_n.
+  Hint Resolve lt_irrefl le_lt_dec lt_Sn.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* less lemmas                                          *)
