@@ -2,7 +2,7 @@
 (* Written by Mitchell Buckley 12/11/2013 *)
 
 Require Import Utf8_core.
-Require Import Ensembles. 
+Require Import Ensembles.
 Require Import Setoid.
 Require Import Finite_Ensembles.
 Require Import Ensembles_setoids.
@@ -40,14 +40,14 @@ Arguments Full_set {U} _.
   Parameter plus minus : carrier -> Ensemble carrier.
 
   (* the carrier type has decidable equality *)
-  
+
   Axiom carrier_decidable_eq : decidable_eq carrier.
 
   (* face-sets are one dimension below their argument *)
 
   Axiom plus_dim :            forall (x y : carrier), In (plus y) x -> S (dim x) = dim y.
   Axiom minus_dim :           forall (x y : carrier), In (minus y) x -> S (dim x) = dim y.
-  
+
   (* face-sets are disjoint, finite and non-empty *)
 
   Axiom plus_Finite :         forall (x : carrier),   Finite (plus x).
@@ -71,9 +71,9 @@ Arguments Full_set {U} _.
   Import M.
 
   (* find subsets of a given set by specifying dimension *)
-  (* The reason that we used S (dim x) = 0) is so that sub S 0 is 
-     always empty. This is a hack that means we don't have to 
-    implement a special (-1) case. It means that all uses of sub 
+  (* The reason that we used S (dim x) = 0) is so that sub S 0 is
+     always empty. This is a hack that means we don't have to
+    implement a special (-1) case. It means that all uses of sub
     should increment their parameter n by default. *)
 
   Definition sub (R : Ensemble carrier) (n : nat) : Ensemble carrier :=
@@ -297,7 +297,7 @@ Arguments Full_set {U} _.
    cut (S (dim u) = dim x0)...
    rewrite H0...
   Qed.
- 
+
   Hint Resolve dim_lemma_a dim_lemma_b dim_lemma_c dim_lemma_d.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
@@ -538,10 +538,10 @@ Hint Resolve less_irrefl less_dim.
 (* Setoid rewrite stuff                                 *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-  (* 
+  (*
     The following set operations are closed under the Same_set relation:
     - Plus, Minus, PlusMinus, MinusPlus
-    - sub, sup, 
+    - sub, sup,
     - setdim
     - moves_def
     - triangle_rest
@@ -627,9 +627,9 @@ Hint Resolve less_irrefl less_dim.
 (* sub and sup                                          *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-(* 
+(*
   Basic properties of sub and sup:
-  - 
+  -
 *)
 
   Lemma sub_zero : forall R, sub R 0 == Empty_set.

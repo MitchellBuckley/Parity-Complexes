@@ -1,9 +1,9 @@
 
-(** 
+(**
 
   Written by Mitchell Buckley, 2015.
 
-  This is an attempt to implement an example of a parity complex. 
+  This is an attempt to implement an example of a parity complex.
   The example is that of cubes.
 
 **)
@@ -21,8 +21,9 @@ Require Import basic_nat.
 Require Import Finite_Ensembles.
 Require Import PreparityComplexes.
 (* Require Import ParityComplexes. *)
-Require Import List.
-Import List.ListNotations.
+Require Import Vector.
+Import VectorNotations.
+
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Parity Complex Definitions                           *)
@@ -35,78 +36,107 @@ Import List.ListNotations.
   | M : symb
   | O : symb.
 
-  Definition clist : Type := sum (unit) (prod (list symb) (bool)).
+  Definition clist : Type := t symb N.
 
   (* Definition list_count {A} *)
 
   Lemma symb_dec : (∀ x y : symb, {x = y} + {x ≠ y}).
   Proof with intuition.
-    intros x y; induction x, y; 
+    intros x y; induction x, y;
     (try (left; reflexivity) || (right; intros J; inversion J)).
   Qed.
 
-Definition cdim : (clist) -> nat := 
-  fun l => 
+  Definition symb_eq : symb -> symb -> bool :=
+  fun a => match a with
+           | M => fun b => match b with
+                           | M => true
+                           | _ => false
+                           end
+           | P => fun b => match b with
+                           | P => true
+                           | _ => false
+                           end
+           | O => fun b => match b with
+                           | O => true
+                           | _ => false
+                           end
+           end.
+
+  Fixpoint Vcount_occ {M : nat} (j : symb) (l : t symb M) : nat :=
     match l with
-    | inl e => 0
-    | inr l' => 
-      match l' with
-      | pair l'' b => count_occ symb_dec l'' O +
-        match b with
-        | true => 0
-        | false => 1
-        end
+    | nil => 0
+    | cons h M' tl => match (symb_eq j h) with
+       | true => S (Vcount_occ j tl)
+       | false =>  Vcount_occ j tl
       end
     end.
 
-Compute cdim (inr ([P;M;M;O;O;M], true)).
+  Definition cdim : (clist) -> nat :=
+    fun l => Vcount_occ O l.
 
-Definition cMinus : clist -> Ensemble clist :=
-  fun l =>
-    match l with 
-    | inl e => Empty_set
-    | inr l' => Full_set
-    end.
+  Lemma vector_dec : forall {A}, (forall (a b : A), {a = b} + {a <> b}) ->
+    forall n, (forall (a b : t A n), {a = b} + {a <> b}).
+  Proof with intuition.
+   intros A H.
+   apply rect2.
+   - left...
+   - intros.
+     specialize H with a b.
+     induction H.
+     + subst.
+       destruct H0.
+        * left; subst...
+        * right... admit.
+     + clear H0. right...
+       inversion H...
+  Qed.
 
-Definition cPlus : clist -> (Ensemble clist) :=
-  fun l =>
-    match l with 
-    | inl e => Empty_set
-    | inr l' => Full_set
-    end.
+Compute cdim [P;M;O;M].
+
+Inductive differl {a b : nat} : t symb (a + 1 + b) -> t symb (a + 1 + b) -> Prop :=
+| fff : forall (A : t _ a) (B : t _ b), differl (append (append A [O]) B) (append (append A [M]) B).
+
+Definition differr (l l' : clist) (m : Fin.t N): Prop :=
+  forall k, (m=k  -> nth l k = O /\ nth l k = P )
+    /\
+                  (m<>k -> nth l k = nth l' k).
+
+Definition is_even {n : nat} : Fin.t (S n) -> Prop. Admitted.
+Definition is_odd  {n : nat} : Fin.t (S n) -> Prop. Admitted.
+
+Definition even : nat -> Prop. Admitted.
+Definition odd  : nat -> Prop. Admitted.
+
+Definition cMinus : clist -> clist -> Prop :=
+forall l l', exists a b, N = a + 1 + b /\ even a /\ (differl l l').
+
+| oddcasesM : forall l l' k, (is_odd k /\ differr l l' k) -> cMinus l l'.
+
+Inductive cPlus : clist -> clist -> Prop :=
+| evencasesP : forall l l' k, (is_even k /\ differr l l' k) -> cPlus l l'
+| oddcasesP : forall l l' k, (is_odd k /\ differl l l' k) -> cPlus l l'.
+
+
 
 Module Orientals_PreParity.
 
 Definition carrier := clist.
-Definition dim := cdim. 
+Definition dim := cdim.
 Definition plus := cPlus.
-Definition minus := cMinus. 
+Definition minus := cMinus.
 
   Theorem carrier_decidable_eq : decidable_eq carrier.
   Proof with intuition.
-    unfold decidable_eq.
-    unfold not.
-    intros a b.
-    destruct a, b; [left | right | right | idtac]; intros.
-    - induction u, u0; reflexivity.
-    - inversion H.
-    - inversion H.
-    - induction p, p0.
-      assert ({b = b0} + {b ≠ b0}). 
-        apply Bool.bool_dec...
-      assert ({a = l} + {a ≠ l}). 
-        apply list_eq_dec; apply symb_dec...
-      induction H; [idtac | right].
-        induction H0; [left | right]; subst...
-          inversion H...
-        intros K; inversion K...
+    admit.
   Qed.
 
   Theorem plus_dim :  forall (x y : carrier), Ensembles.In (plus y) x -> S (dim x) = dim y.
-  Proof.
-  
+  Proof with intuition.
+  unfold plus, dim...
+  induction H...
+  unfold differr in H1...
+  unfold cdim...
 
-  Admitted.
 
   Theorem minus_dim :   forall (x y : carrier), Ensembles.In (minus y) x -> S (dim x) = dim y.
     Proof.

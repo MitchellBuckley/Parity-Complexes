@@ -1,10 +1,10 @@
 
-(** 
-    Written by Mitchell Buckley. Started on 25/11/2013 while a 
+(**
+    Written by Mitchell Buckley. Started on 25/11/2013 while a
     PhD student at Macquarie University.
 
     This file contains some basic lemmas concerning natural
-    numbers that I could not find in the standard library, 
+    numbers that I could not find in the standard library,
     and were required for a formalisation of the theory
     of Parity Complexes.
  **)
@@ -29,14 +29,14 @@ Require Import Arith.
     set (Q := fun n => (forall m, m <= n -> P m)).
 
     intros.
-    assert (Q 0) as A. 
+    assert (Q 0) as A.
       unfold Q... inversion H1...
-    assert (forall l, Q l -> Q (S l)) as B. 
+    assert (forall l, Q l -> Q (S l)) as B.
       unfold Q...
       inversion H2...
     assert (Q n) as C.
       apply (nat_ind Q)...
-    apply (C n). 
+    apply (C n).
     left.
   Qed.
 

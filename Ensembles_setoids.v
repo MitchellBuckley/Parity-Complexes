@@ -1,7 +1,7 @@
 
-(** 
+(**
 
-  Written by Mitchell Buckley. Started on 25/11/2013 while a 
+  Written by Mitchell Buckley. Started on 25/11/2013 while a
   PhD student at Macquarie University
 
   This collection began as a set of results needed for dealing with Parity Complexes.
@@ -105,7 +105,7 @@ Ltac misc_2 :=
 
 (* The crush tactic will attempt to prove set-based results using basic rules of membership in Union, Intersection etc. *)
 (* The final component misc_2 is a last-ditch effort, and will unfold some definitions *)
-Ltac crush := 
+Ltac crush :=
    repeat (repeat (conj || disj || neg || misc || misc_2); intuition); intuition.
 
 
@@ -130,14 +130,14 @@ Ltac crush :=
   Proof with crush.
     crush.
   Qed.
- 
+
   Lemma Complement_inv {U : Type} :
     forall (S : Ensemble U) (x : U), (x ∈ √S) -> ~(x ∈ S).
   Proof with crush.
     crush.
   Qed.
 
-  Hint Resolve Union_inv Intersection_inv Complement_inv Complement_intro. 
+  Hint Resolve Union_inv Intersection_inv Complement_inv Complement_intro.
 
   (** Setoid relations and morphisms **)
 
@@ -301,7 +301,7 @@ Ltac crush :=
     →
     (S ∩ S') ⊆ (T ∩ T').
   Proof with crush.
-    crush. 
+    crush.
   Qed.
 
   Add Parametric Morphism U : (@Intersection U) with
@@ -358,7 +358,7 @@ Ltac crush :=
     →
     iff (S /\ S') (T /\ T').
   Proof with intuition.
-    intuition. 
+    intuition.
   Qed.
 
   Add Parametric Morphism : (@and) with
@@ -372,7 +372,7 @@ Ltac crush :=
     →
     iff (not S) (not T).
   Proof with intuition.
-    intuition. 
+    intuition.
   Qed.
 
   Add Parametric Morphism : (@not) with
@@ -393,7 +393,7 @@ Ltac crush :=
     →
     iff (S -> S') (T -> T').
   Proof with intuition.
-    intuition. 
+    intuition.
   Qed.
 
   (* Implication is `stable' under Iff and disjointness *)
@@ -463,7 +463,7 @@ Ltac crush :=
 
   Lemma Empty_set_def {U : Type} : forall (P : Ensemble U),  (forall x, (~(x ∈ P))) <-> (P == Empty_set).
   Proof with crush.
-    crush. 
+    crush.
     apply H in H0...
     apply H1 in H0...
   Qed.
@@ -488,7 +488,7 @@ Ltac crush :=
   Qed.
 
   (* The full set is zero under Union on the left and right *)
- 
+
   Lemma Full_set_zero_right {U : Type} : forall T : (Ensemble U), T ∪ (Full_set) == (Full_set).
   Proof with crush.
     crush.
@@ -500,7 +500,7 @@ Ltac crush :=
   Qed.
 
   (* The empty set and the full set are dual under complement *)
- 
+
   Lemma Complement_Empty_set {U : Type} : √ (Empty_set) == @Full_set U.
   Proof with crush.
     crush.
@@ -509,7 +509,7 @@ Ltac crush :=
   Lemma Complement_Full_set {U : Type} : √ (Full_set) == @Empty_set U.
   Proof with crush.
     crush.
-    exfalso; apply H... 
+    exfalso; apply H...
   Qed.
 
   (* Adding one element to the empty set creates a singleton *)
@@ -589,7 +589,7 @@ Ltac crush :=
   (** COMPLEMENT PROPERTIES **)
 
   (* Complement preserves Intersection and Union *)
-  
+
   Lemma Union_Complement_compat {U : Type} : forall (S T : Ensemble U),
     (√S ∩ √T) == (√(S ∪ T)).
   Proof with crush.
@@ -608,7 +608,7 @@ Ltac crush :=
   Lemma Complement_Complement_compat {U : Type} : forall (S: Ensemble U), decidable S -> (√(√S)) == S.
   Proof with crush.
     crush.
-    unfold decidable in H. 
+    unfold decidable in H.
     specialize H with (x:=x)...
   Qed.
 
@@ -618,7 +618,7 @@ Ltac crush :=
     T ⊆ (√ S) -> S ⊆ (√ T).
   Proof with crush.
     crush.
-    apply H in H1... 
+    apply H in H1...
   Qed.
 
   (* Double complement is decreasing *)
@@ -626,7 +626,7 @@ Ltac crush :=
   Lemma Complement_closure {U : Type}:
     forall S : Ensemble U, S ⊆ (√ (√ S)).
   Proof with intuition.
-    crush. 
+    crush.
   Qed.
 
   (** INCLUSION PROPERTIES **)
@@ -660,8 +660,8 @@ Ltac crush :=
   Lemma Inhabited_Included {U : Type} :
     forall (S : Ensemble U), Inhabited S -> forall T, S ⊆ T -> Inhabited T.
   Proof with crush.
-    crush. 
-    exists x... 
+    crush.
+    exists x...
   Qed.
 
   Lemma Included_Empty_set {U : Type} :
@@ -681,25 +681,25 @@ Ltac crush :=
   Lemma Union_Included_cancel_right {U : Type} : forall S T R: (Ensemble U),
     S ⊆ R -> S ⊆ (R ∪ T).
   Proof with crush.
-    crush. 
+    crush.
   Qed.
 
   Lemma Union_Included_cancel_left {U : Type} : forall S T R: (Ensemble U),
     S ⊆ T -> S ⊆ (R ∪ T).
   Proof with crush.
-    crush. 
+    crush.
   Qed.
 
   Lemma Intersection_Included_cancel_right {U : Type} : forall S T R: (Ensemble U),
     S ⊆ R -> (S ∩ T) ⊆ R.
   Proof with crush.
-    crush. 
+    crush.
   Qed.
 
   Lemma Intersection_Included_cancel_left {U : Type} : forall S T R: (Ensemble U),
     S ⊆ R -> (T ∩ S) ⊆ R.
   Proof with crush.
-    crush. 
+    crush.
   Qed.
 
   (** PROPERTIES OF DISJOINT **)
@@ -710,7 +710,7 @@ Ltac crush :=
     forall (S T : Ensemble U), (Disjoint S T) <-> (S ∩ T == Empty_set).
   Proof with crush.
     crush.
-    exfalso. apply (H0 x)... 
+    exfalso. apply (H0 x)...
     assert (In Empty_set x)...
   Qed.
 
@@ -719,21 +719,21 @@ Ltac crush :=
   Lemma Disjoint_result {U : Type} :
     forall (S T : Ensemble U), S ∩ T == Empty_set -> S == S ∩ (√ T).
   Proof with crush.
-    crush. 
+    crush.
     assert (In Empty_set x)...
   Qed.
 
   Lemma Disjoint_property_left {U : Type} : forall S T: (Ensemble U),
     Disjoint S T -> S ⊆ (√ T).
   Proof with crush.
-    crush... 
+    crush...
     apply (H0 x)...
   Qed.
 
   Lemma Disjoint_property_right {U : Type} : forall S T: (Ensemble U),
     Disjoint S T -> T ⊆ (√ S).
   Proof with crush.
-    crush... 
+    crush...
     apply (H0 x)...
   Qed.
 
@@ -742,7 +742,7 @@ Ltac crush :=
   Lemma Disjoint_sym {U : Type} : forall S T: (Ensemble U), Disjoint S T -> Disjoint T S.
   Proof with crush.
     crush.
-    apply H0 with x... 
+    apply H0 with x...
   Qed.
 
   (** OTHER MISCELLANEOUS RESULTS **)
@@ -798,12 +798,12 @@ Ltac crush :=
 
   Lemma Setminus_cancel {U : Type} : forall (S : Ensemble U), S \ S == Empty_set.
   Proof with crush.
-    crush. 
+    crush.
   Qed.
 
   Lemma Setminus_Empty_set {U : Type}: forall (T : Ensemble U), T \ Empty_set == T.
   Proof with crush.
-    crush. 
+    crush.
   Qed.
 
   Lemma Union_Setminus_cancel {U : Type} :
@@ -820,7 +820,7 @@ Ltac crush :=
   Proof with crush.
     crush.
       apply (H1 x)...
-      apply H in H3... 
+      apply H in H3...
   Qed.
 
   Lemma Setminus_Included {U : Type}: forall (S T : Ensemble U), (S \ T) ⊆ S.
@@ -877,7 +877,7 @@ Ltac crush :=
   Lemma Add_not_Empty {U : Type} : forall (A:Ensemble U) (x:U), ~(Add U A x == Empty_set).
   Proof with intuition.
     crush.
-    assert (In Empty_set x)... 
+    assert (In Empty_set x)...
     Admitted.
 
   Lemma not_Empty_Add {U : Type} : forall (A:Ensemble U) (x:U), ~ (Empty_set == Add U A x).
