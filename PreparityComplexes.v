@@ -81,26 +81,30 @@ Arguments Full_set {U} _.
   Definition sup (R : Ensemble carrier) (n : nat) : Ensemble carrier :=
     fun (x : carrier) => (x ∈ R /\ S (dim x) <= n).
 
+  (* A proposition stating that all elements of the set have
+     dimension within a fixed range *)
   Definition setdim (R : Ensemble carrier) (n : nat) : Prop :=
     forall x, (x ∈ R) -> dim x <= n.
 
+  (* Extend plus and minus to sets in the expected fashion *)
   Definition Plus (X : Ensemble carrier) : Ensemble carrier :=
     fun (y : carrier) => (exists (x : carrier), (x ∈ X) /\ (In (plus x) y)).
   Definition Minus (X : Ensemble carrier) : Ensemble carrier :=
     fun (y : carrier) => (exists (x : carrier), (x ∈ X) /\ (In (minus x) y)).
 
+  (* Describe purely positive and purely negative face-sets *)
   Definition PlusMinus (X : Ensemble carrier) : Ensemble carrier :=
     Intersection (Plus X) (√ (Minus X)).
   Definition MinusPlus (X : Ensemble carrier) : Ensemble carrier :=
     Intersection (Minus X) (√ (Plus X)).
 
+  (* Define perpendicularity for objects and sets. *)
   Definition Perp (X Y : Ensemble carrier) : Prop :=
     ((Plus X) ∩ (Plus Y) == Empty_set) /\ ((Minus X) ∩ (Minus Y) == Empty_set).
   Definition perp (x y : carrier) : Prop :=
     ((plus x) ∩ (plus y) == Empty_set) /\ ((minus x) ∩ (minus y) == Empty_set).
 
   (* less-than ordering on elements of the carrier type *)
-
   Definition less (x y : carrier) : Prop :=
     (Inhabited ((plus x) ∩ (minus y))).
 
@@ -148,7 +152,10 @@ Arguments Full_set {U} _.
   Notation "S 'moves' M 'to' P" := (moves_def S M P) (at level 89).
 
   (* Definition of well-formed sets *)
-
+  (* Notice that our definition is slightly different from 
+     Street's original, this is a question of taste, and
+     relates to the constructive nature of our constructions.
+  *)
   Definition well_formed (X : Ensemble carrier) : Prop :=
     (forall (x y : carrier), x ∈ X /\ y ∈ X
       -> (dim x = O -> dim y = 0 -> x = y))
@@ -157,7 +164,6 @@ Arguments Full_set {U} _.
       -> (forall (n : nat), dim x = S n -> dim y = S n -> not (perp x y) -> x = y)).
 
   (* Definition of tightness *)
-
   Definition tight (R : Ensemble carrier) : Prop :=
     forall u v,
       triangle u v ->  v ∈ R -> (minus u) ∩ (PlusMinus R) == (Empty_set).
@@ -165,10 +171,11 @@ Arguments Full_set {U} _.
   Hint Unfold moves_def well_formed tight : sets v62.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(* decidability and Finite                           *)
+(* Decidability and Finite                              *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-  (* Since we insist that the carrier type is has decidable equality, all finite sets are decidable *)
+  (* Since we insist that the carrier type is has decidable 
+     equality, all finite sets are decidable *)
 
   Lemma all_decidable : forall (R : Ensemble carrier), Finite R -> decidable R.
   Proof.
@@ -269,6 +276,8 @@ Arguments Full_set {U} _.
     | H: _ |- _ /\ _ => split; [idtac | try splits]
     end.
 
+ (* These four dimension lemmas, with hints, will allow auto
+    to solve some trivial proofs without our intervention *)
  Lemma dim_lemma_a : forall x u, In (Minus (minus x)) u -> S (S (dim u)) = dim x.
  Proof with intuition.
    intros.
@@ -361,7 +370,6 @@ Arguments Full_set {U} _.
   Qed.
 
   (* the restricted triangle ordering implies set membership *)
-
   Lemma triangle_rest_in_set : forall R, forall x y, triangle_rest R x y -> x ∈ R /\ y ∈ R.
   Proof with intuition.
     intros...
@@ -371,7 +379,6 @@ Arguments Full_set {U} _.
   Hint Resolve triangle_rest_in_set.
 
   (* restricted triangle ordering is transitive *)
-
   Lemma triangle_rest_trans : forall X, forall y z, triangle_rest X y z -> forall x, triangle_rest X z x -> triangle_rest X y x.
   Proof with intuition.
     intros.
@@ -381,7 +388,10 @@ Arguments Full_set {U} _.
   Qed.
 
   (* an alternative induction principle for the restricted triangle ordering *)
-
+  (* For all sets S and propositions on pairs P, if P is reflexive on S and
+     True for x z when it's true for y z and there's a path from x to z through 
+     y in S, then P is true for x z whenever there is any path from x to z in S
+  *)
   Lemma triangle_rest_ind' :
     forall (S : Ensemble carrier) (P : carrier → carrier → Prop),
       (∀ x : carrier, x ∈ S → P x x) ->
@@ -419,8 +429,7 @@ Arguments Full_set {U} _.
       rewrite <- H...
   Qed.
 
-  (* the less-than ordering is logically decidable *)
-
+  (* the less-than ordering is decidable *)
   Lemma less_decidable : forall x y, ((less x y) \/ ~(less x y)).
   Proof with intuition.
     intros.
@@ -460,6 +469,9 @@ Arguments Full_set {U} _.
   Qed.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+  (* Numerous hints to help us discharge False under common 
+     scenarios *)
 
   Hint Extern 2 (False) =>
     match goal with
@@ -510,7 +522,7 @@ Arguments Full_set {U} _.
 (* less lemmas                                          *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-(* The less relation is irreflexive *)
+(* The less-than relation is irreflexive *)
 
 Lemma less_irrefl : forall x, less x x -> False.
 Proof with intuition.
@@ -627,11 +639,10 @@ Hint Resolve less_irrefl less_dim.
 (* sub and sup                                          *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-(*
-  Basic properties of sub and sup:
-  -
-*)
+(* Basic properties of sub and sup. *)
 
+
+  (* At dimension zero they are empty. *)
   Lemma sub_zero : forall R, sub R 0 == Empty_set.
   Proof with crush.
     crush.
@@ -643,6 +654,7 @@ Hint Resolve less_irrefl less_dim.
     inversion H1...
   Qed.
 
+  (* Inclusion effects dimension *)
   Lemma sub_Included_Lemma : forall R T m, Included R (sub T (S m)) ->
     forall x, (x ∈ R -> dim x = m).
   Proof with crush.
@@ -659,26 +671,26 @@ Hint Resolve less_irrefl less_dim.
     apply H...
   Qed.
 
+  (* Four little lemmas that will automate some steps *)
   Lemma sub_def_Lemma : forall m x R, In (sub R (S m)) x -> (dim x = m).
   Proof with crush.
     crush.
   Qed.
-
   Lemma sub_def_Lemma' : forall m x R, In (sub R m) x -> (S (dim x) = m).
   Proof with crush.
     crush.
   Qed.
-
   Lemma sup_def_Lemma : forall R m x, In (sup R (S m)) x -> (dim x <= m).
   Proof with crush.
     crush.
   Qed.
-
   Lemma sup_def_Lemma' : forall R m x, In (sup R m) x -> (S (dim x) <= m).
   Proof with crush.
     crush.
   Qed.
 
+  (* hints to make good use of these simple lemmas to solve trivial
+     problems *)
   Hint Extern 1 (dim _ = _) =>
     match goal with
       | H: ?X ⊆ (sub _ (S (?n))), _: In ?X ?x |- (dim ?x = ?n) => apply (sub_Included_Lemma _ _ _ H)
@@ -706,6 +718,7 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve sub_Included_Lemma sub_def_Lemma sup_def_Lemma le_Sn_n n_Sn.
 
+  (* sub and sup embed as expected *)
   Lemma sub_Included : forall T n, (sub T n) ⊆ T.
   Proof with repeat (basic || subsuptac); auto.
     intros.
@@ -727,7 +740,7 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve sub_Included sup_Included sub_sup_Included.
 
-  (* sub and sup are stable under union *)
+  (* sub and sup are stable under Union *)
 
   Lemma sub_Union : forall T R n, sub (T ∪ R) n == (sub T n) ∪ (sub R n).
   Proof with repeat (basic || subsuptac); auto.
@@ -747,7 +760,7 @@ Hint Resolve less_irrefl less_dim.
     inversion H; inversion H0...
   Qed.
 
-  (* sub and sup are stable under inclusion *)
+  (* sub and sup are stable under Inclusion *)
 
   Lemma sub_Included_compat : forall R T, R ⊆ T -> forall m, (sub R m) ⊆ (sub T m).
   Proof.
@@ -758,6 +771,13 @@ Hint Resolve less_irrefl less_dim.
   Proof.
     autounfold with *. intuition.
   Qed.
+
+  Lemma sub_Included' : forall R T, R ⊆ T -> forall n, Included (sub R n) (sub T n).
+  Proof with intuition.
+    crush.
+  Qed.
+
+  (* sub and sup are stable under Intersection *)
 
   Lemma sup_Intersection : forall T R n, sup (T ∩ R) n == (sup T n) ∩ (sup R n).
   Proof with repeat (basic || subsuptac); auto.
@@ -771,17 +791,8 @@ Hint Resolve less_irrefl less_dim.
     unfold Same_set; unfold Included...
   Qed.
 
-  (* sub and sup are idempotent *)
-
-  Lemma sub_idemp : forall n R, sub (sub R n) n == sub R n.
-  Proof with intuition.
-    autounfold with *...
-  Qed.
-
-  Lemma sup_idemp : forall n R, sup (sup R n) n == sup R n.
-  Proof with intuition.
-    autounfold with *...
-  Qed.
+  (* sub and sup are compatible with Plus and Minus in a nice way, the
+     same is true for Setminus and PlusMinus, MinusPlus *)
 
   Lemma sub_Plus : forall n T, sub (Plus T) n == Plus (sub T (S n)).
   Proof with intuition.
@@ -869,6 +880,19 @@ Hint Resolve less_irrefl less_dim.
     rewrite sub_Minus...
   Qed.
 
+  (* sub and sup are idempotent on fixed numbers and 
+     empty or idempotent on differing numbers *)
+
+  Lemma sub_idemp : forall n R, sub (sub R n) n == sub R n.
+  Proof with intuition.
+    autounfold with *...
+  Qed.
+
+  Lemma sup_idemp : forall n R, sup (sup R n) n == sup R n.
+  Proof with intuition.
+    autounfold with *...
+  Qed.
+
   Lemma sub_sup_Empty_set : forall n k, n < k -> forall R, sub (sup R n) k == Empty_set.
   Proof with intuition.
     autounfold with *...
@@ -885,21 +909,28 @@ Hint Resolve less_irrefl less_dim.
     apply (le_trans _ (S (dim x)))...
   Qed.
 
+  Lemma sub_sub_Empty_set : forall n k, ~(n=k) -> forall T, sub (sub T n) k == Empty_set.
+  Proof with intuition.
+    intros...
+    crush... apply H. rewrite H3 in H2...
+  Qed.
+
   Lemma sub_sup_cancel : forall k n, k <= n -> forall P, sub (sup P n) k == sub P k.
   Proof with intuition.
     crush...
   Qed.
 
+  (* sub and sub preserve Empty-sets *)
   Lemma sub_Empty_set : forall k, sub (Empty_set) k == Empty_set.
   Proof with intuition.
     crush...
   Qed.
-
   Lemma sup_Empty_set : forall k, sup (Empty_set) k == Empty_set.
   Proof with intuition.
     crush...
   Qed.
 
+  (* sub and sup commute *)
   Lemma sup_sub_comm : forall R n k, sup (sub R n) k == sub (sup R k) n.
   Proof with intuition.
     crush.
@@ -910,11 +941,13 @@ Hint Resolve less_irrefl less_dim.
     crush.
   Qed.
 
+  (* sup relates to minimum dimension *)
   Lemma sup_sup_min : forall R n k, k <= n -> sup (sup R n) k == sup R k.
   Proof with intuition.
     crush. apply (le_trans _ k)...
   Qed.
 
+  (* some results specific to plus, minus and Singleton *)
   Lemma sub_Singleton_Empty_set : forall y k, ~(S (dim y) = k) -> sub (Singleton y) k == Empty_set.
   Proof with intuition.
     intros...
@@ -961,28 +994,19 @@ Hint Resolve less_irrefl less_dim.
     rewrite H in H1...
   Qed.
 
+  (* sub and sup agree at low dimension *)
   Lemma sub_sup_0 : forall X, sub X 1 == sup X 1.
   Proof with intuition.
     crush. rewrite H1...
     apply le_S_n in H1...
   Qed.
 
+  (* sub and sup are related by Union and the successor function *)
   Lemma sub_Sn_sup_n : forall M n, (Union (sub M (S (S n))) (sup M (S n))) == sup M (S (S n)).
   Proof with intuition.
    crush.
    rewrite H0; crush.
    inversion H1; clear H1; [left | right]; crush.
-  Qed.
-
-  Lemma sub_sub_Empty_set : forall n k, ~(n=k) -> forall T, sub (sub T n) k == Empty_set.
-  Proof with intuition.
-    intros...
-    crush... apply H. rewrite H3 in H2...
-  Qed.
-
-  Lemma sub_Included' : forall R T, R ⊆ T -> forall n, Included (sub R (S n)) (sub T (S n)).
-  Proof with intuition.
-    crush.
   Qed.
 
   Lemma Same_set_by_dimension : forall R T,
@@ -1028,14 +1052,12 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve Finite_sub Finite_sup.
 
+  (* A little lemma about sets of fixed dimension *)
   Lemma dedede :
     forall R T, R ⊆ T -> forall n, sub T n == T -> sub R n == R.
   Proof with intuition.
-    intros...
-    unfold Same_set, Included...
-    unfold sub, In at 1...
-    apply H in H1...
-    rewrite <- H0 in H1...
+    autounfold with *...
+    apply H2...
   Qed.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
@@ -1066,6 +1088,7 @@ Hint Resolve less_irrefl less_dim.
       unfold In in H0. inversion H0. exists x1... right...
   Qed.
 
+  (* Plus and Minus are related to plus and minus *)
   Lemma Plus_Singleton : forall x, Plus (Singleton x) == plus x.
   Proof with intuition.
     autounfold with *... inversion H... inversion H1... exists x...
@@ -1076,6 +1099,7 @@ Hint Resolve less_irrefl less_dim.
     autounfold with *... inversion H... inversion H1... exists x...
   Qed.
 
+  (* PlusMinus is easy on Singletons *)
   Lemma PlusMinus_Singleton : forall x, PlusMinus (Singleton x) == plus x.
   Proof with crush.
     crush...
@@ -1175,6 +1199,7 @@ Hint Resolve less_irrefl less_dim.
     right... apply Intersection_inv in H1...
   Qed.
 
+  (* Minus and Plus preserve inclusion and Empty_sets *)
   Lemma Minus_Included : forall X Y, X ⊆ Y -> (Minus X) ⊆ (Minus Y).
   Proof with intuition.
     crush...
@@ -1205,6 +1230,7 @@ Hint Resolve less_irrefl less_dim.
 
   Hint Resolve all_decidable Plus_Finite Minus_Finite PlusMinus_Finite MinusPlus_Finite.
 
+  (* At dimension 1, everything is simple *)
   Lemma dim_1_properties : forall x, dim x = 1 ->
     (
     Plus  (minus x) == Empty_set /\
@@ -1230,6 +1256,7 @@ Hint Resolve less_irrefl less_dim.
 
   (** WELL_FORMED PROPERTIES **)
 
+  (* well_formed is stable under inclusion *)
   Lemma well_formed_Included :
     forall T, well_formed T -> forall R, R ⊆ T -> well_formed R.
   Proof with intuition.
@@ -1237,6 +1264,7 @@ Hint Resolve less_irrefl less_dim.
     refine (H1 _ _ _ n _ _ _)...
   Qed.
 
+  (* Singletons are well formed *)
   Lemma well_formed_Singleton :
     forall x, well_formed (Singleton x).
   Proof with intuition.
@@ -1246,6 +1274,7 @@ Hint Resolve less_irrefl less_dim.
     inversion H0; inversion H1; subst...
   Qed.
 
+  (* Well formed sets of dimension zero are singletons *)
   Lemma dim_0_Singleton : forall S, Inhabited (sub S 1) -> well_formed S ->
     exists d, sub S 1 == Singleton d.
   Proof with intuition.
@@ -1272,6 +1301,7 @@ Hint Resolve less_irrefl less_dim.
         apply (H6) with (n := n)...
   Qed.
 
+  (* A simple condition for well-formedness of Unions *)
     Lemma well_formed_Union :
       forall A, well_formed A ->
       forall B, well_formed B ->
@@ -1297,6 +1327,7 @@ Hint Resolve less_irrefl less_dim.
 
   (** MAXIMAL and MINIMAL ELEMENTS **)
 
+  (* Finite sets have elements of maximal dimension *)
   Lemma Finite_carrier_have_max_dim_element :
     forall (T : Ensemble carrier), Finite T -> Inhabited T -> exists u, ((u ∈ T) /\
       (forall v, (v ∈ T) -> dim v <= dim u)).
@@ -1449,6 +1480,7 @@ Hint Resolve less_irrefl less_dim.
 (* movement results                                     *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* Movement is a condition that applies dimenion by dimension *)
   Lemma moves_by_dim : forall T M P, ((T moves M to P) -> (forall n, (sub T (S n) moves (sub M n) to (sub P n)))).
   Proof with intuition.
     intros...
@@ -1517,6 +1549,7 @@ Hint Resolve less_irrefl less_dim.
 (* segment lemmas                                       *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* The definition of segment can be expressed `non-inductively' *)
   Lemma segment_def :
     forall S T : Ensemble carrier,
     (S ⊆ T /\
@@ -1556,6 +1589,7 @@ Hint Resolve less_irrefl less_dim.
       apply (H1 y z z0)...
   Qed.
 
+  (* Basic properties of intial and final sets *)
   Lemma initial_property : forall S T M,
     is_initial_segment S M ->
     T ⊆ M ->
@@ -1603,6 +1637,8 @@ Hint Resolve less_irrefl less_dim.
     right with y... left... apply triangle_rest_in_set in H4...
   Qed.
 
+  (* If R is a segment of T then any path in T that starts and ends in R must also be
+     a path in R *)
   Lemma segment_lemma :
     forall R T, is_a_segment R T ->
       forall x y, triangle_rest T x y ->
@@ -1616,6 +1652,7 @@ Hint Resolve less_irrefl less_dim.
     apply H1 with x z...
   Qed.
 
+  (* Initial segments remain initial after final segments are removed *)
   Lemma initial_final_lemma :
     forall R T, is_initial_segment R T ->
       forall Q, is_final_segment Q R ->
@@ -1654,6 +1691,7 @@ Hint Resolve less_irrefl less_dim.
         unfold is_final_segment...
   Qed.
 
+  (* There are two subsets of any R that are obviously initial (final) *)
   Lemma special_is_segment :
     forall R w, w ∈ R ->
       is_final_segment (fun y => y ∈ R ∧ triangle_rest R w y) R.
@@ -1680,6 +1718,7 @@ Hint Resolve less_irrefl less_dim.
       + apply triangle_rest_trans with z...
   Qed.
 
+  (* This is a perpendicularity result related to well-formed sets *)
   Lemma Perp_thing :
     forall U V, Disjoint U V -> well_formed (U ∪ V) -> Finite U -> Finite V ->
        (forall a b, a ∈ U /\ b ∈ V -> dim a = dim b) ->
@@ -1726,6 +1765,7 @@ Hint Resolve less_irrefl less_dim.
       apply (H9 x1)...
   Qed.
 
+  (* basic result about dimension ??? *)
   Lemma TT : forall k R T, setdim T k /\ setdim R k ->
                 (forall m, m <= S k -> sub T m == sub R m) -> R == T.
   Proof with intuition.
@@ -1742,6 +1782,7 @@ Hint Resolve less_irrefl less_dim.
       repeat (rewrite sub_sup_Empty_set)...
   Qed.
 
+  (* Another basic result about well_formed sets and perpendicularity *)
   Lemma well_formed_Union_lemma : forall S T,
     well_formed S ->
     well_formed T ->
@@ -1775,11 +1816,24 @@ Hint Resolve less_irrefl less_dim.
       refine (H5 _ _ _ n _ _ _)...
   Qed.
 
+  Lemma Empty_set_moves : forall M, Empty_set moves M to M.
+  Proof with intuition.
+    intros...
+    unfold moves_def...
+    rewrite <- Setminus_is_Intersection_Complement.
+    rewrite Plus_Empty_set, Minus_Empty_set, Setminus_Empty_set, Empty_set_ident_right...
+    rewrite <- Setminus_is_Intersection_Complement.
+    rewrite Plus_Empty_set, Minus_Empty_set, Setminus_Empty_set, Empty_set_ident_right...
+  Qed.
+
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Section 2                                            *)
+(*                                                      *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Back to non-trivial results                          *)
 
 
+  (* Every set S moves its purely negative faces to its purely positive faces *)
   (* This follows directly from definitions and basic set operations *)
   Lemma Observation_p321 :
     forall (S : Ensemble carrier), Finite S -> S moves (MinusPlus S) to (PlusMinus S).
@@ -1805,9 +1859,9 @@ Hint Resolve less_irrefl less_dim.
     apply all_decidable...
   Qed.
 
+  (* Proposition 2.1 gives an equivalent statement for S moving out of M, in which case P is
+     uniquely defined *)
   (* This follows directly from definitions of movement and basic set operations *)
-  (* note that P is uniquely defined, but that it only satisfies the movement property
-     when the appropriate conditions on M are met *)
   Lemma Prop_2_1 : forall (S M : Ensemble carrier),
      Finite S ->
      ((exists (P : Ensemble carrier), S moves M to P)
@@ -1843,8 +1897,8 @@ Hint Resolve less_irrefl less_dim.
     apply all_decidable...
   Qed.
 
-  (* this is a somewhat more direct expression of the previous lemma *)
-  (* it is more helpful in some cases *)
+  (* This is a somewhat more direct expression of the previous lemma, it 
+     is more helpful in some cases *)
   Lemma Prop_2_1' : forall (S M : Ensemble carrier),
      Finite S ->
      (S moves M to ((M ∪ (Plus S)) ∩ √(Minus S))
@@ -1860,7 +1914,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H0...
   Qed.
 
-  (* dual arguments give the following two lemmas, there is nothing sneaky here *)
+  (* The following lemmas are dual to the two given above *)
   Lemma Prop_2_1_dual : forall (S P : Ensemble carrier),
      Finite S ->
      ((exists (M : Ensemble carrier), S moves M to P)
@@ -1910,10 +1964,12 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H1...
   Qed.
 
-  (* This is proved using proposition 2.1 and basic set operations *)
-  (* the idea is that, all elements of A that are not in MinusPlus S can be
+  (* Proposition 2.2 gives conditions underwhich a movement may be modified by adding or 
+     removing sets X and Y *)
+  (* This is proved using Proposition 2.1 and basic set operations *)
+  (* All elements of A that are not in MinusPlus S can be
      removed to create a meaningful movement condition *)
-  (* similarly, all elements that are disjoint from Plus S and Minus S can
+  (* Similarly, all elements that are disjoint from Plus S and Minus S can
      be safely added to create a meaningful movement condition *)
   Lemma Prop_2_2 :
     forall (S A B X: Ensemble carrier),
@@ -1974,6 +2030,7 @@ Hint Resolve less_irrefl less_dim.
     apply Disjoint_property_left. apply H3.
   Qed.
 
+  (* This is the obvious dual *)
   Lemma Prop_2_2_dual :
     forall (S A B X: Ensemble carrier),
     Finite S ->
@@ -2034,6 +2091,7 @@ Hint Resolve less_irrefl less_dim.
     apply Disjoint_property_left. apply H2.
   Qed.
 
+  (* The following proof is just a specific instance of Proposition 2.2 above *)
 (*
   Lemma Prop_2_2' :
     forall (S A B: Ensemble carrier) (x : carrier),
@@ -2092,9 +2150,10 @@ Hint Resolve less_irrefl less_dim.
   Qed.
 *)
 
-  (* This is a basic condition for composition of movements *)
+
+  (* Proposition 2.3 is a basic condition for composition of movements *)
   (* The proof relies only on definitions and basic set operations *)
-  (* there isn't a meaningful dual to this theorem *)
+  (* There is no dual to this theorem *)
   Lemma Prop_2_3 :
     forall (S M P T Q : Ensemble carrier),
     S moves M to P -> T moves P to Q -> (Disjoint (Minus S) (Plus T) )
@@ -2136,10 +2195,10 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- Union_comm, Union_trans...
   Qed.
 
-  (* This is a basic condition concerning decomposition *)
-  (* The reasoning is no more complicated than the basic
-     combinatorics of the situation *)
-  (* this has an obvious dual *)
+
+  (* Proposition 2.4 gives a basic condition concerning decomposition of movement *)
+  (* The reasoning is no more complicated than the basic combinatorics of the situation *)
+  (* This has an obvious dual *)
   Lemma Prop_2_4 :
     forall (T Z M P : Ensemble carrier),
     Finite Z -> Finite T -> (T ∪ Z) moves M to P ->
@@ -2245,6 +2304,7 @@ Hint Resolve less_irrefl less_dim.
     rewrite H14... auto. auto.
   Qed.
 
+  (* The dual to Proposition 2.4 *)
   Lemma Prop_2_4_dual :
     forall (T Z M P : Ensemble carrier),
     Finite Z -> Finite T -> (T ∪ Z) moves M to P ->
@@ -2350,7 +2410,8 @@ Hint Resolve less_irrefl less_dim.
     rewrite H14... auto. auto.
   Qed.
 
-  (* this remembers some of the essential data to the proof above *)
+  (* The following lemmas remember some of the essential data of Proposition 2.4
+     and its proof. *)
   Lemma Prop_2_4_exact :
     forall (T Z M P : Ensemble carrier),
     Finite Z -> Finite T -> (T ∪ Z) moves M to P ->
@@ -2399,7 +2460,12 @@ Hint Resolve less_irrefl less_dim.
     rewrite <- H4, <- H5...
   Qed.
 
-      Definition less_than := fun R T => (fun x => (exists y, y ∈ T /\ triangle_rest R x y)).
+  (* The following are experimental results concerning specific segments *)
+
+  (* A less_than R T is the set of elements of R that are less than some element of T *)
+  (* It is not strictly required that T be included in R, but the set will be empty 
+     otherwise *)
+  Definition less_than := fun R T => (fun x => (exists y, y ∈ T /\ triangle_rest R x y)).
 
       Lemma Singleton_segment :
         forall R z, is_a_segment (less_than R (Singleton z)) R.
@@ -2466,6 +2532,187 @@ Hint Resolve less_irrefl less_dim.
           inversion H3; clear H3...
           apply triangle_rest_in_set in H4...
       Qed.
+
+  Lemma well_formed_sup : forall R n, well_formed R -> well_formed (sup R n).
+  Proof with intuition.
+    intros.
+    apply (well_formed_Included R)...
+  Qed.
+
+  Lemma well_formed_sub : forall R n, well_formed R -> well_formed (sub R n).
+  Proof with intuition.
+    intros.
+    apply (well_formed_Included R)...
+  Qed.
+
+
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+
+  Lemma Observation_p322 :
+    forall (T Z : Ensemble carrier),
+    well_formed (T ∪ Z) ->
+    Disjoint T Z ->
+    Perp T Z.
+  Proof with repeat basic; auto.
+    intros T Z WF Disj. remember (T ∪ Z) as S'.
+    unfold well_formed in WF...
+    rename H into WF0.
+    rename H0 into WFSn.
+    rename H1 into Disj.
+    unfold Perp...
+
+    apply Disjoint_Intersection_condition. constructor. unfold not in *.
+    intros... rename H0 into PT. rename H1 into PZ.
+    unfold Plus in PT. unfold In in PT.
+    unfold Plus in PZ. unfold In in PZ...
+    assert (dim x0 = S (dim x)). symmetry. apply plus_dim. unfold In...
+    assert (dim x1 = S (dim x)). symmetry. apply plus_dim. unfold In...
+    assert (x0 = x1).
+    refine (WFSn _ _ _ (dim x) _ _ _). split; rewrite HeqS'. right... left...
+    apply H. assumption.
+    unfold perp. intros...
+    apply Disjoint_Intersection_condition in H6.
+    inversion H6 as [J]; clear H6; unfold not in J; apply (J x)...
+    subst.
+    apply (Disj x1)...
+
+    apply Disjoint_Intersection_condition. constructor. unfold not in *.
+    intros... rename H0 into PT. rename H1 into PZ.
+    unfold Minus in PT. unfold In in PT.
+    unfold Minus in PZ. unfold In in PZ...
+    assert (dim x0 = S (dim x)). symmetry. apply minus_dim. unfold In...
+    assert (dim x1 = S (dim x)). symmetry. apply minus_dim. unfold In...
+    assert (x0 = x1).
+    refine (WFSn _ _ _ (dim x) _ _ _). split; rewrite HeqS'. right... left...
+    apply H. assumption.
+    unfold perp. intros...
+    apply Disjoint_Intersection_condition in H7.
+    inversion H7 as [J]; clear H6; unfold not in J; apply (J x)...
+    subst.
+    apply (Disj x1)...
+  Qed.
+
+
+  Lemma well_formed_Setminus : forall S, well_formed S -> forall T, well_formed (Setminus S T).
+  Proof with intuition.
+    intros.
+    apply (well_formed_Included S)...
+    crush.
+  Qed.
+
+  Lemma well_formed_Empty_set : well_formed Empty_set.
+  Proof with intuition.
+    unfold well_formed...
+    exfalso...
+    exfalso...
+  Qed.
+
+  Lemma Disjoint_Plus : forall M R T, Disjoint R T ->
+     R ⊆ M -> T ⊆ M ->
+     well_formed M ->
+     Disjoint (Plus R) (Plus T).
+  Proof with intuition.
+    intros...
+    constructor...
+    apply Intersection_inv in H3...
+    inversion H4; clear H4...
+    inversion H5; clear H5...
+    assert (x0 = x1)...
+      unfold well_formed in H2...
+      remember (dim x0) as n.
+      destruct n...
+      exfalso.
+      assert (In Empty_set x)...
+        rewrite <- (plus_zero x0)...
+      refine (H8 _ _ _ n _ _ _)...
+      assert (S (dim x) = dim x0)...
+      assert (S (dim x) = dim x1)...
+      rewrite Heqn, <- H9...
+      unfold perp in H2...
+      assert (In Empty_set x)...
+        rewrite <- H9...
+    subst.
+    inversion H...
+    apply (H3 x1)...
+  Qed.
+
+  Lemma Disjoint_Minus : forall M R T, Disjoint R T ->
+     R ⊆ M -> T ⊆ M ->
+     well_formed M ->
+     Disjoint (Minus R) (Minus T).
+  Proof with intuition.
+    intros...
+    constructor...
+    apply Intersection_inv in H3...
+    inversion H4; clear H4...
+    inversion H5; clear H5...
+    assert (x0 = x1)...
+      unfold well_formed in H2...
+      remember (dim x0) as n.
+      destruct n...
+      exfalso.
+      assert (In Empty_set x)...
+        rewrite <- (minus_zero x0)...
+      refine (H8 _ _ _ n _ _ _)...
+      assert (S (dim x) = dim x0)...
+      assert (S (dim x) = dim x1)...
+      rewrite Heqn, <- H9...
+      unfold perp in H2...
+      assert (In Empty_set x)...
+        rewrite <- H10...
+    subst.
+    inversion H...
+    apply (H3 x1)...
+  Qed.
+
+Lemma weird_moves_lemma1 : forall M P, forall x, In (Intersection M P) x
+                     -> Disjoint M (plus x) -> (minus x) ⊆ M ->
+    ((Singleton x) moves M to Setminus (M ∪ plus x) (minus x)).
+Proof with intuition.
+   unfold moves_def...
+        rewrite Plus_Singleton, Minus_Singleton.
+        rewrite Setminus_is_Intersection_Complement...
+        rewrite Plus_Singleton, Minus_Singleton.
+        rewrite Union_Setminus_cancel.
+        rewrite I_U_dist_r.
+        rewrite Empty_set_property.
+        rewrite Empty_set_ident_right.
+        apply Disjoint_result.
+        apply Disjoint_Intersection_condition...
+        apply all_decidable...
+        apply Union_Included_cancel_right...
+Qed.
+
+Lemma weird_moves_lemma2 : forall M P, forall x, In (Intersection M P) x
+                     -> Disjoint P (minus x) -> Included (plus x) P ->
+    ((Singleton x) moves Setminus (P ∪ minus x) (plus x) to P).
+Proof with intuition.
+   unfold moves_def...
+        rewrite Plus_Singleton, Minus_Singleton.
+        rewrite Union_Setminus_cancel.
+        rewrite I_U_dist_r.
+        rewrite Empty_set_property.
+        rewrite Empty_set_ident_right.
+        apply Disjoint_result.
+        apply Disjoint_Intersection_condition...
+        apply all_decidable...
+        apply Union_Included_cancel_right...
+
+        rewrite Plus_Singleton, Minus_Singleton.
+        rewrite Setminus_is_Intersection_Complement...
+Qed.
+
+ Lemma sup_Singleton_Empty_set:
+  forall (y : carrier) (k : nat), k <= (dim y) -> sup (Singleton y) k == Empty_set.
+ Proof with intuition.
+   intros...
+   crush...
+   inversion H1; clear H1; subst.
+   assert (S (dim x) <= (dim x))...
+   apply le_trans with k...
+ Qed.
+
 
 End PreParityTheory.
 

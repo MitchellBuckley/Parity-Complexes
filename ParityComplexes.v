@@ -53,23 +53,34 @@ Module ParityComplexTheory (M : ParityComplex).
   Import PPT.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Basic results direct from definitions                *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+(* These would have been included in PreparityComplexes
+   if they did not depend on an axiom given here        *)
+
+
+  (* The restricted triangle ordering is decidable when the set is finite *)
   Lemma triangle_rest_dec :
     forall T,
       Finite T ->
       forall x z, (triangle_rest T z x \/ ~(triangle_rest T z x)).
   Proof with intuition.
+   (* adjust statement to use cardinality of T *)
    intros T TFin.
    assert (exists n, Cardinal T n) as K.
      apply Cardinality_exists...
    inversion K as [n TCard]; clear K.
    revert n T TFin TCard.
+   (* use strong induction on n *)
    refine (strong_induction _ _ _)...
-     - right...
+     - (* case 0: T must be empty *)
+       right...
        apply Cardinality_zero_Empty_set in TCard.
        rewrite TCard in H...
        apply triangle_rest_in_set in H...
-     - set (R := fun r => less z r /\ r ∈ T).
+     - (* R, the set of elements immediately above z, is finite *)
+       set (R := fun r => less z r /\ r ∈ T).
        assert (Finite R) as RFin.
          apply (Finite_Included T)...
          unfold R, Included... unfold In at 1 in H0...
@@ -77,29 +88,35 @@ Module ParityComplexTheory (M : ParityComplex).
          apply less_decidable.
          left... unfold R, In at 1...
          right... unfold R, In at 1 in H1...
+       (* get cardinality of R *)
        assert (exists n, Cardinal R n) as J.
        apply Cardinality_exists...
        inversion J as [k RCard]; clear J...
+       (* If x or z not in T then this is easy *)
        assert (decidable T) as Tdec.
          apply Finite_are_decidable...
        assert ((x ∈ T) \/ ~(x ∈ T))...
          apply Tdec.
        assert ((z ∈ T) \/ ~(z ∈ T))...
          apply Tdec.
+       (* Now if x = z then this is easy *)
        assert ((z = x) \/ ~(z = x))...
          apply carrier_decidable_eq.
        left.
        rewrite H3; left...
 
+       (* There are now two cases depending on the cardinality of R *)
        destruct k.
-       + right...
+       + (* If R is empty then right side is true because z < x *)
+         right...
          inversion H0...
          assert (y ∈ R).
            unfold R, In at 1...
            apply triangle_rest_in_set in H6...
          apply Cardinality_zero_Empty_set in RCard.
          rewrite RCard in H9...
-       + set (T' := Setminus T (Singleton z)).
+       + (* Hmm... *)
+         set (T' := Setminus T (Singleton z)).
          assert (Finite T') as T'Fin.
            unfold T'...
            rewrite Setminus_is_Intersection_Complement.
@@ -169,23 +186,7 @@ Module ParityComplexTheory (M : ParityComplex).
        + right... apply H1... apply triangle_rest_in_set in H0...
   Qed.
 
-
-(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(* Basic results direct from definitions                *)
-(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-
-  Lemma well_formed_sup : forall R n, well_formed R -> well_formed (sup R n).
-  Proof with intuition.
-    intros.
-    apply (well_formed_Included R)...
-  Qed.
-
-  Lemma well_formed_sub : forall R n, well_formed R -> well_formed (sub R n).
-  Proof with intuition.
-    intros.
-    apply (well_formed_Included R)...
-  Qed.
-
+  (* Every finite set X has a minimal element *)
   Lemma minimal_exists :
     forall t, forall X, Cardinal X (S t) -> forall n, Included X (sub Full_set (S n))
       -> exists m, m ∈ X /\ (forall y, y ∈ X -> (triangle_rest X y m) -> m = y).
@@ -284,6 +285,7 @@ Module ParityComplexTheory (M : ParityComplex).
             apply (tr_trans _ _ y)...
   Qed.
 
+  (* Every finite set X has a maximal element *)
   Lemma maximal_exists :
     forall t, forall X, Cardinal X (S t) -> forall n, Included X (sub Full_set (S n))
       -> exists m, m ∈ X /\ (forall y, y ∈ X -> (triangle_rest X m y) -> m = y).
@@ -396,6 +398,7 @@ Module ParityComplexTheory (M : ParityComplex).
             right with y...
   Qed.
 
+  (* More compact statements of the previous two lemmas *) 
   Lemma minimal_exists' : forall (X : Ensemble carrier),
        Finite X /\ Inhabited X ->
          forall n : nat,
@@ -420,6 +423,8 @@ Module ParityComplexTheory (M : ParityComplex).
     apply (maximal_exists x)...
   Qed.
 
+  (* well-formed sets have minimal elements, but here minimal elements are 
+     characterised differently. *) 
   Lemma wf_minimal_exists :
     forall X n, Finite X /\ Inhabited X /\ (X ⊆ sub Full_set (S (S n))) ->
       well_formed X ->
@@ -459,6 +464,8 @@ Module ParityComplexTheory (M : ParityComplex).
           inversion H8... apply Intersection_inv in H13...
   Qed.
 
+  (* well-formed sets have maximal elements, but here maximal elements are 
+     characterised differently. *) 
   Lemma wf_maximal_exists :
     forall X n, Finite X /\ Inhabited X /\ (X ⊆ sub Full_set (S (S n))) ->
       well_formed X ->
@@ -504,6 +511,7 @@ Module ParityComplexTheory (M : ParityComplex).
           inversion H8... apply Intersection_inv in H13...
   Qed.
 
+  (* If X is non-empty then PlusMinus X is non-empty *)
   Lemma PlusMinus_Inhabited :
     forall X n,
       Included X (sub Full_set (S (S n))) ->
@@ -572,6 +580,7 @@ Module ParityComplexTheory (M : ParityComplex).
 (* Section 1                                            *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* Proposition 1.1 *)
   Lemma Prop_1_1 :
     forall x,
     (Plus (plus x)) ∩ (Minus (minus x)) == (Empty_set) == (Plus (minus x)) ∩ (Minus (plus x))
@@ -636,6 +645,7 @@ Module ParityComplexTheory (M : ParityComplex).
     rewrite <- (axiom1 x)... apply Union_inv in H0... inversion H0...
   Qed.
 
+  (* Proposition 1.2 and its three duals *)
   Lemma Prop_1_2 :
     forall u v x,
     triangle u v ->
@@ -660,7 +670,7 @@ Module ParityComplexTheory (M : ParityComplex).
   Lemma Prop_1_2' :
     forall u v x,
     triangle u v ->
-    In (minus x) v ->
+    v ∈ (minus x) ->
     (minus u) ∩ (Plus (plus x)) == Empty_set.
   Proof with repeat basic; auto.
     intros.
@@ -726,6 +736,7 @@ Module ParityComplexTheory (M : ParityComplex).
      - inversion H1.
   Qed.
 
+  (* Proposition 1.3 *)
   Lemma Prop_1_3 :
     forall R S', Finite R ->
       tight R -> well_formed S' -> R ⊆ S' -> is_a_segment R S'.
@@ -770,6 +781,7 @@ Module ParityComplexTheory (M : ParityComplex).
       rewrite H0...
   Qed.
 
+  (* p349 of the corrigenda *)
   Lemma xplus_is_tight :
     forall x, tight (plus x).
   Proof with repeat basic; auto.
@@ -800,8 +812,11 @@ Module ParityComplexTheory (M : ParityComplex).
     apply Empty_set_zero_right.
   Qed.
 
-  (* Section 2 *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Section 2                                            *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* An observation about disjoint sets *)
   Lemma Observation_p322 :
     forall (T Z : Ensemble carrier),
     well_formed (T ∪ Z) ->
@@ -846,9 +861,12 @@ Module ParityComplexTheory (M : ParityComplex).
     apply (Disj x1)...
   Qed.
 
+ 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
-(* Cells                                                *)
+(* Section 3                                            *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+  (* A series of definitions concerning cells, their source, target, and composition *)
 
   Definition Same_pair (A B: Ensemble carrier * Ensemble carrier) : Prop :=
     let (M, P) := A in let (M', P') := B in
@@ -885,6 +903,7 @@ Module ParityComplexTheory (M : ParityComplex).
     let (N, Q) := B in
     ((M ∪ (N ∩ √(sub N (S n)))), ((P ∩ √(sub P (S n))) ∪ Q)).
 
+  (* Definitions of receptivity and their setoid properties *)
   Definition receptive_x (S : Ensemble carrier) (x : carrier) : Prop :=
     ((Plus (minus x)) ∩ (Plus (plus x)) ⊆ S ->
        (Inhabited (S ∩ (Minus (minus x))) -> False) ->
@@ -968,6 +987,7 @@ Module ParityComplexTheory (M : ParityComplex).
 (* Basic results direct from definitions                *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* receptivity is a property that applies dimension by dimension *)
   Lemma receptive_x_by_dimension  : forall T x, receptive_x T x -> (forall n, receptive_x (sub T n) x).
   Proof with intuition.
     unfold receptive, receptive_x.
@@ -1073,16 +1093,7 @@ Module ParityComplexTheory (M : ParityComplex).
     apply receptive_x_by_dimension'...
   Qed.
 
-  Lemma Empty_set_moves : forall M, Empty_set moves M to M.
-  Proof with intuition.
-    intros...
-    unfold moves_def...
-    rewrite <- Setminus_is_Intersection_Complement.
-    rewrite Plus_Empty_set, Minus_Empty_set, Setminus_Empty_set, Empty_set_ident_right...
-    rewrite <- Setminus_is_Intersection_Complement.
-    rewrite Plus_Empty_set, Minus_Empty_set, Setminus_Empty_set, Empty_set_ident_right...
-  Qed.
-
+  (* Every cell has a dimension *)
   Lemma cell_has_dim : forall M P, is_a_cell (M, P) -> exists m, celldim (M, P) m.
   Proof with repeat basic; auto.
     intros.
@@ -1104,6 +1115,7 @@ Module ParityComplexTheory (M : ParityComplex).
     left...
   Qed.
 
+  (* The dimension of sources and targets is easily determined *)
   Lemma target_dim : forall M P, is_a_cell (M, P) -> forall m,
     (celldim (target m (M, P)) m).
   Proof with intuition.
@@ -1124,6 +1136,7 @@ Module ParityComplexTheory (M : ParityComplex).
     apply (le_trans _ (S (dim x)))...
   Qed.
 
+  (* The top layer of a cell has this nice property *)
  Lemma cell_dim_n_property :
     forall M P, is_a_cell (M, P) -> forall n, celldim (M, P) n -> sub M (S n) == sub P (S n).
   Proof with intuition.
@@ -1145,6 +1158,7 @@ Module ParityComplexTheory (M : ParityComplex).
     rewrite <- H13 in H12. rewrite H11 in H12. apply (le_Sn_n n)...
   Qed.
 
+  (* An induction result that help establish that cells are not empty *)
   Lemma M_n_Inhabited :
     forall M P,
       is_a_cell (M, P) ->
@@ -1257,6 +1271,7 @@ Module ParityComplexTheory (M : ParityComplex).
     unfold less in H9...
   Qed.
 
+  (* These are dual to the previous two *)
   Lemma M_n_Empty_set :
     forall M P,
       is_a_cell (M, P) ->
@@ -1291,6 +1306,7 @@ Module ParityComplexTheory (M : ParityComplex).
     rewrite H0 in W...
   Qed.
 
+  (* the set of 0-dimensional elements of a cell is not empty *)
   Lemma M_0_not_empty :
     forall M P,
       is_a_cell (M, P) ->
@@ -1325,6 +1341,7 @@ Module ParityComplexTheory (M : ParityComplex).
     inversion H8 as [s D]; rewrite H1 in D; inversion D.
   Qed.
 
+  (* This is dual to the previous result *)
   Lemma M_0_Inhabited :
     forall M P,
       is_a_cell (M, P) ->
@@ -1365,6 +1382,7 @@ Module ParityComplexTheory (M : ParityComplex).
       inversion H0.  rewrite <- H1...
   Qed.
 
+  (* previous result restated *)
   Lemma M_0_Inhabited' :
     forall M P,
       is_a_cell (M, P) -> Inhabited (sub M 1).
@@ -1389,6 +1407,7 @@ Module ParityComplexTheory (M : ParityComplex).
     apply (P_0_not_empty M P)...
   Qed.
 
+  (* sources and targets are cells *)
   Lemma source_is_a_cell : forall (M P : Ensemble carrier),
     is_a_cell (M, P) ->
     forall n,
@@ -1720,6 +1739,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
   Qed.
 
+  (* Hmm... *)
   Lemma maximal_property :
     forall X, Finite X -> Inhabited X -> forall n, Included X (sub Full_set (S n))
       -> exists x, x ∈ X /\ Disjoint (plus x) (Minus X).
@@ -1742,6 +1762,7 @@ Module ParityComplexTheory (M : ParityComplex).
     inversion H.
   Qed.
 
+  (* Same_set on Finite sets is decidable *)
   Lemma Finite_eq_decidable : forall T, @Finite carrier T -> forall R, Finite R -> ((T == R) \/ ~(T == R)).
   Proof with intuition.
     intros T TFin.
@@ -1770,115 +1791,7 @@ Module ParityComplexTheory (M : ParityComplex).
       - rewrite H...
   Qed.
 
-  Lemma well_formed_Setminus : forall S, well_formed S -> forall T, well_formed (Setminus S T).
-  Proof with intuition.
-    intros.
-    apply (well_formed_Included S)...
-    crush.
-  Qed.
-
-  Lemma well_formed_Empty_set : well_formed Empty_set.
-  Proof with intuition.
-    unfold well_formed...
-    exfalso...
-    exfalso...
-  Qed.
-
-  Lemma Disjoint_Plus : forall M R T, Disjoint R T ->
-     R ⊆ M -> T ⊆ M ->
-     well_formed M ->
-     Disjoint (Plus R) (Plus T).
-  Proof with intuition.
-    intros...
-    constructor...
-    apply Intersection_inv in H3...
-    inversion H4; clear H4...
-    inversion H5; clear H5...
-    assert (x0 = x1)...
-      unfold well_formed in H2...
-      remember (dim x0) as n.
-      destruct n...
-      exfalso.
-      assert (In Empty_set x)...
-        rewrite <- (plus_zero x0)...
-      refine (H8 _ _ _ n _ _ _)...
-      assert (S (dim x) = dim x0)...
-      assert (S (dim x) = dim x1)...
-      rewrite Heqn, <- H9...
-      unfold perp in H2...
-      assert (In Empty_set x)...
-        rewrite <- H9...
-    subst.
-    inversion H...
-    apply (H3 x1)...
-  Qed.
-
-  Lemma Disjoint_Minus : forall M R T, Disjoint R T ->
-     R ⊆ M -> T ⊆ M ->
-     well_formed M ->
-     Disjoint (Minus R) (Minus T).
-  Proof with intuition.
-    intros...
-    constructor...
-    apply Intersection_inv in H3...
-    inversion H4; clear H4...
-    inversion H5; clear H5...
-    assert (x0 = x1)...
-      unfold well_formed in H2...
-      remember (dim x0) as n.
-      destruct n...
-      exfalso.
-      assert (In Empty_set x)...
-        rewrite <- (minus_zero x0)...
-      refine (H8 _ _ _ n _ _ _)...
-      assert (S (dim x) = dim x0)...
-      assert (S (dim x) = dim x1)...
-      rewrite Heqn, <- H9...
-      unfold perp in H2...
-      assert (In Empty_set x)...
-        rewrite <- H10...
-    subst.
-    inversion H...
-    apply (H3 x1)...
-  Qed.
-
-Lemma weird_moves_lemma1 : forall M P, forall x, In (Intersection M P) x
-                     -> Disjoint M (plus x) -> (minus x) ⊆ M ->
-    ((Singleton x) moves M to Setminus (M ∪ plus x) (minus x)).
-Proof with intuition.
-   unfold moves_def...
-        rewrite Plus_Singleton, Minus_Singleton.
-        rewrite Setminus_is_Intersection_Complement...
-        rewrite Plus_Singleton, Minus_Singleton.
-        rewrite Union_Setminus_cancel.
-        rewrite I_U_dist_r.
-        rewrite Empty_set_property.
-        rewrite Empty_set_ident_right.
-        apply Disjoint_result.
-        apply Disjoint_Intersection_condition...
-        apply all_decidable...
-        apply Union_Included_cancel_right...
-Qed.
-
-Lemma weird_moves_lemma2 : forall M P, forall x, In (Intersection M P) x
-                     -> Disjoint P (minus x) -> Included (plus x) P ->
-    ((Singleton x) moves Setminus (P ∪ minus x) (plus x) to P).
-Proof with intuition.
-   unfold moves_def...
-        rewrite Plus_Singleton, Minus_Singleton.
-        rewrite Union_Setminus_cancel.
-        rewrite I_U_dist_r.
-        rewrite Empty_set_property.
-        rewrite Empty_set_ident_right.
-        apply Disjoint_result.
-        apply Disjoint_Intersection_condition...
-        apply all_decidable...
-        apply Union_Included_cancel_right...
-
-        rewrite Plus_Singleton, Minus_Singleton.
-        rewrite Setminus_is_Intersection_Complement...
-Qed.
-
+ (* In a cell M P, a single element can be removed from the movement condition *)
 Lemma P_moves_Mx_to_Px : forall M P, is_a_cell (M, P) ->
                forall x, In (Intersection M P) x ->
                P moves Setminus M (Singleton x) to Setminus P (Singleton x).
@@ -1949,13 +1862,12 @@ Lemma M_moves_Mx_to_Px : forall M P, is_a_cell (M, P) ->
         apply (H4 x0)...
 Qed.
 
-(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
-
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Section 3                                            *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* Proposition 3.1 *)
   Lemma Prop_3_1 :
     forall x M P,
       (plus x) moves M to P ->
@@ -2076,6 +1988,8 @@ Qed.
       rewrite H6...
   Qed.
 
+  (* The statement of Lemma 3.2 B that is parametrised over dimension n
+     and cardinality m *)
   Definition Lemma_3_2_b_st : nat -> nat -> Prop :=
     (fun n => (fun m =>
     forall (X : Ensemble carrier),
@@ -2085,6 +1999,8 @@ Qed.
     is_a_cell ( (sup M n) ∪ (((sub M (S n)) ∪ Minus X) ∩ √(Plus X)), (sup P n) ∪ (((sub M (S n)) ∪ Minus X) ∩ √(Plus X)) )
     /\ (Minus X ∩ (sub M (S n))) == Empty_set))).
 
+  (* The statement of Lemma 3.2 C that is parametrised over dimension n
+     and cardinality m *)
   Definition Lemma_3_2_c_st : nat -> nat -> Prop :=
     (fun n => (fun m =>
     forall (X : Ensemble carrier),
@@ -2112,11 +2028,13 @@ Qed.
     is_a_cell ( M ∪ X, (sup P n) ∪ (((sub P (S n)) ∪ Plus X) ∩ √(Minus X)) ∪ X)
     ))).
 
+  (* The statement of Proposition 3.3 that is parametrised over dimension n *)
   Definition Prop_3_3_st : nat -> Prop :=
     fun n => forall M P, is_a_cell (M, P) ->
     celldim (M, P) n ->
     receptive M /\ receptive P.
 
+  (* receptivity is downward closed with respect to dimension *)
   Lemma dim_Prop_3_3 : forall n m, n <= m -> Prop_3_3_st m -> Prop_3_3_st n.
   Proof with intuition.
     unfold Prop_3_3_st, celldim, setdim; intros.
@@ -2124,6 +2042,7 @@ Qed.
     apply le_trans with n...
   Qed.
 
+  (* Lemma 3.2 holds when m=0 *)
   Lemma Lemma_3_2_b_n_0 : forall n, Lemma_3_2_b_st n 0.
   Proof with intuition.
     intros n.
@@ -2242,6 +2161,7 @@ Qed.
     inversion H3.
   Qed.
 
+  (* Lemma 3.2 holds when m=1, n=0 *)
   Lemma Lemma_3_2_b_0_1 : Lemma_3_2_b_st 0 1.
   Proof with intuition.
     unfold Lemma_3_2_b_st.
@@ -2381,6 +2301,7 @@ Qed.
       apply plus_minus_Disjoint.
   Qed.
 
+  (* Lemma 3.2B implies Lemma 3.2C for fixed m,n *)
   Lemma Lemma_3_2_Step_1 :
     forall n m, (Lemma_3_2_b_st n m) -> (Lemma_3_2_c_st n m).
   Proof with intuition.
@@ -2868,6 +2789,7 @@ Qed.
         apply Empty_set_moves.
   Qed.
 
+  (* Lemma 3.2B for m=1 implies Lemma 3.2B for 1 <= m *)
   Lemma Lemma_3_2_Step_2 :
     forall n, ((Lemma_3_2_b_st n 1) -> (forall m, Lemma_3_2_b_st n (S m))).
   Proof with intuition.
@@ -3223,16 +3145,6 @@ Qed.
         apply Intersection_Included_compat...
         apply Union_Included_compat...
 
- Lemma sup_Singleton_Empty_set:
-  forall (y : carrier) (k : nat), k <= (dim y) -> sup (Singleton y) k == Empty_set.
- Proof with intuition.
-   intros...
-   crush...
-   inversion H1; clear H1; subst.
-   assert (S (dim x) <= (dim x))...
-   apply le_trans with k...
- Qed.
-
       assert (sup N n == sup M n) as J1.
         unfold N.
         rewrite <- Setminus_is_Intersection_Complement.
@@ -3350,6 +3262,8 @@ Qed.
     apply (H1 x0)... basic...
     apply (Plus_Included Z X)... rewrite XZrel...
   Qed.
+
+(* COMMENTED TO HERE *)
 
     Lemma maximal_plus_lemma :
       forall S m,
