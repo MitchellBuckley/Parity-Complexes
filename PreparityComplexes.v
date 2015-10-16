@@ -1826,10 +1826,17 @@ Hint Resolve less_irrefl less_dim.
     rewrite Plus_Empty_set, Minus_Empty_set, Setminus_Empty_set, Empty_set_ident_right...
   Qed.
 
+
+  Lemma perp_sym : forall a b, perp a b -> perp b a.
+  Proof.
+    unfold perp; intuition; rewrite Intersection_comm; assumption.
+  Qed.
+
+
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Section 2                                            *)
-(*                                                      *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
 (* Back to non-trivial results                          *)
 
 
@@ -2713,6 +2720,29 @@ Qed.
    apply le_trans with k...
  Qed.
 
+
+  Lemma perp_sym : forall a b, perp a b -> perp b a.
+  Proof with intuition.
+    unfold perp; intuition; rewrite Intersection_comm; assumption.
+  Qed.
+
+ Lemma well_formed_shortcut : forall A B,
+  well_formed A ->
+  well_formed B ->
+  (forall a b n, a ∈ A -> b ∈ B -> dim a = S n -> dim b = S n -> (~ perp a b) -> a = b) ->
+  (forall a b  , a ∈ A -> b ∈ B -> dim a = 0 -> dim b = 0 -> a = b) ->
+  well_formed (A ∪ B).
+ Proof with intuition.
+   intros.
+   unfold well_formed in H.
+   unfold well_formed in H0.
+   unfold well_formed; intuition; repeat (basic; intuition).
+   symmetry. apply H2...
+   refine (H4 _ _ _ n _ _ _)...
+   symmetry. apply (H1 _ _ n)... apply perp_sym in H6...
+   apply (H1 _ _ n)...
+   refine (H5 _ _ _ n _ _ _)...
+ Qed.
 
 End PreParityTheory.
 

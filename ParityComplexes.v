@@ -18,11 +18,13 @@ Require Import Recdef.
 
 Module Type ParityComplex.
 
+  (* Import Preparity with its theory *)
   Declare Module C : PreParity.
   Import C.
   Module PPT := PreParityTheory C.
   Import PPT.
 
+  (* Add the axioms *)
   Axiom axiom1 :
     forall (x : carrier),
       (Plus (plus x)) ∪ (Minus (minus x)) == (Plus (minus x)) ∪ (Minus (plus x)).
@@ -57,7 +59,8 @@ Module ParityComplexTheory (M : ParityComplex).
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 (* These would have been included in PreparityComplexes
-   if they did not depend on an axiom given here        *)
+   if they did not depend on an axioms given here
+*)
 
 
   (* The restricted triangle ordering is decidable when the set is finite *)
@@ -987,6 +990,27 @@ Module ParityComplexTheory (M : ParityComplex).
 (* Basic results direct from definitions                *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* results for same_pair *)
+  Lemma Same_pair_dec : forall A B C D, 
+                 Finite A -> Finite B ->
+                 Finite C -> Finite D ->
+                      (((A, B) === (C, D)) \/ ~((A, B) === (C, D))).
+  Proof with intuition.
+    intros.
+    assert ((A == C) \/ ~(A == C))... apply Finite_eq_decidable...
+    assert ((B == D) \/ ~(B == D))... apply Finite_eq_decidable...
+      right; unfold Same_pair...
+      right; unfold Same_pair...
+  Qed.
+
+  Lemma Same_pair_by_dim' : forall A B C D, (forall k, (sub A (S k), sub B (S k)) === (sub C (S k), sub D (S k)))
+                               -> ((A, B) === (C, D)).
+  Proof with intuition.
+    unfold Same_pair...
+    apply Same_set_by_dimension... apply H...
+    apply Same_set_by_dimension... apply H...
+  Qed.
+
   (* receptivity is a property that applies dimension by dimension *)
   Lemma receptive_x_by_dimension  : forall T x, receptive_x T x -> (forall n, receptive_x (sub T n) x).
   Proof with intuition.
@@ -1213,6 +1237,7 @@ Module ParityComplexTheory (M : ParityComplex).
     subst. unfold less in H9...
   Qed.
 
+  (* dual *)
   Lemma P_n_Inhabited :
     forall M P,
       is_a_cell (M, P) ->
@@ -1792,7 +1817,7 @@ Module ParityComplexTheory (M : ParityComplex).
   Qed.
 
  (* In a cell M P, a single element can be removed from the movement condition *)
-Lemma P_moves_Mx_to_Px : forall M P, is_a_cell (M, P) ->
+  Lemma P_moves_Mx_to_Px : forall M P, is_a_cell (M, P) ->
                forall x, In (Intersection M P) x ->
                P moves Setminus M (Singleton x) to Setminus P (Singleton x).
   Proof with intuition.
@@ -1825,9 +1850,10 @@ Lemma P_moves_Mx_to_Px : forall M P, is_a_cell (M, P) ->
         apply cellcond. exists M; apply cellcond.
         inversion H1; clear H1.
         apply (H4 x0)...
-Qed.
+  Qed.
 
-Lemma M_moves_Mx_to_Px : forall M P, is_a_cell (M, P) ->
+  (* dual *)
+  Lemma M_moves_Mx_to_Px : forall M P, is_a_cell (M, P) ->
                forall x, In (Intersection M P) x ->
                M moves Setminus M (Singleton x) to Setminus P (Singleton x).
   Proof with intuition.
@@ -1860,7 +1886,7 @@ Lemma M_moves_Mx_to_Px : forall M P, is_a_cell (M, P) ->
         apply cellcond. exists M; apply cellcond.
         inversion H1; clear H1.
         apply (H4 x0)...
-Qed.
+  Qed.
 
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
@@ -1930,6 +1956,7 @@ Qed.
       rewrite H6...
   Qed.
 
+  (* dual *)
   Lemma Prop_3_1_dual :
     forall x M P,
       (minus x) moves M to P ->
@@ -2010,6 +2037,7 @@ Qed.
     is_a_cell ( (sup M n) ∪ (((sub M (S n)) ∪ Minus X) ∩ √(Plus X)) ∪ X, P ∪ X)
     ))).
 
+  (* dual *)
   Definition Lemma_3_2_b_dual_st : nat -> nat -> Prop :=
     (fun n => (fun m =>
     forall (X : Ensemble carrier),
@@ -2019,6 +2047,7 @@ Qed.
     is_a_cell ( (sup M n) ∪ (((sub P (S n)) ∪ Plus X) ∩ √(Minus X)), (sup P n) ∪ (((sub P (S n)) ∪ Plus X) ∩ √(Minus X)) )
     /\ (Plus X ∩ (sub P (S n))) == Empty_set))).
 
+  (* dual *)
   Definition Lemma_3_2_c_dual_st : nat -> nat -> Prop :=
     (fun n => (fun m =>
     forall (X : Ensemble carrier),
@@ -2103,6 +2132,7 @@ Qed.
     inversion H3.
   Qed.
 
+  (* dual *)
   Lemma Lemma_3_2_b_dual_n_0 : forall n, Lemma_3_2_b_dual_st n 0.
   Proof with intuition.
     intros n.
@@ -2231,6 +2261,7 @@ Qed.
       apply Disjoint_sym. apply plus_minus_Disjoint.
   Qed.
 
+  (* dual *)
   Lemma Lemma_3_2_b_dual_0_1 : Lemma_3_2_b_dual_st 0 1.
   Proof with intuition.
     unfold Lemma_3_2_b_st.
@@ -2546,6 +2577,7 @@ Qed.
         apply Empty_set_moves.
   Qed.
 
+  (* dual *)
   Lemma Lemma_3_2_dual_Step_1 :
     forall n m, (Lemma_3_2_b_dual_st n m) -> (Lemma_3_2_c_dual_st n m).
   Proof with intuition.
@@ -3028,6 +3060,7 @@ Qed.
     apply (Minus_Included Z X)... rewrite XZrel...
   Qed.
 
+  (* dual *)
   Lemma Lemma_3_2_dual_Step_2 :
     forall n, ((Lemma_3_2_b_dual_st n 1) -> (forall m, Lemma_3_2_b_dual_st n (S m))).
   Proof with intuition.
@@ -3263,50 +3296,53 @@ Qed.
     apply (Plus_Included Z X)... rewrite XZrel...
   Qed.
 
-(* COMMENTED TO HERE *)
+  (* Maximal and minimal elements of S have a predictable relationship with S *)
+  Lemma maximal_plus_lemma :
+    forall S m,
+      (forall y : carrier, y ∈ S -> triangle_rest S m y -> m = y) ->
+      m ∈ S ->
+      (plus m) ⊆ (PlusMinus S).
+  Proof with intuition.
+    intros.
+    unfold Included, PlusMinus...
+    apply Intersection_intro...
+    exists m...
+    apply Complement_intro...
+    inversion H2; clear H2...
+    assert (m = x0)...
+      apply H...
+      right with x0...
+      exists x...
+      left...
+    subst.
+    intuition.
+  Qed.
 
-    Lemma maximal_plus_lemma :
-      forall S m,
-        (forall y : carrier, y ∈ S -> triangle_rest S m y -> m = y) ->
-        m ∈ S ->
-        (plus m) ⊆ (PlusMinus S).
-    Proof with intuition.
-      intros.
-      unfold Included, PlusMinus...
-      apply Intersection_intro...
-      exists m...
-      apply Complement_intro...
-      inversion H2; clear H2...
-      assert (m = x0)...
-        apply H...
-        right with x0...
-        exists x...
-        left...
-      subst.
-      intuition.
-    Qed.
+  (* dual *)
+  Lemma minimal_plus_lemma :
+    forall S m,
+      (forall y : carrier, y ∈ S -> triangle_rest S y m -> m = y) ->
+      m ∈ S ->
+      (minus m) ⊆ (MinusPlus S).
+  Proof with intuition.
+    intros.
+    unfold Included, MinusPlus...
+    apply Intersection_intro...
+    exists m...
+    apply Complement_intro...
+    inversion H2; clear H2...
+    assert (m = x0)...
+      apply H...
+      right with m...
+      exists x...
+      left...
+    subst.
+    intuition.
+  Qed.
 
-    Lemma minimal_plus_lemma :
-      forall S m,
-        (forall y : carrier, y ∈ S -> triangle_rest S y m -> m = y) ->
-        m ∈ S ->
-        (minus m) ⊆ (MinusPlus S).
-    Proof with intuition.
-      intros.
-      unfold Included, MinusPlus...
-      apply Intersection_intro...
-      exists m...
-      apply Complement_intro...
-      inversion H2; clear H2...
-      assert (m = x0)...
-        apply H...
-        right with m...
-        exists x...
-        left...
-      subst.
-      intuition.
-    Qed.
-
+  (* This is a specific disjointness result proven on page 327. It is not an 
+     easy thing to do and occurs within a specific context. It is essential to 
+     proving Lemma 3.2. It has 3 duals. *)
     Lemma Disjoint_result_p327 :
        forall S x n,
        Cardinal S n ->
@@ -3577,6 +3613,7 @@ Qed.
         exists v...
     Qed.
 
+  (* dual 1 *)
     Lemma Disjoint_result_p327_dual :
        forall S x n,
        Cardinal S n ->
@@ -3920,6 +3957,7 @@ Qed.
         exists v...
     Qed.
 
+  (* dual 2*)
     Lemma Disjoint_result_p327' :
        forall T x n,
        Cardinal T n ->
@@ -4254,6 +4292,7 @@ Qed.
         exists v...
     Qed.
 
+  (* dual 3 *)
     Lemma Disjoint_result_p327_dual' :
        forall T x n,
        Cardinal T n ->
@@ -4588,6 +4627,8 @@ Qed.
         exists v...
     Qed.
 
+  (* Lemma 3.2B and Proposition 3.3 at dimension n (forall m) imply 
+     Lemma 3.2B at dimension n+1 with m=1 *)
   Lemma Lemma_3_2_Step_3 :
     forall n, (forall m , Lemma_3_2_b_st n m) ->
               (forall m , Lemma_3_2_b_dual_st n m) ->
@@ -5373,6 +5414,7 @@ Qed.
       inversion H3.
   Qed.
 
+  (* dual *)
   Lemma Lemma_3_2_dual_Step_3 :
     forall n, (forall m , Lemma_3_2_b_st n m) ->
               (forall m , Lemma_3_2_b_dual_st n m) ->
@@ -6158,9 +6200,10 @@ Qed.
       inversion H3.
   Qed.
 
-(* ~~~~~~~~~~~~   Prop_3_3  ~~~~~~~~~~~~~~~ *)
+  (* A lemma for Proposition 3.3. This says that receptive_x really only examines the set
+     at dimension 2 below the dimension of x. *)
 
-  Lemma fff : forall T x, receptive_x T x <-> (dim x <= 1 \/ ((2 <= dim x) /\ receptive_x (sub T (pred (dim x))) x)).
+  Lemma receptive_x_restated : forall T x, receptive_x T x <-> (dim x <= 1 \/ ((2 <= dim x) /\ receptive_x (sub T (pred (dim x))) x)).
   Proof with intuition.
     split; intros.
     assert ({dim x <= 1} + {2 <= dim x})...
@@ -6195,21 +6238,24 @@ Qed.
         assert (S (S (dim x0)) = dim x)... rewrite <- H5...
   Qed.
 
+  (* A definition stating that all cells of dimension n are receptive *)
   Definition n_receptive : nat -> Prop :=
     fun n => forall M P, is_a_cell (M, P) ->
     celldim (M, P) n -> forall x,
      receptive_x M x /\ receptive_x P x.
 
- Lemma ggg : forall P Q : carrier -> Prop, (forall x, (P x) /\ (Q x)) <-> ((forall x, P x) /\ (forall x, Q x)).
- Proof with intuition.
- intuition. apply H... apply H...
- Qed.
-
+  (* Proposition 3.3 is true for cells of dimension 0. *)
   Lemma n_receptive_zero : Prop_3_3_st 0.
   Proof with intuition.
+    (* A basic logical result that is useful below *)
+    Lemma forall_and_compat : forall P Q : carrier -> Prop, (forall x, (P x) /\ (Q x)) <-> ((forall x, P x) /\ (forall x, Q x)).
+    Proof with intuition.
+    intuition. apply H... apply H...
+    Qed.
+    (* Now to the proof *)
     unfold Prop_3_3_st, receptive.
     intros M P MPcell MPdim.
-    apply ggg; intros x.
+    apply forall_and_compat; intros x.
     assert (sub M (S 0) == sub P (S 0)) as K.
       apply cell_dim_n_property...
     assert (M == sub M 1) as Mdim.
@@ -6280,6 +6326,7 @@ Qed.
         pose (Prop_1_1 x). intuition. rewrite <- H11 in H4...
   Qed.
 
+  (* Empty sets are always receptive *)
   Lemma receptive_x_Empty_set : forall x, receptive_x Empty_set x.
   Proof with intuition.
     unfold receptive_x...
@@ -6287,11 +6334,15 @@ Qed.
     inversion H1; repeat (basic; intuition).
   Qed.
 
-  Lemma n_receptive_ind : forall n, (Prop_3_3_st n) -> (forall m, Lemma_3_2_b_st (S n) m) -> (forall m, Lemma_3_2_b_dual_st (S n) m) -> Prop_3_3_st (S n).
+  (* If Proposition 3.3 holds for n, and Lemma 3.2B holds for n+1, the Proposition 3.3 holds for n+1 *)
+  Lemma n_receptive_ind : forall n, (Prop_3_3_st n) 
+          -> (forall m, Lemma_3_2_b_st (S n) m) 
+           -> (forall m, Lemma_3_2_b_dual_st (S n) m) 
+               -> Prop_3_3_st (S n).
   Proof with intuition.
     intros n H L1 L2.
     unfold Prop_3_3_st, receptive...
-    + apply fff.
+    + apply receptive_x_restated.
       assert ({dim x <= 1} + {2 <= dim x})...
         apply le_le_S_dec.
       right...
@@ -6366,7 +6417,7 @@ Qed.
           inversion H2.
         rewrite H2.
         apply receptive_x_Empty_set.
-    + apply fff.
+    + apply receptive_x_restated.
       assert ({dim x <= 1} + {2 <= dim x})...
         apply le_le_S_dec.
       right...
@@ -6443,7 +6494,8 @@ Qed.
         apply receptive_x_Empty_set.
   Qed.
 
-  Lemma hhh : forall M x, (2 <= dim x -> receptive_x M x) -> receptive_x M x.
+  (* The receptivity proposition needs only to be checked at dimension 2 and above *)
+  Lemma receptive_x_above_two : forall M x, (2 <= dim x -> receptive_x M x) -> receptive_x M x.
   Proof with intuition.
     intros.
     assert ({2 <= dim x} + {dim x < 2})...
@@ -6465,20 +6517,21 @@ Qed.
       rewrite H1 in H3; inversion H3.
   Qed.
 
+  (* If Proposition 3.3 holds for n then all cells are receptive *)
   Lemma Prop_all_receptive :
     (forall n, Prop_3_3_st n) ->
       forall M P, is_a_cell (M, P) -> receptive M /\ receptive P.
   Proof with intuition.
     unfold n_receptive...
     + unfold receptive...
-      apply hhh...
+      apply receptive_x_above_two...
       set (n := pred (pred (dim x))).
       assert (is_a_cell (source n (M, P))).
         apply source_is_a_cell...
       unfold Prop_3_3_st, receptive in H.
       apply (H n) in H2...
       Focus 2. apply source_dim...
-      apply fff...
+      apply receptive_x_restated...
       right...
       assert (receptive_x (sub (sup M (S n)) (pred (dim x))) x).
         apply receptive_x_by_dimension...
@@ -6486,14 +6539,14 @@ Qed.
       unfold n.
       rewrite <- S_pred with (m:=0)...
     + unfold receptive...
-      apply hhh...
+      apply receptive_x_above_two...
       set (n := pred (pred (dim x))).
       assert (is_a_cell (target n (M, P))).
         apply target_is_a_cell...
       unfold Prop_3_3_st, receptive in H.
       apply (H n) in H2...
       Focus 2. apply target_dim...
-      apply fff...
+      apply receptive_x_restated...
       right...
       assert (receptive_x (sub (sup P (S n)) (pred (dim x))) x).
         apply receptive_x_by_dimension...
@@ -6502,6 +6555,8 @@ Qed.
       rewrite <- S_pred with (m:=0)...
   Qed.
 
+  (* Proposition 3.3 and Lemma 3.2B hold. This must be presented (initially)
+     as a single result because they are intimately related. *)
   Lemma all_the_work :
     forall n, (Prop_3_3_st n) /\ (forall m, (Lemma_3_2_b_st n m /\ Lemma_3_2_b_dual_st n m)).
   Proof with intuition.
@@ -6540,6 +6595,7 @@ Qed.
           apply Lemma_3_2_dual_Step_3; [apply H0 | apply H0 | assumption ].
   Qed.
 
+  (* Proposition 3.3 *)
   Lemma Prop_3_3 : forall M P,
     is_a_cell (M, P) -> receptive M /\ receptive P.
   Proof with intuition.
@@ -6548,18 +6604,21 @@ Qed.
     apply all_the_work.
   Qed.
 
+  (* Lemma 3.2B *)
   Lemma Lemma_3_2_b :
     forall n m, (Lemma_3_2_b_st n m).
   Proof.
     apply all_the_work.
   Qed.
 
+  (* dual *)
   Lemma Lemma_3_2_b_dual :
     forall n m, (Lemma_3_2_b_dual_st n m).
   Proof.
     apply all_the_work.
   Qed.
 
+  (* Lemma 3.2C *)
   Lemma Lemma_3_2_c :
     forall n m, (Lemma_3_2_c_st n m).
   Proof.
@@ -6568,6 +6627,7 @@ Qed.
     apply Lemma_3_2_b.
   Qed.
 
+  (* dual *)
   Lemma Lemma_3_2_c_dual :
     forall n m, (Lemma_3_2_c_dual_st (S n) m).
   Proof.
@@ -6576,45 +6636,40 @@ Qed.
     apply Lemma_3_2_b_dual.
   Qed.
 
-  Lemma Disjoint_Setminus : forall A B, @Disjoint carrier (A \ B) (B).
-  Proof with intuition.
-    intros.
-    constructor...
-    repeat (basic; intuition).
-  Qed.
+  (* Some little properties of triangle_rest *)
 
   Definition set_le (A : Ensemble carrier) (w : carrier) :=
       fun k => triangle_rest A w k.
   Definition set_ge (A : Ensemble carrier) (w : carrier) :=
       fun k => triangle_rest A k w.
 
-  Lemma ffff : forall A w, Included (set_le A w) A.
+  Lemma set_le_Included : forall A w, (set_le A w) ⊆ A.
   Proof with intuition.
     unfold set_le...
     unfold Included, In at 1...
     apply triangle_rest_in_set in H...
   Qed.
 
-  Lemma gggg : forall A w, Included (set_ge A w) A.
+  Lemma set_ge_Included : forall A w, (set_ge A w) ⊆ A.
   Proof with intuition.
     unfold set_ge...
     unfold Included, In at 1...
     apply triangle_rest_in_set in H...
   Qed.
 
-  Lemma fffff : forall A w, In A w -> In (set_le A w) w.
+  Lemma set_le_ident : forall A w, w ∈ A -> w ∈ (set_le A w).
   Proof with intuition.
     unfold set_le, In at 1...
     left...
   Qed.
 
-  Lemma ggggg : forall A w, In A w -> In (set_ge A w) w.
+  Lemma set_ge_ident : forall A w, w ∈ A -> w ∈ (set_ge A w).
   Proof with intuition.
     unfold set_ge, In at 1...
     left...
   Qed.
 
-  Hint Resolve fff ffff ggg gggg.
+  Hint Resolve set_le_Included set_ge_Included set_le_ident set_ge_ident.
 
   Hint Resolve Cardinality_Singleton_is_one.
 
@@ -6628,6 +6683,8 @@ Qed.
 (* mu and pi                                            *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* mu' is a function that computes a set. It is recursive, but the recursion is
+     non-standard so we must provide an explicit proof of termination. *)
   Function mu' (x : carrier) (n : nat) {measure (fun s => (dim x) - s) n} : Ensemble carrier :=
     match leb n (dim x) with
     | true => match beq_nat n (dim x) with
@@ -6648,8 +6705,10 @@ Qed.
             + apply IHn. simpl in teq... simpl in teq0...
      Qed.
 
+  (* mu is defined as the union of all the mu' n *)
   Definition mu (x : carrier) := fun y => exists n, In (mu' x n) y.
 
+  (* pi' is defined dually to mu' *)
   Function pi' (x : carrier) (n : nat) {measure (fun s => (dim x) - s) n} : Ensemble carrier :=
     match leb n (dim x) with
     | true => match beq_nat n (dim x) with
@@ -6670,12 +6729,14 @@ Qed.
             + apply IHn. simpl in teq... simpl in teq0...
      Qed.
 
+  (* pi is defined dually to mu *)
   Definition pi (x : carrier) := fun y => exists n, In (pi' x n) y.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Basic results from definitions                       *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* mu is {x} at the top dimension *)
   Lemma mu'_Singleton : forall x, (mu' x (dim x)) = Singleton x.
   Proof with intuition.
     intros x.
@@ -6687,6 +6748,7 @@ Qed.
     rewrite H, H0...
   Qed.
 
+  (* mu is empty at higher dimensions *)
   Lemma mu'_Empty_set : forall n x, S (dim x) <= n -> (mu' x n) = Empty_set.
   Proof with intuition.
     intros...
@@ -6701,6 +6763,7 @@ Qed.
     rewrite H0...
   Qed.
 
+  (* definitional property of mu *)
   Lemma mu'_MinusPlus : forall n x, (S n <= (dim x)) -> (mu' x n) = MinusPlus (mu' x (S n)).
   Proof with intuition.
     intros n x...
@@ -6721,6 +6784,7 @@ Qed.
     rewrite H0, H1...
   Qed.
 
+  (* The expected induction principle for mu, if we could have defined it more simply *)
   Lemma mu'_ind' :
      forall (x : carrier) (P : nat -> Ensemble carrier -> Prop),
        (P (dim x) (Singleton x))
@@ -6743,12 +6807,14 @@ Qed.
 
   Hint Resolve le_not_gt.
 
+  (* mu is finite *)
   Lemma mu'_Finite : forall n x, Finite (mu' x n).
   Proof with intuition.
     intros.
     apply mu'_ind'...
   Qed.
 
+  (* dimension properties of mu *)
   Lemma mu'_dim : forall x n y, In (mu' x n) y -> dim y = n.
   Proof with intuition.
     intros x n.
@@ -6777,6 +6843,7 @@ Qed.
        apply mu'_dim in H...
   Qed.
 
+  (* pi is {x} at top dimension *)
   Lemma pi'_Singleton : forall x, (pi' x (dim x)) = Singleton x.
   Proof with intuition.
     intros x.
@@ -6788,6 +6855,7 @@ Qed.
     rewrite H, H0...
   Qed.
 
+  (* pi is empty at higher dimensions *)
   Lemma pi'_Empty_set : forall n x, S (dim x) <= n -> (pi' x n) = Empty_set.
   Proof with intuition.
     intros...
@@ -6802,6 +6870,7 @@ Qed.
     rewrite H0...
   Qed.
 
+  (* a defining property of pi *)
   Lemma pi'_PlusMinus : forall n x, S n <= (dim x) -> (pi' x n) = PlusMinus (pi' x (S n)).
   Proof with intuition.
     intros n x...
@@ -6822,6 +6891,7 @@ Qed.
     rewrite H0, H1...
   Qed.
 
+  (* The induction principle one expects for pi *)
   Lemma pi'_ind' :
      forall (x : carrier) (P : nat -> Ensemble carrier -> Prop),
        (P (dim x) (Singleton x))
@@ -6842,12 +6912,14 @@ Qed.
        apply leb_complete_conv in e...
    Qed.
 
+  (* pi is finite *)
   Lemma pi'_Finite : forall n x, Finite (pi' x n).
   Proof with intuition.
     intros.
     apply pi'_ind'...
   Qed.
 
+  (* dimension properties of pi *)
   Lemma pi'_dim : forall x n y, In (pi' x n) y -> dim y = n.
   Proof with intuition.
     intros x n.
@@ -6878,6 +6950,7 @@ Qed.
        apply pi'_dim in H...
   Qed.
 
+  (* mu and pi are inhabited at lowest dimensions *)
   Lemma mu'_Inhabited : forall x, forall n, n <= dim x -> Inhabited (mu' x n).
   Proof with intuition.
     intros x.
@@ -6904,31 +6977,10 @@ Qed.
       apply le_not_gt in H0...
   Qed.
 
-  Lemma perp_sym : forall a b, perp a b -> perp b a.
-  Proof with intuition.
-    unfold perp; intuition; rewrite Intersection_comm; assumption.
-  Qed.
-
- Lemma well_formed_shortcut : forall A B,
-  well_formed A ->
-  well_formed B ->
-  (forall a b n, a ∈ A -> b ∈ B -> dim a = S n -> dim b = S n -> (~ perp a b) -> a = b) ->
-  (forall a b  , a ∈ A -> b ∈ B -> dim a = 0 -> dim b = 0 -> a = b) ->
-  well_formed (A ∪ B).
- Proof with intuition.
-   intros.
-   unfold well_formed in H.
-   unfold well_formed in H0.
-   unfold well_formed; intuition; repeat (basic; intuition).
-   symmetry. apply H2...
-   refine (H4 _ _ _ n _ _ _)...
-   symmetry. apply (H1 _ _ n)... apply perp_sym in H6...
-   apply (H1 _ _ n)...
-   refine (H5 _ _ _ n _ _ _)...
- Qed.
-
+  (* Notation for the cell-like pair obtained using mu and pi *)
   Notation "'<<' x '>>'" := ((mu x), (pi x)) (at level 85).
 
+  (* These pairs have expected dimension *)
   Lemma atom_dim : forall x, celldim (<< x >>) (dim x).
   Proof with intuition.
     intros.
@@ -6961,30 +7013,12 @@ Qed.
       inversion H.
   Qed.
 
+  (* Statements that mu and pi are tight. This is a necessary condition for Theorem 4.1. *)
   Definition mu_is_tight : Prop := forall x n, tight (sub (mu x) n).
   Definition pi_is_tight : Prop := forall x n, tight (sub (pi x) n).
 
-  Lemma Same_pair_dec : forall A B C D, Finite A ->
-                                      Finite B ->
-                                      Finite C ->
-                                      Finite D ->
-                                      (((A, B) === (C, D)) \/ ~((A, B) === (C, D))).
-  Proof with intuition.
-    intros.
-    assert ((A == C) \/ ~(A == C))... apply Finite_eq_decidable...
-    assert ((B == D) \/ ~(B == D))... apply Finite_eq_decidable...
-      right; unfold Same_pair...
-      right; unfold Same_pair...
-  Qed.
-
-  Lemma Same_pair_by_dim' : forall A B C D, (forall k, (sub A (S k), sub B (S k)) === (sub C (S k), sub D (S k)))
-                               -> ((A, B) === (C, D)).
-  Proof with intuition.
-    unfold Same_pair...
-    apply Same_set_by_dimension... apply H...
-    apply Same_set_by_dimension... apply H...
-  Qed.
-
+  (* This says that if (M,P) is a cell of non-zero dimension, and it is not atomic, 
+     then there is a k<n where one can observe that (M,P) differs from << u >> *)
   Lemma notatomic_lemma :
     forall M P n, is_a_cell (M, P) -> celldim (M, P) n -> (0 < n) ->
     forall u, u ∈ (sub M (S n)) -> ~((M, P) === << u >>) ->
@@ -7124,6 +7158,47 @@ Qed.
     exists x...
   Qed.
 
+(* This is a corollary of Lemma 3.2B which is needed for Theorem 4.1 *) 
+Lemma Lemma_3_2_b_corr : forall n, forall x, forall M P,
+                          is_a_cell (M, P) /\ celldim (M, P) n ->
+                          dim x = (S n) /\ plus x ⊆ sub M (S n) ->
+                          well_formed ((sub P (S n) ∪ minus x) ∩ √plus x).
+Proof with intuition.
+  intros n...
+  pose (Lemma_3_2_b n 1 (Singleton x)).
+  assert (is_a_cell
+            (sup M n
+             ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x)),
+            sup P n
+            ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x)))
+          /\ Minus (Singleton x) ∩ sub M (S n) == Empty_set).
+  apply a...
+  unfold Included; repeat (basic; intuition)...
+    inversion H0. rewrite <- H4. unfold sub, In at 1...
+  rewrite PlusMinus_Singleton...
+  clear a.
+  unfold is_a_cell in H0...
+  assert ((forall n0 : nat,
+          well_formed (sub (sup P n ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x))) (S n0)))).
+               apply well_formed_by_dimension...
+  specialize H11 with n.
+  rewrite sub_Union in H11.
+  rewrite sub_sup_Empty_set in H11...
+  rewrite Empty_set_ident_left in H11...
+  rewrite <- Setminus_is_Intersection_Complement in H11.
+  rewrite sub_Setminus in H11.
+  rewrite sub_Plus in H11.
+  rewrite sub_Union in H11.
+  rewrite sub_Minus in H11.
+  rewrite sub_idemp in H11.
+  rewrite sub_Singleton in H11...
+  rewrite Minus_Singleton in H11.
+  rewrite Plus_Singleton in H11.
+  rewrite Setminus_is_Intersection_Complement in H11.
+  rewrite <- (cell_dim_n_property M P)...
+Qed.
+
+(* dual *)
 Lemma Lemma_3_2_b_dual_corr : forall n,
                           forall x, forall M P,
                           is_a_cell (M, P) /\ celldim (M, P) n ->
@@ -7169,45 +7244,9 @@ Proof with intuition.
   rewrite (cell_dim_n_property M P)...
 Qed.
 
-Lemma Lemma_3_2_b_corr : forall n, forall x, forall M P,
-                          is_a_cell (M, P) /\ celldim (M, P) n ->
-                          dim x = (S n) /\ plus x ⊆ sub M (S n) ->
-                          well_formed ((sub P (S n) ∪ minus x) ∩ √plus x).
-Proof with intuition.
-  intros n...
-  pose (Lemma_3_2_b n 1 (Singleton x)).
-  assert (is_a_cell
-            (sup M n
-             ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x)),
-            sup P n
-            ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x)))
-          /\ Minus (Singleton x) ∩ sub M (S n) == Empty_set).
-  apply a...
-  unfold Included; repeat (basic; intuition)...
-    inversion H0. rewrite <- H4. unfold sub, In at 1...
-  rewrite PlusMinus_Singleton...
-  clear a.
-  unfold is_a_cell in H0...
-  assert ((forall n0 : nat,
-          well_formed (sub (sup P n ∪ ((sub M (S n) ∪ Minus (Singleton x)) ∩ √Plus (Singleton x))) (S n0)))).
-               apply well_formed_by_dimension...
-  specialize H11 with n.
-  rewrite sub_Union in H11.
-  rewrite sub_sup_Empty_set in H11...
-  rewrite Empty_set_ident_left in H11...
-  rewrite <- Setminus_is_Intersection_Complement in H11.
-  rewrite sub_Setminus in H11.
-  rewrite sub_Plus in H11.
-  rewrite sub_Union in H11.
-  rewrite sub_Minus in H11.
-  rewrite sub_idemp in H11.
-  rewrite sub_Singleton in H11...
-  rewrite Minus_Singleton in H11.
-  rewrite Plus_Singleton in H11.
-  rewrite Setminus_is_Intersection_Complement in H11.
-  rewrite <- (cell_dim_n_property M P)...
-Qed.
 
+  (* This is the excision of extremals algorithm, the final 
+     result in this formalisation *)
   Lemma Theorem_4_1 :
     mu_is_tight ->
     forall n,
@@ -8567,6 +8606,8 @@ Qed.
                   rewrite (sub_sup_Empty_set) ||
                   rewrite Setminus_Empty_set); try (rewrite ydim in * )...
  Qed.
+
+
 
 End ParityComplexTheory.
 

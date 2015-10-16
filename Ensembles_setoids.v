@@ -927,6 +927,11 @@ Ltac crush :=
     crush.
   Qed.
 
+  Lemma Disjoint_Setminus {U : Type} : forall (A B:Ensemble U), Disjoint (A \ B) (B).
+  Proof with intuition.
+    crush. 
+  Qed.
+
 Hint Resolve Singleton_inv Singleton_intro Add_intro1 Add_intro2
   Intersection_inv
  (* Couple_inv Setminus_intro Strict_Included_intro
