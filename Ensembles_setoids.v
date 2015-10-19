@@ -62,7 +62,7 @@ Ltac disj :=
     | H: In (_ ∪ _) ?x |- _ => inversion H; clear H
     | H: In ?P ?x |- In (?P ∪  _) ?x => left
     | H: In ?P ?x |- In (_  ∪ ?P) ?x => right
- end.
+  end.
 
 Ltac conj :=
   match goal with
@@ -101,12 +101,12 @@ Ltac misc_2 :=
     | H: Disjoint ?a ?b |- _ => inversion H; clear H
     | H: _ |- Disjoint ?a ?b => constructor; unfold not; intros
     | H: Inhabited ?S |- _ => inversion H; clear H
- end.
+  end.
 
 (* The crush tactic will attempt to prove set-based results using basic rules of membership in Union, Intersection etc. *)
 (* The final component misc_2 is a last-ditch effort, and will unfold some definitions *)
 Ltac crush :=
-   repeat (repeat (conj || disj || neg || misc || misc_2); intuition); intuition.
+    repeat (repeat (conj || disj || neg || misc || misc_2); intuition); intuition.
 
 
   (** EXTRA MEMBERSHIP PROPERTIES **)
@@ -676,7 +676,7 @@ Ltac crush :=
     crush.
   Qed.
 
- (* Union and Intersection are meet and join for Inclusion *)
+  (* Union and Intersection are meet and join for Inclusion *)
 
   Lemma Union_Included_cancel_right {U : Type} : forall S T R: (Ensemble U),
     S ⊆ R -> S ⊆ (R ∪ T).
@@ -765,7 +765,7 @@ Ltac crush :=
   Qed.
 
   Lemma Included_Singleton {U : Type} : forall (S : Ensemble U), Inhabited S ->
-     forall a, S ⊆ (Singleton a) -> S == (Singleton a).
+      forall a, S ⊆ (Singleton a) -> S == (Singleton a).
   Proof with crush.
     crush.
     assert (x ∈ Singleton x0)...
@@ -807,7 +807,7 @@ Ltac crush :=
   Qed.
 
   Lemma Union_Setminus_cancel {U : Type} :
-   forall (A B: Ensemble U),
+    forall (A B: Ensemble U),
     decidable A → A ⊆ B → (B \ A) ∪ A == B.
   Proof with crush.
     crush.
@@ -934,7 +934,7 @@ Ltac crush :=
 
 Hint Resolve Singleton_inv Singleton_intro Add_intro1 Add_intro2
   Intersection_inv
- (* Couple_inv Setminus_intro Strict_Included_intro
+  (* Couple_inv Setminus_intro Strict_Included_intro
   Strict_Included_strict *) Noone_in_empty Inhabited_not_empty Add_not_Empty
   not_Empty_Add Inhabited_add Included_Empty.
 Hint Resolve Union_inv.

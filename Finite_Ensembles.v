@@ -22,27 +22,27 @@
 (* Borrow some tactics from Ensembles_setoids *)
 
   Ltac finitecrush :=
-   repeat (repeat (conj || disj || neg || misc); intuition); intuition.
+    repeat (repeat (conj || disj || neg || misc); intuition); intuition.
 
   (* New definitions of Finite and Cardinal with extra constructor *)
 
   Inductive Finite {U : Type} : Ensemble U -> Prop :=
   |  Finite_Empty_set : Finite (Empty_set)
   |  Finite_Add : forall A : Ensemble U, Finite A ->
-                   forall x : U, ~(x ∈ A) ->
+                    forall x : U, ~(x ∈ A) ->
                     Finite (Add U A x)
   |  Finite_Same_set : forall T, Finite T ->
                         forall S, S == T ->
-                         Finite S.
+                          Finite S.
 
   Inductive Cardinal {U : Type} : Ensemble U -> nat -> Prop :=
   | Cardinal_Empty_set : Cardinal (Empty_set) 0
   | Cardinal_Add : forall (A : Ensemble U) (n : nat),
-                     Cardinal A n ->
+                      Cardinal A n ->
                       forall x : U, ~ x ∈ A ->
-                       Cardinal (Add U A x) (S n)
+                        Cardinal (Add U A x) (S n)
   | Cardinal_Same_set : forall A n, Cardinal A n ->
-                         forall B, A == B ->
+                          forall B, A == B ->
                           Cardinal B n.
 
   Hint Constructors Finite Cardinal.
@@ -146,12 +146,12 @@
   (* If set B is finite, A is a subset of B and ... then A is also finite *)
   Lemma Finite_Setminus_Included {U : Type} :
   (* \ref{arxiv.org/pdf/math/9405204} for proof I followed *)
-     forall (B: Ensemble U),
-       Finite B ->
-     forall A,
-       A ⊆ B ->
-       B == A ∪ (B \ A) ->
-       Finite A.
+      forall (B: Ensemble U),
+        Finite B ->
+      forall A,
+        A ⊆ B ->
+        B == A ∪ (B \ A) ->
+        Finite A.
   Proof with finitecrush.
     intros B BFinite.
 
@@ -191,10 +191,10 @@
 
   (* This is essentially the same as the previous Lemma, the statement is just different *)
   Lemma Finite_Included {U : Type} :
-     forall (B: Ensemble U),
-       Finite B ->
-     forall A,
-       A ⊆ B -> (forall x, x ∈ B -> ((x ∈ A) \/ ~(x ∈ A))) -> Finite A.
+      forall (B: Ensemble U),
+        Finite B ->
+      forall A,
+        A ⊆ B -> (forall x, x ∈ B -> ((x ∈ A) \/ ~(x ∈ A))) -> Finite A.
   Proof with intuition.
     intros.
     apply (Finite_Setminus_Included B)...
@@ -450,7 +450,7 @@
   Lemma Cardinal_Setminus {U : Type} :
     decidable_eq U ->
       forall n (T : Ensemble U), Cardinal T n ->
-         forall u, u ∈ T -> Cardinal (T \ (Singleton u)) (pred n).
+          forall u, u ∈ T -> Cardinal (T \ (Singleton u)) (pred n).
   Proof with intuition.
     intuition.
     induction H0...
@@ -504,7 +504,7 @@
   Qed.
 
   (* For all decidable propositions P and finite sets W,
-     W either contains an element satisfying P, or it does not *)
+      W either contains an element satisfying P, or it does not *)
 
   Lemma Finite_decidable_existence {U : Type}:
     forall W, Finite W ->
@@ -588,3 +588,37 @@
     rewrite Setminus_is_Intersection_Complement.
     apply Setminus_Finite...
   Qed.
+
+  (* Same_set on Finite sets is decidable *)
+  Lemma Finite_eq_decidable {U : Type} : 
+      decidable_eq U ->
+      forall T, @Finite U T -> 
+      forall R, Finite R -> ((T == R) \/ ~(T == R)).
+  Proof with intuition.
+    intros dec_eq T TFin.
+      induction TFin; intros.
+      - apply Finite_Empty_or_Inhabited in H...
+        right...
+        rewrite <- H in H0; inversion H0... inversion H1.
+      - assert ((x ∈ R) \/ ~(x ∈ R))... 
+          apply Finite_are_decidable in H0. autounfold in H0...
+          assumption.
+        + assert (R == Add _ (Setminus R (Singleton x)) x).
+            apply Add_Setminus_cancel...
+          assert (A == (Setminus R (Singleton x)) \/ (A == (Setminus R (Singleton x)) -> False))...
+            apply IHTFin...
+            apply Setminus_Finite'...
+          * left...
+            rewrite H4...
+          * right...
+            apply H4...
+            rewrite <- H3...
+            unfold Same_set, Included, Setminus...
+            unfold In at 1...
+            inversion H6; clear H6. apply H; rewrite H7...
+            unfold In at 1 in H5...
+            unfold Add in H6... apply Union_inv in H6...
+        + right... apply H2...  rewrite <- H1...
+      - rewrite H...
+  Qed.
+

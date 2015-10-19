@@ -7,7 +7,7 @@
     numbers that I could not find in the standard library,
     and were required for a formalisation of the theory
     of Parity Complexes.
- **)
+  **)
 
 
 
@@ -49,10 +49,10 @@ Require Import Arith.
   (* A four case comparison of two natural numbers *)
   Lemma lt_eq_eq_lt_dec: forall k m, {k < m} + {k = m} + {k = S m} + {S m < k}.
   Proof with intuition.
-   intros.
-   pose (lt_eq_lt_dec k m)...
-   unfold lt in b.
-   apply le_lt_eq_dec in b...
+    intros.
+    pose (lt_eq_lt_dec k m)...
+    unfold lt in b.
+    apply le_lt_eq_dec in b...
   Qed.
 
   (* Three basic contradictions on less-than *)
@@ -87,7 +87,7 @@ Require Import Arith.
 
   Lemma le_SSSn : ∀ n : nat, S (S (S n)) <= n -> False.
   Proof with intuition.
-     intros n.
+      intros n.
     induction n...
       inversion H...
   Qed.
