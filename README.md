@@ -10,6 +10,7 @@ The files exhibit dependence in the following order:
  - Finite_Ensembles.v 
  - PreparityComplexes.v 
  - ParityComplexes.v 
+
 These files contain the following content:
  - Basic results in logic and for natural numbers that we could not find in the standard library.
  - Setoid rewrite for Ensembles and some extra properties of Ensembles.
@@ -18,10 +19,12 @@ These files contain the following content:
  - Implementation of Sections 1, 3 and 4.
 
 Compilation instructions:
+
 1. First, there is already a make file here. One can check it by running 'cat Make'
 2. One should then run 'coq_makefile -f Make -o Makefile'.
 3. Finally, run 'make' to compile all the code. Warning: the final file might take 5 or 10 minutes to compile.
+
 This has been compiled with coqc version 8.4 (September 2012 with OCaml 3.12.1). We have not checked other releases.
 
-The author is not so experienced with make files and compilation options, any recommendations are welcome at [this address](mitchell.alan.buckley@gmail.com).
+The author is not so experienced with make files and compilation options, any recommendations are welcome at [this address](mailto:mitchell.alan.buckley@gmail.com).
  
