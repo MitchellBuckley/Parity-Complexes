@@ -1141,7 +1141,6 @@ Module ParityComplexTheory (M : ParityComplex).
       rewrite H1 in H3; inversion H3.
   Qed.
 
-
   (* Cells                                                *)
   (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
@@ -2396,7 +2395,6 @@ Module ParityComplexTheory (M : ParityComplex).
       repeat (rewrite Empty_set_ident_left in H12|| rewrite Empty_set_ident_right in H12).
       trivial.
 
-
     unfold is_a_cell in *...
     - apply (Inhabited_Included (sup M n ∪ Y))...
 
@@ -2431,7 +2429,6 @@ Module ParityComplexTheory (M : ParityComplex).
           + repeat (rewrite (sub_sup_Empty_set) || rewrite (sub_sub_Empty_set (S n)) ||
                   rewrite Empty_set_ident_left)...
           apply well_formed_sub. apply well_formed_sub...
-
 
     - assert (P == sup P (S n)) as dimP.
         unfold Same_set, Included, sup, In...
@@ -3291,7 +3288,6 @@ Module ParityComplexTheory (M : ParityComplex).
     apply (H1 x0)... basic...
     apply (Plus_Included Z X)... rewrite XZrel...
   Qed.
-
 
   (* This is a specific disjointness result proven on page 327. It is not an 
       easy thing to do and occurs within a specific context. It is essential to 
@@ -5321,7 +5317,6 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Plus_Empty_set ||
                   rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
 
-
     rewrite Xsing.
     rewrite Minus_Singleton.
     rewrite DisjUnion.
@@ -6552,8 +6547,6 @@ Module ParityComplexTheory (M : ParityComplex).
     rewrite Setminus_is_Intersection_Complement in H11.
     rewrite (cell_dim_n_property M P)...
   Qed.
-
-
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Section 4                                            *)
@@ -8403,9 +8396,5 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Setminus_Empty_set); try (rewrite ydim in * )...
   Qed.
 
-
-
 End ParityComplexTheory.
-
-
 

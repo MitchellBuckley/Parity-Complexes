@@ -9,8 +9,6 @@
     of Parity Complexes.
   **)
 
-
-
 Require Import Utf8_core.
 Require Import Arith.
 

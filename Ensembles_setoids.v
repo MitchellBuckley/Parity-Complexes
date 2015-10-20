@@ -108,7 +108,6 @@ Ltac misc_2 :=
 Ltac crush :=
     repeat (repeat (conj || disj || neg || misc || misc_2); intuition); intuition.
 
-
   (** EXTRA MEMBERSHIP PROPERTIES **)
 
   (* Fundamental relationships between union/or, intersection/and, complement/not *)
@@ -332,7 +331,6 @@ Ltac crush :=
     symmetry proved by (iff_sym)
     transitivity proved by (iff_trans)
   as prop_iff.
-
 
   (* Iff is `stable' under or, and and not *)
   Lemma or_iff_compat :

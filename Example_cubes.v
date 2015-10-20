@@ -10,7 +10,6 @@
 
 (** Import libraries **)
 
-
 Require Import Utf8_core.
 Require Import Ensembles.
 Require Import Relations.
@@ -23,7 +22,6 @@ Require Import PreparityComplexes.
 (* Require Import ParityComplexes. *)
 Require Import Vector.
 Import VectorNotations.
-
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Parity Complex Definitions                           *)
@@ -116,8 +114,6 @@ Inductive cPlus : clist -> clist -> Prop :=
 | evencasesP : forall l l' k, (is_even k /\ differr l l' k) -> cPlus l l'
 | oddcasesP : forall l l' k, (is_odd k /\ differl l l' k) -> cPlus l l'.
 
-
-
 Module Orientals_PreParity.
 
 Definition carrier := clist.
@@ -136,7 +132,6 @@ Definition minus := cMinus.
   induction H...
   unfold differr in H1...
   unfold cdim...
-
 
   Theorem minus_dim :   forall (x y : carrier), Ensembles.In (minus y) x -> S (dim x) = dim y.
     Proof.

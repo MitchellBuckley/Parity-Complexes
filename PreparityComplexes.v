@@ -62,8 +62,6 @@ Arguments Full_set {U} _.
 
   End PreParity.
 
-
-
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Pre-Parity Complex Theory                            *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
@@ -1528,7 +1526,6 @@ Arguments Full_set {U} _.
     intuition.
   Qed.
 
-
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Results that don't seem to have a well-defined 
    category                                             *)
@@ -2018,7 +2015,6 @@ Arguments Full_set {U} _.
     rewrite Plus_Empty_set, Minus_Empty_set, Setminus_Empty_set, Empty_set_ident_right...
   Qed.
 
-
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Section 2                                            *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
@@ -2432,7 +2428,6 @@ Arguments Full_set {U} _.
     rewrite <- Union_comm, Union_trans...
   Qed.
 
-
   (* Proposition 2.4 gives a basic condition concerning decomposition of movement *)
   (* The reasoning is no more complicated than the basic combinatorics of the situation *)
   (* This has an obvious dual *)
@@ -2673,7 +2668,6 @@ Arguments Full_set {U} _.
     rewrite <- H4, <- H5...
   Qed.
 
-
   (* dual *)
   Lemma Prop_2_4_dual_exact :
     forall (T Z M P : Ensemble carrier),
@@ -2723,5 +2717,4 @@ Arguments Full_set {U} _.
   Qed.
 
 End PreParityTheory.
-
 

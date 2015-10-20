@@ -6,7 +6,8 @@
   This collection began as a set of results needed for dealing with Finite sets
   among parity complexes.
   That is still its primary function, but it now presents a different definition
-  than the standard library and covers a wide range of rewrite rules.
+  than the standard library and covers a wide range of rewrite rules and basic
+  results.
 
 **)
 
@@ -24,7 +25,12 @@
   Ltac finitecrush :=
     repeat (repeat (conj || disj || neg || misc); intuition); intuition.
 
-  (* New definitions of Finite and Cardinal with extra constructor *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Definitions                                          *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+(* New definitions of Finite and Cardinal with extra 
+   constructor                                          *)
 
   Inductive Finite {U : Type} : Ensemble U -> Prop :=
   |  Finite_Empty_set : Finite (Empty_set)
@@ -47,7 +53,9 @@
 
   Hint Constructors Finite Cardinal.
 
-  (** SETOID MORPHISMS **)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Setoid rewrites                                      *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
   (* Iff is stable under decidable, Finite, Cardinal *)
   Add Parametric Morphism U : (@Finite U) with
@@ -82,13 +90,14 @@
         apply (Cardinal_Same_set A)...
   Qed.
 
-  (** COMPATIBILITY WITH UNION ETC. **)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Decidability                                         *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
   Definition decidable_eq (U : Type) : Prop :=
     forall (a b : U), (a = b \/ ~(a = b)).
 
   (* Finite sets are decidable sets if the type has decidable equality *)
-
   Lemma Finite_are_decidable {U : Type}:
     decidable_eq U ->
       forall (T : Ensemble U), Finite T -> decidable T.
@@ -107,8 +116,47 @@
 
   Hint Resolve Finite_are_decidable.
 
-  (* Finite sets are closed under Intersection and Union *)
+  (* Finite sets are either empty or Inhabited *)
+  Lemma Finite_Empty_or_Inhabited {U : Type} :
+    forall A : (Ensemble U), Finite A -> ((A == Empty_set) \/ (Inhabited A)).
+  Proof with intuition.
+    intros.
+    induction H...
+      left; rewrite H0...
+      right; rewrite H0...
+  Qed.
 
+  Hint Resolve Finite_Empty_or_Inhabited.
+
+  (* For all decidable propositions P and finite sets W,
+      W either contains an element satisfying P, or it does not *)
+  Lemma Finite_decidable_existence {U : Type}:
+    forall W, Finite W ->
+      forall P : U -> Prop, (forall c, P c \/ ~(P c)) ->
+        ((exists x, x ∈ W /\ P x) \/ ~((exists x, x ∈ W /\ P x))).
+  Proof with intuition.
+    intros W WFin.
+    induction WFin...
+      - right... inversion H0... inversion H2...
+
+      - assert (P x ∨ (P x → False))...
+        + left... exists x...
+        + assert ((∃ x : U, x ∈ A ∧ P x) ∨ ((∃ x : U, x ∈ A ∧ P x) → False))...
+      left... inversion H3 as [ a D]; exists a...
+      right... apply H3... inversion H1 as [ a D]; exists a...
+      unfold Add in H4. apply Union_inv in H4... exfalso. inversion H6... rewrite <- H4 in H5...
+
+      - assert ((∃ x : U, x ∈ T ∧ P x) ∨ ((∃ x : U, x ∈ T ∧ P x) → False))...
+        + left... inversion H2 as [a A]; exists a... rewrite H...
+        + right... apply H2. inversion H1 as [ a A]; exists a... rewrite <- H...
+  Qed.
+
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Finite: Intersection, Union, Included, Setminus      *)
+(*         Singleton, le, lt                            *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+  (* Finite sets are closed under Intersection and Union *)
   Lemma Finite_Intersection {U : Type} : forall (S: Ensemble U), Finite S -> forall T, decidable T -> Finite (T ∩ S).
   Proof with finitecrush.
     intros S SFin.
@@ -143,14 +191,22 @@
 
   Hint Resolve Finite_Union Finite_Intersection.
 
+  (* Singletons are finite *)
+  Lemma Finite_Singleton {U : Type} :
+    forall x : U, Finite (Singleton x).
+  Proof with finitecrush.
+    intros...
+    apply (Finite_Same_set (Add U (Empty_set) x))...
+    crush.
+  Qed.
+
+  Hint Resolve Finite_Singleton.
+
   (* If set B is finite, A is a subset of B and ... then A is also finite *)
   Lemma Finite_Setminus_Included {U : Type} :
   (* \ref{arxiv.org/pdf/math/9405204} for proof I followed *)
-      forall (B: Ensemble U),
-        Finite B ->
-      forall A,
-        A ⊆ B ->
-        B == A ∪ (B \ A) ->
+      forall (B: Ensemble U), Finite B ->
+      forall A, A ⊆ B -> B == A ∪ (B \ A) ->
         Finite A.
   Proof with finitecrush.
     intros B BFinite.
@@ -204,101 +260,39 @@
 
   Hint Resolve Finite_Included Finite_Setminus_Included.
 
-  (** CARDINALITY **)
-
-  (* Sets are finite precisely when they have a cardinality *)
-
-  Lemma Cardinality_exists {U : Type} :
-    forall (T : Ensemble U), Finite T -> exists n, Cardinal T n.
-  Proof with finitecrush.
-    intros T TFin.
-    induction TFin.
-      - exists 0...
-      - inversion IHTFin; clear IHTFin. exists (S x0)...
-      - inversion IHTFin; clear IHTFin. exists (x). rewrite H...
+  (* Finite sets are closed under Setminus *)
+  Lemma Setminus_Finite {U : Type} :
+    decidable_eq U ->
+    forall (A : Ensemble U), Finite A ->
+    forall (B : Ensemble U), Finite B ->
+      Finite (A ∩ (√ B)).
+  Proof with intuition.
+    intros Udec...
+    induction H...
+    - apply (Finite_Same_set Empty_set)...
+    - unfold Add.
+      rewrite I_U_dist_r.
+      apply Finite_Union...
+      assert (x ∈ B \/ ~(x ∈ B))...
+        apply Finite_are_decidable...
+      + apply (Finite_Same_set Empty_set)...
+        crush.
+      + apply (Finite_Same_set (Singleton x))...
+        crush.
+    - rewrite H1...
   Qed.
 
-  Lemma Cardinal_are_Finite {U : Type} :
-    forall n (T : Ensemble U), Cardinal T n -> Finite T.
-  Proof with finitecrush.
-    intros n T Tcard.
-    induction Tcard...
-      rewrite <- H...
-  Qed.
-
-  (* A set is empty precisely when it has cardinality zero *)
-
-  Lemma Cardinality_zero_Empty_set {U : Type} :
-    forall (T : Ensemble U), Cardinal T 0 -> T == (Empty_set).
-  Proof with finitecrush.
-    remember 0 as n.
-    intros T cardT.
-    induction cardT...
-      inversion Heqn.
-      rewrite <- H...
-  Qed.
-
-  Lemma Cardinality_Empty_set_is_zero {U : Type} :
-    forall (T : Ensemble U), T == (Empty_set) -> Cardinal T 0.
-  Proof with finitecrush.
-    intros.
-    rewrite H...
-  Qed.
-
-  (* A set is a singleton precisely when it has cardinality one *)
-
-  Lemma Cardinality_one_Singleton {U : Type} :
-    forall (T : Ensemble U), Cardinal T 1 -> exists x, T == (Singleton x).
-  Proof with finitecrush.
-    remember 1 as n.
-    intros. induction H.
-      - inversion Heqn.
-      - inversion Heqn.
-        subst. exists x...
-        clear IHCardinal.
-        assert (A == Empty_set) as K.
-          apply Cardinality_zero_Empty_set...
-        rewrite K.
-        unfold Same_set, Included...
-      - apply IHCardinal in Heqn.
-        inversion Heqn.
-        exists x... rewrite <- H0...
-  Qed.
-
-  Lemma Cardinality_Singleton_is_one {U : Type} :
-    forall (x : U), Cardinal (Singleton x) 1.
-  Proof with finitecrush.
-    intros.
-    apply (Cardinal_Same_set (Add U (Empty_set) x))...
-    unfold Same_set, Included...
-  Qed.
-
-  (* Finite sets are either empty or Inhabited *)
-
-  Lemma Finite_Empty_or_Inhabited {U : Type} :
-    forall A : (Ensemble U), Finite A -> ((A == Empty_set) \/ (Inhabited A)).
+  (* Finite sets are closed under Setminus *)
+  Lemma Setminus_Finite' {U : Type} :
+    decidable_eq U ->
+    forall (A : Ensemble U), Finite A ->
+    forall (B : Ensemble U), Finite B ->
+      Finite (A \ B).
   Proof with intuition.
     intros.
-    induction H...
-      left; rewrite H0...
-      right; rewrite H0...
+    rewrite Setminus_is_Intersection_Complement.
+    apply Setminus_Finite...
   Qed.
-
-  Hint Resolve Finite_Empty_or_Inhabited.
-
-  (* Singletons are finite *)
-
-  Lemma Finite_Singleton {U : Type} :
-    forall x : U, Finite (Singleton x).
-  Proof with finitecrush.
-    intros...
-    apply (Finite_Same_set (Add U (Empty_set) x))...
-    crush.
-  Qed.
-
-  Hint Resolve Finite_Singleton.
-
-  (* some basic sets of natural numbers are finite *)
 
   (* {x | x <  n} is finite for all n *)
   Lemma lt_n_is_Finite : forall n, Finite (fun m => (m < n)).
@@ -334,6 +328,10 @@
         * crush.
   Qed.
 
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* maximal and minimal elements                         *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
   (* Finite non-empty sets of natural numbers have maximum and minimum elements *)
   Lemma Finite_nat_have_maximum_le_element :
     forall (T : Ensemble nat), Finite T -> Inhabited T ->
@@ -359,7 +357,6 @@
         rewrite H1...
         apply H3. rewrite <- H1...
   Qed.
-
   Lemma Finite_nat_have_minimum_le_element :
     forall (T : Ensemble nat), Finite T -> Inhabited T ->
       exists u, ((u ∈ T) /\ (forall v, (v ∈ T) -> u <= v)).
@@ -385,8 +382,7 @@
         exists x... rewrite H1...  apply H3.  rewrite <- H1...
   Qed.
 
-  (* decidable sets of natural numbers have minimum elements *)
-
+  (* decidable (non-empty) sets of natural numbers have minimum elements *)
   Lemma decidable_nat_have_minimum_le_element :
     forall (T : Ensemble nat), decidable T -> Inhabited T ->
       exists u, ((u ∈ T) /\ (forall v, (v ∈ T) -> u <= v)).
@@ -420,8 +416,76 @@
   apply (le_trans _ w)... apply H0... unfold Z, In at 1...
   Qed.
 
-  (* Finite sets are inhabited precisely when they have non-zero cardinality *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Cardinality general results                          *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* Sets are finite precisely when they have a cardinality *)
+  Lemma Cardinality_exists {U : Type} :
+    forall (T : Ensemble U), Finite T -> exists n, Cardinal T n.
+  Proof with finitecrush.
+    intros T TFin.
+    induction TFin.
+      - exists 0...
+      - inversion IHTFin; clear IHTFin. exists (S x0)...
+      - inversion IHTFin; clear IHTFin. exists (x). rewrite H...
+  Qed.
+  Lemma Cardinal_are_Finite {U : Type} :
+    forall n (T : Ensemble U), Cardinal T n -> Finite T.
+  Proof with finitecrush.
+    intros n T Tcard.
+    induction Tcard...
+      rewrite <- H...
+  Qed.
+
+  (* A set is empty precisely when it has cardinality zero *)
+  Lemma Cardinality_zero_Empty_set {U : Type} :
+    forall (T : Ensemble U), Cardinal T 0 -> T == (Empty_set).
+  Proof with finitecrush.
+    remember 0 as n.
+    intros T cardT.
+    induction cardT...
+      inversion Heqn.
+      rewrite <- H...
+  Qed.
+  Lemma Cardinality_Empty_set_is_zero {U : Type} :
+    forall (T : Ensemble U), T == (Empty_set) -> Cardinal T 0.
+  Proof with finitecrush.
+    intros.
+    rewrite H...
+  Qed.
+
+  (* A set is a singleton precisely when it has cardinality one *)
+  Lemma Cardinality_one_Singleton {U : Type} :
+    forall (T : Ensemble U), Cardinal T 1 -> exists x, T == (Singleton x).
+  Proof with finitecrush.
+    remember 1 as n.
+    intros. induction H.
+      - inversion Heqn.
+      - inversion Heqn.
+        subst. exists x...
+        clear IHCardinal.
+        assert (A == Empty_set) as K.
+          apply Cardinality_zero_Empty_set...
+        rewrite K.
+        unfold Same_set, Included...
+      - apply IHCardinal in Heqn.
+        inversion Heqn.
+        exists x... rewrite <- H0...
+  Qed.
+  Lemma Cardinality_Singleton_is_one {U : Type} :
+    forall (x : U), Cardinal (Singleton x) 1.
+  Proof with finitecrush.
+    intros.
+    apply (Cardinal_Same_set (Add U (Empty_set) x))...
+    unfold Same_set, Included...
+  Qed.
+
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Relationship between Finite and Cardinal             *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+  (* Finite sets are inhabited precisely when they have non-zero cardinality *)
   Lemma Cardinal_Sn {U : Type} : forall (T : Ensemble U) n, Cardinal T (S n) -> Inhabited T.
   Proof with intuition.
     intros.
@@ -430,7 +494,6 @@
       inversion HeqW.
       rewrite <- H0...
   Qed.
-
   Lemma Finite_Inhabited_Cardinal_Sn {U : Type} : forall (X : Ensemble U),
     Finite X -> Inhabited X ->
       exists n, Cardinal X (S n).
@@ -445,8 +508,11 @@
       exists n...
   Qed.
 
-  (* Setminus reduces cardinality by one *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+(* Cardinality is compatible with Setminus, Included    *)
+(* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+  (* Setminus reduces cardinality by one *)
   Lemma Cardinal_Setminus {U : Type} :
     decidable_eq U ->
       forall n (T : Ensemble U), Cardinal T n ->
@@ -473,7 +539,6 @@
   Qed.
 
   (* Inclusion of finite sets implies ordering of cardinality *)
-
   Lemma Cardinal_le {U : Type} :
     decidable_eq U ->
     forall (T : Ensemble U) n, Cardinal T n ->
@@ -503,32 +568,7 @@
       crush.
   Qed.
 
-  (* For all decidable propositions P and finite sets W,
-      W either contains an element satisfying P, or it does not *)
-
-  Lemma Finite_decidable_existence {U : Type}:
-    forall W, Finite W ->
-      forall P : U -> Prop, (forall c, P c \/ ~(P c)) ->
-        ((exists x, x ∈ W /\ P x) \/ ~((exists x, x ∈ W /\ P x))).
-  Proof with intuition.
-    intros W WFin.
-    induction WFin...
-      - right... inversion H0... inversion H2...
-
-      - assert (P x ∨ (P x → False))...
-        + left... exists x...
-        + assert ((∃ x : U, x ∈ A ∧ P x) ∨ ((∃ x : U, x ∈ A ∧ P x) → False))...
-      left... inversion H3 as [ a D]; exists a...
-      right... apply H3... inversion H1 as [ a D]; exists a...
-      unfold Add in H4. apply Union_inv in H4... exfalso. inversion H6... rewrite <- H4 in H5...
-
-      - assert ((∃ x : U, x ∈ T ∧ P x) ∨ ((∃ x : U, x ∈ T ∧ P x) → False))...
-        + left... inversion H2 as [a A]; exists a... rewrite H...
-        + right... apply H2. inversion H1 as [ a A]; exists a... rewrite <- H...
-  Qed.
-
   (* Among finite sets of equal cardinality, inclusion implies same_set *)
-
   Lemma Cardinal_eq_Included_Same_set {U : Type} :
     decidable_eq U ->
     forall n (Z : Ensemble U), Cardinal Z n ->
@@ -555,39 +595,7 @@
       - rewrite <- H. apply IHZcard... rewrite H...
   Qed.
 
-  (* Finite sets are closed under Setminus *)
-
-  Lemma Setminus_Finite {U : Type} :
-    decidable_eq U ->
-    forall (A : Ensemble U), Finite A ->
-    forall (B : Ensemble U), Finite B ->
-      Finite (A ∩ (√ B)).
-  Proof with intuition.
-    intros Udec...
-    induction H...
-    - apply (Finite_Same_set Empty_set)...
-    - unfold Add.
-      rewrite I_U_dist_r.
-      apply Finite_Union...
-      assert (x ∈ B \/ ~(x ∈ B))...
-        apply Finite_are_decidable...
-      + apply (Finite_Same_set Empty_set)...
-        crush.
-      + apply (Finite_Same_set (Singleton x))...
-        crush.
-    - rewrite H1...
-  Qed.
-
-  Lemma Setminus_Finite' {U : Type} :
-    decidable_eq U ->
-    forall (A : Ensemble U), Finite A ->
-    forall (B : Ensemble U), Finite B ->
-      Finite (A \ B).
-  Proof with intuition.
-    intros.
-    rewrite Setminus_is_Intersection_Complement.
-    apply Setminus_Finite...
-  Qed.
+(* A final decidability result *)
 
   (* Same_set on Finite sets is decidable *)
   Lemma Finite_eq_decidable {U : Type} : 
@@ -621,4 +629,5 @@
         + right... apply H2...  rewrite <- H1...
       - rewrite H...
   Qed.
+
 
