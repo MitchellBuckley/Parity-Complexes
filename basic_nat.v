@@ -41,7 +41,7 @@ Require Import Arith.
   (* Less-than-or-equal-to is a total relation *)
   Lemma le_total : forall n m, (n <= m) \/ (m <= n).
   Proof with intuition.
-    apply NPeano.Nat.le_ge_cases.
+    apply Nat.le_ge_cases.
   Qed.
 
   (* A four case comparison of two natural numbers *)
@@ -58,7 +58,7 @@ Require Import Arith.
   Proof with intuition.
     intros n.
     induction n...
-    apply (lt_n_0) in H...
+    apply (Nat.nlt_0_r) in H...
   Qed.
 
   Lemma lt_SSn : ∀ n : nat, S (S n) < n -> False.

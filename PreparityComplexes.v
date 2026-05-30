@@ -5,10 +5,11 @@ Require Import Utf8_core.
 Require Import Ensembles.
 Require Import Setoid.
 Require Import Finite_Ensembles.
-Require Import Ensembles_setoids.
+Require Import Ensembles_Setoids.
 Require Import basic_nat.
 Require Import Relations. (* required for reflexive, transitive closure *)
 Require Import Arith.
+Require Import Lia.
 
 (* Implicits *)
 
@@ -501,9 +502,11 @@ Arguments Full_set {U} _.
 (* More tactics (Hints)                                 *)
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+Search (_ = S _).
+
   Hint Extern 2 (False) =>
     match goal with
-    | H : S ?n <= ?n |- False => apply le_Sn_n in H; assumption
+    | H : S ?n <= ?n |- False => apply Nat.nle_succ_diag_l in H; assumption
     | H : ?n   =  S ?n  |- False => apply n_Sn in H; assumption
     | H : S ?n =  ?n |- False => symmetry in H; apply n_Sn in H; assumption
     | H : In Empty_set _ |- False => inversion H
@@ -515,23 +518,15 @@ Arguments Full_set {U} _.
   Hint Extern 2 (False) =>
     match goal with
     | H : S ?n = S ?m |- False => inversion H; clear H
-    | H : ?n = S (S ?n)  |- False => apply n_SSn in H
-    | H : S (S ?n) =  ?n |- False => symmetry in H; apply n_SSn in H
-    | H : S (S ?n) <  ?n |- False => apply lt_SSn in H
-    | H : S (S ?n) <= ?n |- False => apply le_SSn in H
-    | H : ?n = S (S (S ?n))  |- False => apply n_SSSn in H
-    | H : S (S (S ?n)) =  ?n |- False => symmetry in H; apply n_SSSn in H
-    | H : S (S (S ?n)) <  ?n |- False => apply lt_SSSn in H
-    | H : S (S (S ?n)) <= ?n |- False => apply le_SSSn in H
     | H : ?m = ?n, H' : S ?n = ?m |- False => rewrite H in H'
     end.
 
   Hint Extern 2 (False) =>
     match goal with
     | H : S ?n < ?n |- False => apply lt_Sn in H; assumption
-    | H :   ?n < ?n |- False => apply lt_irrefl in H; assumption
-    | H :   ?m < ?n , H' : ?n = ?m |- False => rewrite H' in H; apply lt_irrefl in H; assumption
-    | H :   ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply lt_irrefl in H; assumption
+    | H :   ?n < ?n |- False => apply Nat.lt_irrefl in H; assumption
+    | H :   ?m < ?n , H' : ?n = ?m |- False => rewrite H' in H; apply Nat.lt_irrefl in H; assumption
+    | H :   ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply Nat.lt_irrefl in H; assumption
     | H : S ?m < ?n , H' : ?n = ?m |- False => rewrite H' in H; apply lt_Sn in H; assumption
     | H : S ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply lt_Sn in H; assumption
     end.
@@ -544,7 +539,7 @@ Arguments Full_set {U} _.
       | H : In (sup ?S _) ?x |- In ?S ?x => unfold sup, In at 1 in H; apply H
     end.
 
-  Hint Resolve lt_irrefl le_lt_dec lt_Sn.
+  Hint Resolve Nat.lt_irrefl le_lt_dec lt_Sn.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Setoid rewrites                                      *)
@@ -721,7 +716,7 @@ Arguments Full_set {U} _.
     | H: In (sup _ (?n)) ?x |- (S (dim ?x) <= ?n) => apply (sup_def_Lemma' _ _ _ H)
     end.
 
-  Hint Resolve sub_Included_Lemma sub_def_Lemma sup_def_Lemma le_Sn_n n_Sn.
+  Hint Resolve sub_Included_Lemma sub_def_Lemma sup_def_Lemma n_Sn.
 
   (* sub and sup are compatible with Inclusion *)
   Lemma sub_Included : forall T n, (sub T n) ⊆ T.
@@ -884,15 +879,13 @@ Arguments Full_set {U} _.
   Proof with intuition.
     autounfold with *...
     subst. exfalso.
-    apply (le_Sn_n n).
-    apply (le_trans _ (S (dim x)))...
+    lia.
   Qed.
   Lemma sup_sub_Empty_set : forall n k : nat, k < n -> forall R, sup (sub R n) k == Empty_set.
   Proof with intuition.
     autounfold with *...
     subst. exfalso.
-    apply (le_Sn_n k).
-    apply (le_trans _ (S (dim x)))...
+    lia.
   Qed.
   Lemma sub_sub_Empty_set : forall n k, ~(n=k) -> forall T, sub (sub T n) k == Empty_set.
   Proof with intuition.
@@ -927,7 +920,7 @@ Arguments Full_set {U} _.
   (* sup sup is related to minimum dimension *)
   Lemma sup_sup_min : forall R n k, k <= n -> sup (sup R n) k == sup R k.
   Proof with intuition.
-    crush. apply (le_trans _ k)...
+    crush. lia.
   Qed.
 
   (* sub and sup on {x}, plus x and minus x *)
@@ -944,7 +937,7 @@ Arguments Full_set {U} _.
     crush...
     inversion H1; clear H1; subst.
     assert (S (dim x) <= (dim x))...
-    apply le_trans with k...
+    lia.
   Qed.
   Lemma sub_Singleton : forall y k, (dim y = k) -> sub (Singleton y) (S k) == Singleton y.
   Proof with intuition.
@@ -985,7 +978,6 @@ Arguments Full_set {U} _.
   Lemma sub_sup_0 : forall X, sub X 1 == sup X 1.
   Proof with intuition.
     crush. rewrite H1...
-    apply le_S_n in H1...
   Qed.
 
   (* sub and sup are related by Union and the successor function *)
@@ -1025,7 +1017,6 @@ Arguments Full_set {U} _.
     intros.
     apply (Finite_Included T)...
     assert ({S (dim x) = n} + {~ (S (dim x)) = n})...
-      apply eq_nat_dec.
   Qed.
   Lemma Finite_sup : forall T, Finite T -> forall n, Finite (sup T n).
   Proof with intuition.
@@ -1465,13 +1456,13 @@ Arguments Full_set {U} _.
             inversion H2.
             exists x... unfold Add in H4... inversion H4.
             rewrite H3 in H5. inversion H5. apply Singleton_inv in H5.
-            subst. apply le_refl.
+            subst. lia.
             apply IHFinite in H3. inversion H3 as [z].
             assert (((dim x) <= (dim z)) \/ ((dim z) <= (dim x))). apply le_total.
             inversion H5; [exists z | exists x]... unfold Add in H4...
             inversion H4... apply Singleton_inv in H10; subst...
             unfold Add in H4...
-            inversion H4... apply (le_trans _ (dim z) _)...
+            inversion H4... apply (transitivity (H8 _ H10))...
             apply Singleton_inv in H10; subst...
 
       assert (Inhabited T). inversion H0. apply (Inhabited_intro _ _ x).
@@ -1626,7 +1617,8 @@ Arguments Full_set {U} _.
 
   Lemma setdim_sup : forall R n k, k <= n -> setdim (sup R (S k)) n.
   Proof with intuition.
-    unfold setdim, sup... unfold In at 1 in H0... apply (le_trans _ k)...
+    unfold setdim, sup... unfold In at 1 in H0...
+    lia.
   Qed.
 
   Lemma setdim_sub : forall R n k, k <= n -> setdim (sub R (S k)) n.
@@ -1637,7 +1629,7 @@ Arguments Full_set {U} _.
 
   Lemma setdim_sup' : forall R n k, k <= n -> setdim (sup R k) n.
   Proof with intuition.
-    unfold setdim, sup... unfold In at 1 in H0... apply (le_trans _ k)...
+    unfold setdim, sup... unfold In at 1 in H0... lia.
   Qed.
 
   Lemma setdim_Setminus : forall R T n, setdim R n -> setdim (R \ T) n.

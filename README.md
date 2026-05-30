@@ -21,10 +21,9 @@ These files contain the following content:
 Compilation instructions:
 
 1. First, there is already a make file here. One can check it by running 'cat Make'
-2. One should then run 'coq_makefile -f Make -o Makefile'.
+2. One should then run 'coq_makefile -f _CoqProject -o Makefile'.
 3. Finally, run 'make' to compile all the code. Warning: the final file might take 5 or 10 minutes to compile.
 
-This has been compiled with coqc version 8.4 (September 2012 with OCaml 3.12.1). We have not checked other releases.
+This has been compiled with coqc version 8.20.1 (May 2026). We have not checked other releases.
 
 The author is not so experienced with make files and compilation options, any recommendations are welcome at [this address](mailto:mitchell.alan.buckley@gmail.com).
- 

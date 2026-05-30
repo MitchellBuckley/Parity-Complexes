@@ -759,7 +759,7 @@ Ltac crush :=
     forall (A : Ensemble U) x, decidable (Singleton x) -> (x ∈ A) -> (A == Add U (A \ (Singleton x)) x).
   Proof with crush.
     unfold decidable...
-    specialize H with (x0:=x0)...
+    specialize H with (x0)...
   Qed.
 
   Lemma Included_Singleton {U : Type} : forall (S : Ensemble U), Inhabited S ->
@@ -810,7 +810,6 @@ Ltac crush :=
   Proof with crush.
     crush.
     assert ((x ∈ A) \/ ~(x ∈ A))...
-    apply H.
   Qed.
 
   Lemma Disjoint_Union_Setminus {U : Type} :
