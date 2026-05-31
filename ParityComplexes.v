@@ -7854,7 +7854,8 @@ Module ParityComplexTheory (M : ParityComplex).
         * unfold N, L...
           repeat (rewrite <- Setminus_is_Intersection_Complement).
           repeat (rewrite sub_Union || rewrite sub_Setminus).
-          rewrite (sub_Singleton_Empty_set _ (S m))...
+          rewrite (sub_Singleton_Empty_set _ (S m)).
+          2: intuition; lia.
           rewrite (Setminus_Empty_set)...
           apply Same_set_by_dimension'.
           intros k.
@@ -7868,6 +7869,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_plus_Empty_set ) ||
                   rewrite (sub_minus_Empty_set ) ||
                   rewrite (Setminus_Empty_set) ||
+                  rewrite Union_idemp ||
                   rewrite (Empty_set_ident_left) ||
                   rewrite (Empty_set_ident_right)); try (rewrite dimx in *)...
           assert (S m = k)... rewrite <- H7 in a...
@@ -7928,6 +7930,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_plus_Empty_set ) ||
                   rewrite (sub_minus_Empty_set ) ||
                   rewrite (Setminus_Empty_set) ||
+                  rewrite Union_idemp ||
                   rewrite (Empty_set_ident_left) ||
                   rewrite (Empty_set_ident_right)); try (rewrite dimx in *)...
           assert (S m = k)... rewrite <- H7 in a...
@@ -8323,6 +8326,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_plus_Empty_set y k) ||
                   rewrite (sub_minus_Empty_set y k) ||
                   rewrite (Setminus_Empty_set) ||
+                  rewrite Union_idemp ||
                   rewrite (Empty_set_ident_left) ||
                   rewrite (Empty_set_ident_right)); try (rewrite ydim in *)...
           assert (S m = k)... rewrite <- H9 in a...
@@ -8373,6 +8377,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_plus_Empty_set y k) ||
                   rewrite (sub_minus_Empty_set y k) ||
                   rewrite (Setminus_Empty_set) ||
+                  rewrite Union_idemp ||
                   rewrite (Empty_set_ident_left) ||
                   rewrite (Empty_set_ident_right)); try (rewrite ydim in *)...
           assert (S m = k)... rewrite <- H9 in a...

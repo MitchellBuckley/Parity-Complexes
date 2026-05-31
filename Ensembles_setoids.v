@@ -825,7 +825,7 @@ Ltac crush :=
     crush.
   Qed.
 
-  #[export] Hint Resolve Same_set_sym Same_set_refl Same_set_trans.
+  #[export] Hint Resolve Same_set_refl Same_set_trans.
   #[export] Hint Resolve Included_refl Included_trans.
   #[export] Hint Resolve Union_trans Union_comm Union_idemp.
   #[export] Hint Resolve Intersection_trans Intersection_comm Intersection_idemp.
