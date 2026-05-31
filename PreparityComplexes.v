@@ -6,7 +6,6 @@ Require Import Ensembles.
 Require Import Setoid.
 Require Import Finite_Ensembles.
 Require Import Ensembles_Setoids.
-Require Import basic_nat.
 Require Import Relations. (* required for reflexive, transitive closure *)
 Require Import Arith.
 Require Import Lia.
@@ -523,12 +522,9 @@ Search (_ = S _).
 
   Hint Extern 2 (False) =>
     match goal with
-    | H : S ?n < ?n |- False => apply lt_Sn in H; assumption
     | H :   ?n < ?n |- False => apply Nat.lt_irrefl in H; assumption
     | H :   ?m < ?n , H' : ?n = ?m |- False => rewrite H' in H; apply Nat.lt_irrefl in H; assumption
     | H :   ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply Nat.lt_irrefl in H; assumption
-    | H : S ?m < ?n , H' : ?n = ?m |- False => rewrite H' in H; apply lt_Sn in H; assumption
-    | H : S ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply lt_Sn in H; assumption
     end.
 
   Hint Extern 2 (_ ∈ _) =>
@@ -539,7 +535,7 @@ Search (_ = S _).
       | H : In (sup ?S _) ?x |- In ?S ?x => unfold sup, In at 1 in H; apply H
     end.
 
-  Hint Resolve Nat.lt_irrefl le_lt_dec lt_Sn.
+  Hint Resolve Nat.lt_irrefl le_lt_dec.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Setoid rewrites                                      *)
@@ -1458,7 +1454,7 @@ Search (_ = S _).
             rewrite H3 in H5. inversion H5. apply Singleton_inv in H5.
             subst. lia.
             apply IHFinite in H3. inversion H3 as [z].
-            assert (((dim x) <= (dim z)) \/ ((dim z) <= (dim x))). apply le_total.
+            assert (((dim x) <= (dim z)) \/ ((dim z) <= (dim x))). apply Nat.le_ge_cases.
             inversion H5; [exists z | exists x]... unfold Add in H4...
             inversion H4... apply Singleton_inv in H10; subst...
             unfold Add in H4...

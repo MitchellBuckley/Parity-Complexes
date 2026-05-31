@@ -7,7 +7,6 @@ Require Import Relations.
 Require Import Ensembles_Setoids.
 Require Import Arith.
 Require Import Setoid.
-Require Import basic_nat.
 Require Import Finite_Ensembles.
 Require Import PreparityComplexes.
 Require Import Recdef.
@@ -74,7 +73,7 @@ Module ParityComplexTheory (M : ParityComplex).
     inversion K as [n TCard]; clear K.
     revert n T TFin TCard.
     (* use strong induction on n *)
-    refine (strong_induction _ _ _)...
+    refine (Nat.strong_induction_le _ _ _)...
       - (* case 0: T must be empty *)
         right...
         apply Cardinality_zero_Empty_set in TCard.
@@ -189,7 +188,7 @@ Module ParityComplexTheory (M : ParityComplex).
     forall t, forall X, Cardinal X (S t) -> forall n, Included X (sub Full_set (S n))
       -> exists m, m ∈ X /\ (forall y, y ∈ X -> (triangle_rest X y m) -> m = y).
   Proof with intuition.
-    refine (strong_induction _ _ _)...
+    refine (Nat.strong_induction_le _ _ _)...
 
     - apply Cardinality_one_Singleton in H.
       inversion H; clear H.
@@ -288,7 +287,7 @@ Module ParityComplexTheory (M : ParityComplex).
     forall t, forall X, Cardinal X (S t) -> forall n, Included X (sub Full_set (S n))
       -> exists m, m ∈ X /\ (forall y, y ∈ X -> (triangle_rest X m y) -> m = y).
   Proof with intuition.
-    refine (strong_induction _ _ _)...
+    refine (Nat.strong_induction_le _ _ _)...
 
     - apply Cardinality_one_Singleton in H.
       inversion H; clear H.
@@ -1543,6 +1542,15 @@ Module ParityComplexTheory (M : ParityComplex).
     apply (P_0_not_empty M P)...
   Qed.
 
+  (* A four case comparison of two natural numbers *)
+  Lemma lt_eq_eq_lt_dec: forall k m, {k < m} + {k = m} + {k = S m} + {S m < k}.
+  Proof with intuition.
+    intros.
+    pose (lt_eq_lt_dec k m)...
+    unfold lt in b.
+    apply le_lt_eq_dec in b...
+  Qed.
+
   (* sources are cells *)
   Lemma source_is_a_cell : forall (M P : Ensemble carrier),
     is_a_cell (M, P) ->
@@ -1625,6 +1633,7 @@ Module ParityComplexTheory (M : ParityComplex).
               rewrite Empty_set_ident_left)...
       apply moves_by_dim...
       rewrite <- H6 in a...
+      lia.
     * rewrite b.
       repeat (rewrite sub_sub_Empty_set ||
               rewrite (sub_sup_cancel) ||
@@ -1649,7 +1658,7 @@ Module ParityComplexTheory (M : ParityComplex).
     * repeat (rewrite sub_sub_Empty_set || rewrite sub_sup_cancel ||
               rewrite Empty_set_ident_left)...
       apply moves_by_dim...
-      rewrite <- H6 in a...
+      rewrite <- H6 in a; lia.
     * rewrite b.
       repeat (rewrite sub_idemp ||
               rewrite sub_sub_Empty_set ||
@@ -1668,6 +1677,7 @@ Module ParityComplexTheory (M : ParityComplex).
               rewrite sub_sup_Empty_set ||
               rewrite Empty_set_ident_left || rewrite Empty_set_ident_right)...
       apply Empty_set_moves.
+      lia.
   Qed.
 
   (* targets are cells *)
@@ -1760,7 +1770,7 @@ Module ParityComplexTheory (M : ParityComplex).
           repeat (rewrite <- sub_Setminus || rewrite <- sub_Union || rewrite <- sub_Minus || rewrite <- sub_Plus)...
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper...
-          assert (S n = k)... rewrite <- H10 in a...
+          assert (S n = k)... rewrite <- H10 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
@@ -1779,6 +1789,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
                   rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
+                  lia.
     * apply Same_set_by_dimension'.
         intros.
         rewrite <- Setminus_is_Intersection_Complement.
@@ -1791,7 +1802,7 @@ Module ParityComplexTheory (M : ParityComplex).
           repeat (rewrite <- sub_Setminus || rewrite <- sub_Union || rewrite <- sub_Minus || rewrite <- sub_Plus)...
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper...
-          assert (S n = k)... rewrite <- H10 in a...
+          assert (S n = k)... rewrite <- H10 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
@@ -1809,7 +1820,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_sub_Empty_set) ||
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
-                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
+                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)... lia.
 
   + unfold moves_def in *...
     * apply Same_set_by_dimension'.
@@ -1823,8 +1834,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
           repeat (rewrite <- sub_Setminus || rewrite <- sub_Union || rewrite <- sub_Minus || rewrite <- sub_Plus)...
           rewrite Setminus_is_Intersection_Complement.
-          apply sub_Same_set_Proper...
-          assert (S n = k)... rewrite <- H10 in a...
+          apply sub_Same_set_Proper... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel ) ||
                   rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
@@ -1855,7 +1865,7 @@ Module ParityComplexTheory (M : ParityComplex).
           repeat (rewrite <- sub_Setminus || rewrite <- sub_Union || rewrite <- sub_Minus || rewrite <- sub_Plus)...
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper...
-          assert (S n = k)... rewrite <- H10 in a...
+          assert (S n = k)... rewrite <- H10 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel ) ||
                   rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
@@ -2403,7 +2413,7 @@ Module ParityComplexTheory (M : ParityComplex).
           apply lt_eq_lt_dec.
         + repeat (rewrite (sub_sub_Empty_set) || rewrite Empty_set_ident_right)...
           apply well_formed_sub. apply well_formed_sup...
-          apply eq_add_S in H18. rewrite <- H18 in a0...
+          apply eq_add_S in H18. rewrite <- H18 in a0... lia.
         + rewrite b.
           repeat (rewrite (sub_sup_Empty_set) || rewrite (sub_sub_Empty_set (S (S n))) ||
                   rewrite Empty_set_ident_right || rewrite Empty_set_ident_left)...
@@ -2453,9 +2463,7 @@ Module ParityComplexTheory (M : ParityComplex).
                 rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
         apply moves_by_dim...
         rewrite <- H18 in a...
-        lia.
-        rewrite <- H18 in a...
-        assert (S n = n0)... rewrite <- H21 in a...
+        lia. lia. lia.
       + rewrite b.
         repeat (rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
                 rewrite (sub_sup_Empty_set n (S n)) ||
@@ -2504,8 +2512,8 @@ Module ParityComplexTheory (M : ParityComplex).
             rewrite <- H22 in b...
             inversion H18...
         rewrite (H18).
-        rewrite Empty_set_ident_left...
-        apply Empty_set_moves.
+        rewrite Empty_set_ident_left.
+        apply Empty_set_moves. lia. lia.
 
     - unfold Y.
       apply moves_by_dim'; intros.
@@ -2517,10 +2525,8 @@ Module ParityComplexTheory (M : ParityComplex).
                 rewrite Empty_set_ident_right || rewrite Plus_Empty_set ||
                 rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
         apply moves_by_dim...
-        rewrite <- H18 in a...
         lia.
-        rewrite <- H18 in a...
-        apply eq_add_S in H18... rewrite <- H18 in a...
+        lia. lia.
       + rewrite <- b.
         repeat (rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
                 rewrite (sub_sup_cancel n0 n0) || rewrite Empty_set_ident_right ||
@@ -2669,7 +2675,7 @@ Module ParityComplexTheory (M : ParityComplex).
           apply lt_eq_lt_dec.
         + repeat (rewrite (sub_sub_Empty_set) || rewrite Empty_set_ident_right)...
           apply well_formed_sub. apply well_formed_sup...
-          apply eq_add_S in H18. rewrite <- H18 in a0...
+          apply eq_add_S in H18. rewrite <- H18 in a0... lia.
         + rewrite b.
           repeat (rewrite (sub_sup_Empty_set) || rewrite (sub_sub_Empty_set (S (S n))) ||
                   rewrite Empty_set_ident_right || rewrite Empty_set_ident_left)...
@@ -2701,11 +2707,9 @@ Module ParityComplexTheory (M : ParityComplex).
       + repeat (rewrite (sub_sup_cancel) || rewrite sub_sub_Empty_set ||
                 rewrite Empty_set_ident_right || rewrite Plus_Empty_set ||
                 rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
-        apply moves_by_dim...
-        rewrite <- H18 in a...
-        rewrite <- H18 in a...
+        apply moves_by_dim... lia.
+        rewrite <- H18 in a... lia.
         lia.
-        apply eq_add_S in H18... rewrite <- H18 in a...
       + rewrite <- b.
         repeat (rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
                 rewrite (sub_sup_cancel n0 n0) || rewrite Empty_set_ident_right ||
@@ -2765,9 +2769,9 @@ Module ParityComplexTheory (M : ParityComplex).
                 rewrite Empty_set_ident_right || rewrite Plus_Empty_set ||
                 rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
         apply moves_by_dim...
-        rewrite <- H18 in a...
         rewrite <- H18 in a... lia.
-        assert (S n = n0)... rewrite <- H21 in a...
+        rewrite <- H18 in a... lia.
+        assert (S n = n0)... rewrite <- H21 in a... lia.
       + rewrite b.
         repeat (rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
                 rewrite (sub_sup_Empty_set n (S n)) ||
@@ -2815,7 +2819,7 @@ Module ParityComplexTheory (M : ParityComplex).
             inversion H18...
         rewrite (H18).
         rewrite Empty_set_ident_left...
-        apply Empty_set_moves.
+        apply Empty_set_moves. all: lia.
   Qed.
 
   (* Lemma 3.2B for m=1 implies Lemma 3.2B for 1 <= m *)
@@ -5187,7 +5191,7 @@ Module ParityComplexTheory (M : ParityComplex).
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper... apply MPcell.
           apply eq_add_S in H3.
-          rewrite <- H3 in a...
+          rewrite <- H3 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
@@ -5206,6 +5210,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
                   rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
+          lia.
 
       apply Same_set_by_dimension'.
         intros.
@@ -5220,7 +5225,7 @@ Module ParityComplexTheory (M : ParityComplex).
           repeat (rewrite <- sub_Setminus || rewrite <- sub_Union || rewrite <- sub_Minus || rewrite <- sub_Plus)...
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper... apply MPcell.
-          apply eq_add_S in H3... rewrite <- H3 in a...
+          apply eq_add_S in H3... rewrite <- H3 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite (sub_sub_Empty_set _ (S n)) || rewrite sub_idemp ||
@@ -5239,7 +5244,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_sub_Empty_set) ||
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
-                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
+                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)... lia.
 
     unfold moves_def...
       apply Same_set_by_dimension'.
@@ -5255,7 +5260,7 @@ Module ParityComplexTheory (M : ParityComplex).
           repeat (rewrite <- sub_Setminus || rewrite <- sub_Union || rewrite <- sub_Minus || rewrite <- sub_Plus)...
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper... apply MPcell. apply eq_add_S in H3.
-          rewrite <- H3 in a...
+          rewrite <- H3 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite (sub_sub_Empty_set _ (S n)) || rewrite sub_idemp ||
@@ -5274,7 +5279,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_sub_Empty_set) ||
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
-                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
+                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)... lia.
 
       apply Same_set_by_dimension'.
         intros.
@@ -5290,7 +5295,7 @@ Module ParityComplexTheory (M : ParityComplex).
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper... apply MPcell.
           apply eq_add_S in H3.
-          rewrite <- H3 in a...
+          rewrite <- H3 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite (sub_sub_Empty_set _ (S n)) || rewrite sub_idemp ||
@@ -5310,6 +5315,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
                   rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
+                  lia.
 
     rewrite Xsing.
     rewrite Minus_Singleton.
@@ -5965,7 +5971,7 @@ Module ParityComplexTheory (M : ParityComplex).
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper... apply MPcell.
           apply eq_add_S in H3.
-          rewrite <- H3 in a...
+          rewrite <- H3 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite sub_idemp || rewrite (sub_sub_Empty_set) ||
@@ -5983,7 +5989,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_sub_Empty_set) ||
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
-                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
+                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)... lia.
 
       apply Same_set_by_dimension'.
         intros.
@@ -5998,7 +6004,7 @@ Module ParityComplexTheory (M : ParityComplex).
           repeat (rewrite <- sub_Setminus || rewrite <- sub_Union || rewrite <- sub_Minus || rewrite <- sub_Plus)...
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper... apply MPcell.
-          apply eq_add_S in H3... rewrite <- H3 in a...
+          apply eq_add_S in H3... rewrite <- H3 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite (sub_sub_Empty_set _ (S n)) || rewrite sub_idemp ||
@@ -6018,7 +6024,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
                   rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
-
+          lia.
     unfold moves_def...
       apply Same_set_by_dimension'.
         intros.
@@ -6034,6 +6040,7 @@ Module ParityComplexTheory (M : ParityComplex).
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper... apply MPcell. apply eq_add_S in H3.
           rewrite <- H3 in a...
+          lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite (sub_sub_Empty_set _ (S n)) || rewrite sub_idemp ||
@@ -6052,7 +6059,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_sub_Empty_set) ||
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
-                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
+                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)... lia.
 
       apply Same_set_by_dimension'.
         intros.
@@ -6068,7 +6075,7 @@ Module ParityComplexTheory (M : ParityComplex).
           rewrite Setminus_is_Intersection_Complement.
           apply sub_Same_set_Proper... apply MPcell.
           apply eq_add_S in H3.
-          rewrite <- H3 in a...
+          rewrite <- H3 in a... lia.
           rewrite b.
           repeat (rewrite (sub_sup_cancel (S n)) || rewrite (sub_sup_Empty_set _ (S (S n))) ||
                   rewrite (sub_sub_Empty_set _ (S n)) || rewrite sub_idemp ||
@@ -6087,7 +6094,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (sub_sub_Empty_set) ||
                   rewrite Empty_set_ident_left || rewrite Empty_set_ident_right ||
                   rewrite Plus_Empty_set ||
-                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)...
+                  rewrite Minus_Empty_set || rewrite Setminus_Empty_set)... lia.
 
     rewrite Xsing.
     rewrite Plus_Singleton.
@@ -6568,7 +6575,7 @@ Module ParityComplexTheory (M : ParityComplex).
             + inversion teq0.
             + inversion teq.
         - induction n0...
-            + rewrite Sn_minus_1...
+            + lia.
             + apply IHn. simpl in teq... simpl in teq0...
       Qed.
 
@@ -6592,7 +6599,7 @@ Module ParityComplexTheory (M : ParityComplex).
             + inversion teq0.
             + inversion teq.
         - induction n0...
-            + rewrite Sn_minus_1...
+            + lia.
             + apply IHn. simpl in teq... simpl in teq0...
       Qed.
 
@@ -7664,6 +7671,7 @@ Module ParityComplexTheory (M : ParityComplex).
                     rewrite (sub_sub_Empty_set)
                     ); try (rewrite dimx in *)...
             apply Empty_set_moves.
+            all: lia.
 
       + unfold L, R.
         unfold is_a_cell...
@@ -7782,6 +7790,7 @@ Module ParityComplexTheory (M : ParityComplex).
                     rewrite (Setminus_Empty_set))...
             apply moves_by_dim... apply cellcond.
             rewrite dimx in H8. rewrite H8 in H6...
+            lia.
 
         * apply moves_by_dim'.
           intros k.
@@ -7838,6 +7847,7 @@ Module ParityComplexTheory (M : ParityComplex).
                     rewrite (Setminus_Empty_set)
                     ); try (rewrite dimx in *)...
             apply moves_by_dim, cellcond.
+            lia.
 
       + split.
 
@@ -7896,7 +7906,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Empty_set_ident_right ||
                   rewrite (sub_sup_Empty_set) ||
                   rewrite Setminus_Empty_set); try (rewrite dimx in * )...
-          rewrite dimx in H6...
+                  all: lia.
 
         * unfold Q, R...
           repeat (rewrite <- Setminus_is_Intersection_Complement).
@@ -7956,7 +7966,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Empty_set_ident_right ||
                   rewrite (sub_sup_Empty_set) ||
                   rewrite Setminus_Empty_set); try (rewrite dimx in * )...
-                    rewrite dimx in H6...
+                  all : lia.
 
       (* y case *)
     -
@@ -8178,7 +8188,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite (Setminus_Empty_set) ||
                   rewrite (Empty_set_ident_left) ||
                   rewrite (Empty_set_ident_right)); try (rewrite ydim in *)...
-          apply moves_by_dim. apply cellcond.
+          apply moves_by_dim. apply cellcond. lia.
         * apply moves_by_dim'.
           intros k.
           repeat (rewrite <- Setminus_is_Intersection_Complement).
@@ -8349,7 +8359,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Empty_set_ident_right ||
                   rewrite (sub_sup_Empty_set) ||
                   rewrite Setminus_Empty_set); try (rewrite ydim in * )...
-          rewrite ydim in H8...
+                  all: lia.
 
         * unfold Q, R.
           apply Same_set_by_dimension'.
@@ -8399,6 +8409,7 @@ Module ParityComplexTheory (M : ParityComplex).
                   rewrite Empty_set_ident_right ||
                   rewrite (sub_sup_Empty_set) ||
                   rewrite Setminus_Empty_set); try (rewrite ydim in * )...
+                  all: lia.
   Qed.
 
 End ParityComplexTheory.

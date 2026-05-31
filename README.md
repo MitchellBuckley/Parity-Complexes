@@ -5,14 +5,12 @@ These five files are enough to formalise Ross Street's `Parity Complexes' up to 
 Strictly speaking, we have formalised sections 1 and 2, Propositions 3.1, 3.2, 3.3, and Theorem 4.1.
 
 The files exhibit dependence in the following order:
- - basic_nat.v 
  - Ensembles_setoids.v 
  - Finite_Ensembles.v 
  - PreparityComplexes.v 
  - ParityComplexes.v 
 
 These files contain the following content:
- - Basic results in logic and for natural numbers that we could not find in the standard library.
  - Setoid rewrite for Ensembles and some extra properties of Ensembles.
  - Modified definitions of Finite and Cardinal that interact well with setoid rewrites. Some basic properties of finite sets.
  - Definition of parity complex without axioms (preparity complex), basic structural results and implementation of Section 2.
