@@ -44,7 +44,7 @@ Module Type ParityComplex.
     triangle x y ->
     (~ (In (plus z) x /\ In (minus z) y) /\ ~ (In (plus z) y /\ In (minus z) x)).
 
-  Hint Resolve axiom2a axiom2b.
+  #[export] Hint Resolve axiom2a axiom2b.
 
 End ParityComplex.
 
@@ -898,7 +898,7 @@ Module ParityComplexTheory (M : ParityComplex).
     let (M, P) := A in let (M', P') := B in
     (M == M') /\ (P == P') .
 
-  Hint Unfold Same_pair.
+  #[export] Hint Unfold Same_pair.
 
   Notation " F === G" := (Same_pair F G) (at level 89).
 
@@ -1175,11 +1175,11 @@ Module ParityComplexTheory (M : ParityComplex).
   Definition cell_receptive (G : Ensemble carrier * Ensemble carrier) : Prop :=
     let (M, P) := G in
     (receptive M /\ receptive P).
-  Hint Unfold is_a_cell.
+  #[export] Hint Unfold is_a_cell.
 
   (* A repackaging of is_a_cell that allows for rewrites *)
   Definition is_a_cell' (S T : Ensemble carrier) := is_a_cell (S, T).
-  Hint Unfold is_a_cell'.
+  #[export] Hint Unfold is_a_cell'.
 
   Add Parametric Morphism : (is_a_cell') with
     signature (@Same_set carrier) ==> (@Same_set carrier) ==> (iff) as is_a_cell_Same_set.

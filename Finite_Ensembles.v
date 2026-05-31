@@ -50,7 +50,7 @@
                           forall B, A == B ->
                           Cardinal B n.
 
-  Hint Constructors Finite Cardinal.
+  #[export] Hint Constructors Finite Cardinal.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Setoid rewrites                                      *)
@@ -112,7 +112,7 @@
     + rewrite H0...
   Qed.
 
-  Hint Resolve Finite_are_decidable.
+  #[export] Hint Resolve Finite_are_decidable.
 
   (* Finite sets are either empty or Inhabited *)
   Lemma Finite_Empty_or_Inhabited {U : Type} :
@@ -124,7 +124,7 @@
       right; rewrite H0...
   Qed.
 
-  Hint Resolve Finite_Empty_or_Inhabited.
+  #[export] Hint Resolve Finite_Empty_or_Inhabited.
 
   (* For all decidable propositions P and finite sets W,
       W either contains an element satisfying P, or it does not *)
@@ -185,7 +185,7 @@
       - rewrite H2...
   Qed.
 
-  Hint Resolve Finite_Union Finite_Intersection.
+  #[export] Hint Resolve Finite_Union Finite_Intersection.
 
   (* Singletons are finite *)
   Lemma Finite_Singleton {U : Type} :
@@ -196,7 +196,7 @@
     crush.
   Qed.
 
-  Hint Resolve Finite_Singleton.
+  #[export] Hint Resolve Finite_Singleton.
 
   (* If set B is finite, A is a subset of B and ... then A is also finite *)
   Lemma Finite_Setminus_Included {U : Type} :
@@ -254,7 +254,7 @@
     assert (x ∈ A ∨ (x ∈ A → False))...
   Qed.
 
-  Hint Resolve Finite_Included Finite_Setminus_Included.
+  #[export] Hint Resolve Finite_Included Finite_Setminus_Included.
 
   (* Finite sets are closed under Setminus *)
   Lemma Setminus_Finite {U : Type} :

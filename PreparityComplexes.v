@@ -58,7 +58,7 @@ Arguments Full_set {U} _.
   Axiom minus_zero:           forall (x : carrier),   (dim x) = 0 -> minus x == Empty_set.
   Axiom plus_minus_Disjoint : forall (y : carrier),   Disjoint (plus y) (minus y).
 
-  Hint Resolve plus_dim minus_dim plus_Finite minus_Finite plus_minus_Disjoint.
+  #[export] Hint Resolve plus_dim minus_dim plus_Finite minus_Finite plus_minus_Disjoint.
 
   End PreParity.
 
@@ -143,7 +143,7 @@ Arguments Full_set {U} _.
     y ∈ S ->
     z ∈ S.
 
-  Hint Unfold PlusMinus MinusPlus Perp perp less triangle
+  #[export] Hint Unfold PlusMinus MinusPlus Perp perp less triangle
     Plus Minus sup sub: sets v62.
 
   (* Definition of movement, with notation *)
@@ -172,7 +172,7 @@ Arguments Full_set {U} _.
     forall u v,
       triangle u v ->  v ∈ R -> (minus u) ∩ (PlusMinus R) == (Empty_set).
 
-  Hint Unfold moves_def well_formed tight : sets v62.
+  #[export] Hint Unfold moves_def well_formed tight : sets v62.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Decidability                                         *)
@@ -188,7 +188,7 @@ Arguments Full_set {U} _.
     assumption.
   Qed.
 
-  Hint Resolve all_decidable.
+  #[export] Hint Resolve all_decidable.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Tactics                                              *)
@@ -310,7 +310,7 @@ Arguments Full_set {U} _.
     rewrite H0...
   Qed.
 
-  Hint Resolve dim_lemma_a dim_lemma_b dim_lemma_c dim_lemma_d.
+  #[export] Hint Resolve dim_lemma_a dim_lemma_b dim_lemma_c dim_lemma_d.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* less                                                 *)
@@ -346,7 +346,7 @@ Arguments Full_set {U} _.
     rewrite <- H0...
   Qed.
 
-  Hint Resolve less_irrefl less_dim.
+  #[export] Hint Resolve less_irrefl less_dim.
 
   (* the less ordering is decidable *)
   Lemma less_decidable : forall x y, ((less x y) \/ ~(less x y)).
@@ -436,7 +436,7 @@ Arguments Full_set {U} _.
     induction H... induction H...
   Qed.
 
-  Hint Resolve triangle_rest_in_set.
+  #[export] Hint Resolve triangle_rest_in_set.
 
   (* restricted triangle ordering is transitive *)
   Lemma triangle_rest_trans : forall X, forall y z, triangle_rest X y z -> forall x, triangle_rest X z x -> triangle_rest X y x.
@@ -503,7 +503,7 @@ Arguments Full_set {U} _.
 
 Search (_ = S _).
 
-  Hint Extern 2 (False) =>
+  #[export] Hint Extern 2 (False) =>
     match goal with
     | H : S ?n <= ?n |- False => apply Nat.nle_succ_diag_l in H; assumption
     | H : ?n   =  S ?n  |- False => apply n_Sn in H; assumption
@@ -514,20 +514,20 @@ Search (_ = S _).
     | H : ?n = 0, K : ?n = S _ |- False => rewrite K in H; inversion H
     end.
 
-  Hint Extern 2 (False) =>
+  #[export] Hint Extern 2 (False) =>
     match goal with
     | H : S ?n = S ?m |- False => inversion H; clear H
     | H : ?m = ?n, H' : S ?n = ?m |- False => rewrite H in H'
     end.
 
-  Hint Extern 2 (False) =>
+  #[export] Hint Extern 2 (False) =>
     match goal with
     | H :   ?n < ?n |- False => apply Nat.lt_irrefl in H; assumption
     | H :   ?m < ?n , H' : ?n = ?m |- False => rewrite H' in H; apply Nat.lt_irrefl in H; assumption
     | H :   ?m < ?n , H' : ?m = ?n |- False => rewrite H' in H; apply Nat.lt_irrefl in H; assumption
     end.
 
-  Hint Extern 2 (_ ∈ _) =>
+  #[export] Hint Extern 2 (_ ∈ _) =>
     match goal with
       | H : ?S == ?T, _: In ?T ?x |- In ?S ?x => rewrite H; assumption
       | H : ?S == ?T, _: In ?S ?x |- In ?T ?x => rewrite <- H; assumption
@@ -535,7 +535,7 @@ Search (_ = S _).
       | H : In (sup ?S _) ?x |- In ?S ?x => unfold sup, In at 1 in H; apply H
     end.
 
-  Hint Resolve Nat.lt_irrefl le_lt_dec.
+  #[export] Hint Resolve Nat.lt_irrefl le_lt_dec.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Setoid rewrites                                      *)
@@ -687,7 +687,7 @@ Search (_ = S _).
 
   (* hints to make good use of these simple lemmas to solve trivial
       problems *)
-  Hint Extern 1 (dim _ = _) =>
+  #[export] Hint Extern 1 (dim _ = _) =>
     match goal with
       | H: ?X ⊆ (sub _ (S (?n))), _: In ?X ?x |- (dim ?x = ?n) => apply (sub_Included_Lemma _ _ _ H)
       | H: In (sub _ (S ?n)) ?x |- (dim ?x = ?n) => apply (sub_def_Lemma _ _ _ H)
@@ -695,24 +695,24 @@ Search (_ = S _).
           apply minus_dim in K; rewrite H in K; inversion K; trivial
     end.
 
-  Hint Extern 1 (S (dim _) = _) =>
+  #[export] Hint Extern 1 (S (dim _) = _) =>
     match goal with
       | H: In (sub _ (?n)) ?x |- (S (dim ?x) = ?n) => apply (sub_def_Lemma' _ _ _ H)
     end.
 
-  Hint Extern 1 (dim _ <= _) =>
+  #[export] Hint Extern 1 (dim _ <= _) =>
     match goal with
     | H: In (sup _ (S ?n)) ?x |- (dim ?x <= ?n) => apply (sup_def_Lemma _ _ _ H)
     | H: In (sup _ (?n)) ?x |- (S (dim ?x) <= ?n) => apply (sup_def_Lemma' _ _ _ H)
     | H: ?X ⊆ (sup _ (S (?n))), _: In ?X ?x |- (dim ?x <= ?n) => apply (sup_Included_Lemma _ _ _ H)
     end.
 
-  Hint Extern 1 (S (dim _) <= _) =>
+  #[export] Hint Extern 1 (S (dim _) <= _) =>
     match goal with
     | H: In (sup _ (?n)) ?x |- (S (dim ?x) <= ?n) => apply (sup_def_Lemma' _ _ _ H)
     end.
 
-  Hint Resolve sub_Included_Lemma sub_def_Lemma sup_def_Lemma n_Sn.
+  #[export] Hint Resolve sub_Included_Lemma sub_def_Lemma sup_def_Lemma n_Sn.
 
   (* sub and sup are compatible with Inclusion *)
   Lemma sub_Included : forall T n, (sub T n) ⊆ T.
@@ -732,7 +732,7 @@ Search (_ = S _).
     rewrite H1...
   Qed.
 
-  Hint Resolve sub_Included sup_Included sub_sup_Included.
+  #[export] Hint Resolve sub_Included sup_Included sub_sup_Included.
 
   (* sub and sup are stable under Union *)
   Lemma sub_Union : forall T R n, sub (T ∪ R) n == (sub T n) ∪ (sub R n).
@@ -1022,7 +1022,7 @@ Search (_ = S _).
       apply le_dec.
   Qed.
 
-  Hint Resolve Finite_sub Finite_sup.
+  #[export] Hint Resolve Finite_sub Finite_sup.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* Plus and Minus                                       *)
@@ -1181,7 +1181,7 @@ Search (_ = S _).
     exfalso...
   Qed.
 
-  Hint Resolve all_decidable Plus_Finite Minus_Finite PlusMinus_Finite MinusPlus_Finite.
+  #[export] Hint Resolve all_decidable Plus_Finite Minus_Finite PlusMinus_Finite MinusPlus_Finite.
 
   (* Plus and minus behave well when x has dimesion 1 *)
   Lemma dim_1_properties : forall x, dim x = 1 ->
@@ -1433,7 +1433,7 @@ Search (_ = S _).
     apply (H3 x1)...
   Qed.
 
-  Hint Resolve well_formed_Singleton well_formed_Included.
+  #[export] Hint Resolve well_formed_Singleton well_formed_Included.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* minimal and maximal elements                         *)
@@ -1466,9 +1466,9 @@ Search (_ = S _).
       apply IHFinite in H2. inversion H2. exists x...
   Qed.
 
-  Hint Resolve Finite_are_decidable carrier_decidable_eq.
+  #[export] Hint Resolve Finite_are_decidable carrier_decidable_eq.
 
-  Hint Resolve Finite_Singleton sub_sup_0.
+  #[export] Hint Resolve Finite_Singleton sub_sup_0.
 
   (* Maximal and minimal elements under triangle_rest S 
      have a predictable relationship with S *)
@@ -1563,7 +1563,7 @@ Search (_ = S _).
     rewrite H3...
   Qed.
 
-  Hint Resolve Finite_sub Finite_sup PlusMinus_Finite MinusPlus_Finite Plus_Finite Minus_Finite.
+  #[export] Hint Resolve Finite_sub Finite_sup PlusMinus_Finite MinusPlus_Finite Plus_Finite Minus_Finite.
 
   (* Some little properties of triangle_rest *)
 
@@ -1598,9 +1598,9 @@ Search (_ = S _).
     left...
   Qed.
 
-  Hint Resolve set_le_Included set_ge_Included set_le_ident set_ge_ident.
+  #[export] Hint Resolve set_le_Included set_ge_Included set_le_ident set_ge_ident.
 
-  Hint Resolve Cardinality_Singleton_is_one.
+  #[export] Hint Resolve Cardinality_Singleton_is_one.
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 (* setdim                                               *)

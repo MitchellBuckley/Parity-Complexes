@@ -32,8 +32,8 @@ Arguments Singleton : default implicits.
 Arguments Empty_set {U} _.
 Arguments Full_set {U} _.
 
-Hint Constructors Singleton Full_set Empty_set Inhabited.
-Hint Unfold Complement.
+#[export] Hint Constructors Singleton Full_set Empty_set Inhabited.
+#[export] Hint Unfold Complement.
 
 (** Set notation using UTF-8 characters **)
 
@@ -52,7 +52,7 @@ Notation "√ A"        := (Complement A) (at level 59).
 Definition decidable {A : Type} (X : Ensemble A) : Prop :=
   forall (x : A), (x ∈ X) \/ ~(x ∈ X).
 
-Hint Unfold decidable.
+#[export] Hint Unfold decidable.
 
 (** Ensemble-specific tactics **)
 
@@ -136,7 +136,7 @@ Ltac crush :=
     crush.
   Qed.
 
-  Hint Resolve Union_inv Intersection_inv Complement_inv Complement_intro.
+  #[export] Hint Resolve Union_inv Intersection_inv Complement_inv Complement_intro.
 
   (** Setoid relations and morphisms **)
 
@@ -825,12 +825,12 @@ Ltac crush :=
     crush.
   Qed.
 
-  Hint Resolve Same_set_sym Same_set_refl Same_set_trans.
-  Hint Resolve Included_refl Included_trans.
-  Hint Resolve Union_trans Union_comm Union_idemp.
-  Hint Resolve Intersection_trans Intersection_comm Intersection_idemp.
-  Hint Resolve Empty_set_ident_left Empty_set_ident_right Full_set_ident_left Full_set_ident_right.
-  Hint Resolve Empty_set_zero_left Empty_set_zero_right Full_set_zero_left Full_set_zero_right.
+  #[export] Hint Resolve Same_set_sym Same_set_refl Same_set_trans.
+  #[export] Hint Resolve Included_refl Included_trans.
+  #[export] Hint Resolve Union_trans Union_comm Union_idemp.
+  #[export] Hint Resolve Intersection_trans Intersection_comm Intersection_idemp.
+  #[export] Hint Resolve Empty_set_ident_left Empty_set_ident_right Full_set_ident_left Full_set_ident_right.
+  #[export] Hint Resolve Empty_set_zero_left Empty_set_zero_right Full_set_zero_left Full_set_zero_right.
 
   (* These directly copied from the Constructive_sets library June 2015 *)
   (* names may be adjusted at some point *)
@@ -929,9 +929,9 @@ Ltac crush :=
     crush. 
   Qed.
 
-Hint Resolve Singleton_inv Singleton_intro Add_intro1 Add_intro2
+#[export] Hint Resolve Singleton_inv Singleton_intro Add_intro1 Add_intro2
   Intersection_inv
   (* Couple_inv Setminus_intro Strict_Included_intro
   Strict_Included_strict *) Noone_in_empty Inhabited_not_empty Add_not_Empty
   not_Empty_Add Inhabited_add Included_Empty.
-Hint Resolve Union_inv.
+#[export] Hint Resolve Union_inv.
